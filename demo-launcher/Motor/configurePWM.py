@@ -26,7 +26,7 @@ class PWMController:
 
     # Motor control methods
     def set_motor_speed(self, speed_percent, value = True):
-        period_ns = 1000000  # 1 ms period for example
+        period_ns = 50000  # 1 ms period for example
         duty_cycle_ns = int(period_ns * (speed_percent / 100))
         self.set_pwm_period(period_ns)
         self.set_pwm_duty_cycle(duty_cycle_ns)
