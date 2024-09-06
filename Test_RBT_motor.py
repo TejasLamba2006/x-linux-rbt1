@@ -164,15 +164,19 @@ def directionBackward():
 
 
 while not exit_flag:
-    forward()
-    os.system("python3 vl53l5cx/examples/simple_ranging_example.py")
+    directionForward()
+    rampUp()
+    # os.system("python3 vl53l5cx/examples/simple_ranging_example.py")
     time.sleep(5)
+    rampDown()
     stop()
     time.sleep(3)
-    backward()
-    os.system("./Sensor/ism330dhcx.sh")
+    directionBackward()
+    rampUp()
+    # os.system("./Sensor/ism330dhcx.sh")
     time.sleep(5)
-    os.system("./Sensor/ism330dhcx.sh")
+    # os.system("./Sensor/ism330dhcx.sh")
+    rampDown()
     stop()
     time.sleep(3)
     
