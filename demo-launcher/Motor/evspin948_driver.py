@@ -12,7 +12,7 @@ import sys
 import time
 from Motor.stspin_driver import STSpinDriver
 from gpiod.line import Direction, Value
-from Motor.configurePWM import PWMController
+from Motor.pwm_controller import PWMController
 
 pwm_mode =1
 
