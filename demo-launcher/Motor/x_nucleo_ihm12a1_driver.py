@@ -13,7 +13,7 @@
 import sys
 import time
 from application.x_linux_spn1.stspin_driver import STSpinDriver
-
+project_name = "X-LINUX-RBT1"
 
 class IHM12a1Driver(STSpinDriver):
     def __init__(self, pins=None):
@@ -38,19 +38,19 @@ class IHM12a1Driver(STSpinDriver):
 
         try:
             chip, pin = self.pins["pwm_a"]
-            self.lines["pwm_a"] = self.gpio_chips[chip].request_lines(consumer="X-LINUX-SPN1",config={pin: self.config_output})
+            self.lines["pwm_a"] = self.gpio_chips[chip].request_lines(consumer=project_name,config={pin: self.config_output})
             chip, pin = self.pins["pwm_b"]
-            self.lines["pwm_b"] = self.gpio_chips[chip].request_lines(consumer="X-LINUX-SPN1",config={pin: self.config_output})
+            self.lines["pwm_b"] = self.gpio_chips[chip].request_lines(consumer=project_name,config={pin: self.config_output})
             chip, pin = self.pins["ref_ab"]
-            self.lines["ref_ab"] = self.gpio_chips[chip].request_lines(consumer="X-LINUX-SPN1",config={pin: self.config_output})
+            self.lines["ref_ab"] = self.gpio_chips[chip].request_lines(consumer=project_name,config={pin: self.config_output})
             chip, pin = self.pins["en_ab"]
-            self.lines["en_ab"] = self.gpio_chips[chip].request_lines(consumer="X-LINUX-SPN1",config={pin: self.config_input})
+            self.lines["en_ab"] = self.gpio_chips[chip].request_lines(consumer=project_name,config={pin: self.config_input})
             chip, pin = self.pins["stdby"]
-            self.lines["stdby"] = self.gpio_chips[chip].request_lines(consumer="X-LINUX-SPN1",config={pin: self.config_output})
+            self.lines["stdby"] = self.gpio_chips[chip].request_lines(consumer=project_name,config={pin: self.config_output})
             chip, pin = self.pins["dir_a"]
-            self.lines["dir_a"] = self.gpio_chips[chip].request_lines(consumer="X-LINUX-SPN1",config={pin: self.config_output})
+            self.lines["dir_a"] = self.gpio_chips[chip].request_lines(consumer=project_name,config={pin: self.config_output})
             chip, pin = self.pins["dir_b"]
-            self.lines["dir_b"] = self.gpio_chips[chip].request_lines(consumer="X-LINUX-SPN1",config={pin: self.config_output})
+            self.lines["dir_b"] = self.gpio_chips[chip].request_lines(consumer=project_name,config={pin: self.config_output})
 
 
             self.set_lines_value(["stdby", "ref_ab"], [1, 1])

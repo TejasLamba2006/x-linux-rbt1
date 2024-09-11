@@ -13,7 +13,7 @@ import time
 from Motor.stspin_driver import STSpinDriver
 from gpiod.line import Direction, Value
 from Motor.pwm_controller import PWMController
-
+project_name = "X-LINUX-RBT1"
 pwm_mode =1
 
 
@@ -56,27 +56,27 @@ class EVSPIN948Driver(STSpinDriver):
         try:
             chip, pin = self.pins["pwm_a"]
             if pin != "NA" and pwm_mode == 0:
-                self.lines["pwm_a"] = self.gpio_chips[chip].request_lines(consumer="X-LINUX-SPN1",config={pin: self.config_output})
+                self.lines["pwm_a"] = self.gpio_chips[chip].request_lines(consumer=project_name,config={pin: self.config_output})
             chip, pin = self.pins["pwm_b"]
             if pin != "NA" and pwm_mode == 0:
-                self.lines["pwm_b"] = self.gpio_chips[chip].request_lines(consumer="X-LINUX-SPN1",config={pin: self.config_output})
+                self.lines["pwm_b"] = self.gpio_chips[chip].request_lines(consumer=project_name,config={pin: self.config_output})
             chip, pin = self.pins["ref_a"]
             if pin != "NA":
-                self.lines["ref_a"] = self.gpio_chips[chip].request_lines(consumer="X-LINUX-SPN1",config={pin: self.config_output})
+                self.lines["ref_a"] = self.gpio_chips[chip].request_lines(consumer=project_name,config={pin: self.config_output})
             chip, pin = self.pins["ref_b"]
             if pin != "NA":
-                self.lines["ref_b"] = self.gpio_chips[chip].request_lines(consumer="X-LINUX-SPN1",config={pin: self.config_output})
+                self.lines["ref_b"] = self.gpio_chips[chip].request_lines(consumer=project_name,config={pin: self.config_output})
             chip, pin = self.pins["en_a"]
-            self.lines["en_a"] = self.gpio_chips[chip].request_lines(consumer="X-LINUX-SPN1",config={pin: self.config_input})
+            self.lines["en_a"] = self.gpio_chips[chip].request_lines(consumer=project_name,config={pin: self.config_input})
             chip, pin = self.pins["en_b"]
-            self.lines["en_b"] = self.gpio_chips[chip].request_lines(consumer="X-LINUX-SPN1",config={pin: self.config_input})
+            self.lines["en_b"] = self.gpio_chips[chip].request_lines(consumer=project_name,config={pin: self.config_input})
             chip, pin = self.pins["stdby"]
             if pin != "NA":    
-                self.lines["stdby"] = self.gpio_chips[chip].request_lines(consumer="X-LINUX-SPN1",config={pin: self.config_output})
+                self.lines["stdby"] = self.gpio_chips[chip].request_lines(consumer=project_name,config={pin: self.config_output})
             chip, pin = self.pins["dir_a"]
-            self.lines["dir_a"] = self.gpio_chips[chip].request_lines(consumer="X-LINUX-SPN1",config={pin: self.config_output})
+            self.lines["dir_a"] = self.gpio_chips[chip].request_lines(consumer=project_name,config={pin: self.config_output})
             chip, pin = self.pins["dir_b"]
-            self.lines["dir_b"] = self.gpio_chips[chip].request_lines(consumer="X-LINUX-SPN1",config={pin: self.config_output})
+            self.lines["dir_b"] = self.gpio_chips[chip].request_lines(consumer=project_name,config={pin: self.config_output})
 
             self.set_lines_value(["stdby", "ref_a", "ref_b"], [1, 0, 0])
             self.set_lines_value(["dir_a", "dir_b", "pwm_a", "pwm_b"], [0, 0, 0, 0])
