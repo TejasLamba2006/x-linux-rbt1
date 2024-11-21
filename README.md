@@ -4,7 +4,7 @@
 
 **X-LINUX-RBT1** is an OpenSTLinux-based expansion software package designed to support robotics application development on STM32MP microprocessor platform. It provides Linux software (drivers, APIs, and applications) targeting X-STM32-RBT01 board based on STSPIN948 motor driver. This software serves as a starting point for developing more complex robotics applications. The included application and drivers run on the Cortex-A core(s) of the MPU.
 
-![X-LINUX-SPN1 Package](/_htmresc/01_x-linux-spn1-package.png "X-LINUX-SPN1 Package")
+![X-LINUX-RBT1 Package](/_htmresc/01_x-linux-rbt1-package.png "X-LINUX-RBT1 Package")
 
 ## Description
 
@@ -75,7 +75,7 @@ The current package provides software support for the following board:
  - [X-STM32-RBT01](https://www.st.com/en/evaluation-tools/evspin948.html) based on the STSPIN948 driver and multiple sensors.
     - [STSPIN948](https://www.st.com/en/motor-drivers/stspin948.html) is a 4.5 A dual full-bridge driver for brushed DC motors or bipolar stepper motors. The power stage is designed with high dynamic performance, allowing for high-frequency PWM control with precise duty-cycle. Each full-bridge is independent, with a current limiter with an adjustable threshold and OFF-time with slow or mixed decay selection. Two amplifiers with fixed amplification factors are available for current sensing (using an external shunt resistor). The adjustable slew-rate ensures the best trade-off between performance and EMI. The device offers a complete set of protection features, including overcurrent, overtemperature, and low bus voltage detection.
 
-    ![EVSPIN948 Board](/_htmresc/05_hw_setup_evspin948.png "EVSPIN948")
+    ![X-STM32-RBT01 Board](/_htmresc/05_hw_setup_rbt01.png "X-STM32-RBT01")
 
 ## Software Setup
 
@@ -100,6 +100,7 @@ The Python package ["gpiod"](https://github.com/hhk7734/python3-gpiod) is a prer
 ```sh
 # Install gpiod
 root@stm32mp:~$ apt-get install python3-gpiod
+root@stm32mp:~$ Pip install smbus2
 ```
 
 ### Deploying the Files to the MPU Board
