@@ -79,6 +79,10 @@ The current package provides software support for the following board:
     
     ![X-STM32-RBT01 Board](/_htmresc/05_hw_setup_rbt01.png "X-STM32-RBT01")
 
+    The board plugs into the 40 Pin connectors available on the top side of the STM32MP257F-DK discovery boards, as shown below. 
+
+    ![X-STM32-RBT01 mounted on STM32MP257F-DK](/_htmresc/06_x-stm32-rbt01_stm32mp257f-dk.png "X-STM32-RBT01 on STM32MP257F-DK")
+
 ## Software Setup
 
 This section describes the software setup required for building, flashing, deploying, and running the application.
