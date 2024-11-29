@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The **X-LINUX-RBT1** is a Linux-based expansion software package designed for robotics application development on STM32MP and other microprocessor platforms. It provides drivers, APIs, and applications tailored for the X-STM32-RBT01 board, which features the STSPIN948 motor driver. This package serves as a foundational tool for engineers to build complex robotics solutions.
+The **X-LINUX-RBT1** is a Linux-based expansion software package designed for robotics application development on STM32MP and other microprocessor platforms. It provides drivers, APIs, and applications tailored for the X-STM32MP-RBT01 board, which features the STSPIN948 motor driver. This package serves as a foundational tool for engineers to build complex robotics solutions.
 
 ![X-LINUX-RBT1 Package](/_htmresc/figure01_x-linux-rbt1-package.png)
 
@@ -57,7 +57,7 @@ Key STMicroelectronics components available on this board are described below:
 
 The *X-STM32MP-RBT01* board can be plugged into the 40-pin connectors available on STM32MP discovery boards or Raspberry Pi, as shown below.
 
-![X-STM32-RBT01 with STM32MP157F-DK2](/_htmresc/figure04_x-stm32-rbt01_stm32mp257f-dk.png)
+![X-STM32MP-RBT01 with STM32MP157F-DK2](/_htmresc/figure04_x-stm32mp-rbt01_stm32mp257f-dk.png)
 
 ### Important Setup Notes
 
