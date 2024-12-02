@@ -4,7 +4,7 @@
 
 The **X-LINUX-RBT1** is a Linux-based expansion software package designed for robotics application development on STM32MP and other microprocessor platforms. It provides drivers, APIs, and applications tailored for the X-STM32MP-RBT01 board, which features the STSPIN948 motor driver. This package serves as a foundational tool for engineers to build complex robotics solutions.
 
-![X-LINUX-RBT1 Package](/_htmresc/figure01_x-linux-rbt1-package.png)
+![Figure 1: X-LINUX-RBT1 Package](_htmresc/figure01_x-linux-rbt1-package.png)
 
 ## Description
 
@@ -37,7 +37,7 @@ The package is composed of multiple layers and modules:
 #### 4. **Applications**
 - Includes sample applications demonstrating practical use cases, such as remote rover control, integrating all modules into cohesive robotics solutions.
 
-![System Components](/_htmresc/figure02_system_components.png)
+![Figure 2: System Components](_htmresc/figure02_system_components.png)
 
 Engineers can develop custom applications leveraging the APIs and drivers provided in this package.
 
@@ -45,7 +45,7 @@ Engineers can develop custom applications leveraging the APIs and drivers provid
 
 The current package provides software support for [X-STM32MP-RBT01](https://www.st.com/en/evaluation-tools/evspin948.html) expansion board.
 
-![X-STM32-RBT01 Board](/_htmresc/figure03_hw_setup_rbt01.png)
+![Figure 3: X-STM32-RBT01 Board](_htmresc/figure03_hw_setup_rbt01.png)
 
 Key STMicroelectronics components available on this board are described below:
 
@@ -57,7 +57,7 @@ Key STMicroelectronics components available on this board are described below:
 
 The *X-STM32MP-RBT01* board can be plugged into the 40-pin connectors available on STM32MP discovery boards or Raspberry Pi, as shown below.
 
-![X-STM32MP-RBT01 with STM32MP157F-DK2](/_htmresc/figure04_x-stm32mp-rbt01_stm32mp257f-dk.png)
+![Figure 4: X-STM32MP-RBT01 with STM32MP157F-DK2](_htmresc/figure04_x-stm32mp-rbt01_stm32mp257f-dk.png)
 
 ### Important Setup Notes
 
@@ -120,11 +120,11 @@ chmod +x deploy.sh
 
 Once the files are deployed and the board is rebooted, the demo-launcher menu will display an option for **X-LINUX-RBT1**, as shown below.
 
-![X-LINUX-RBT1 Launch Icon](/_htmresc/figure05_x-linux-rbt1_icon_image.png)
+![Figure 5: Application Launch Icon](_htmresc/figure05_x-linux-rbt1_icon_image.png)
 
 On launching the application application, users are presented with an **Information Interface** screen.
 
-![X-LINUX-RBT1 Info Screen](/_htmresc/figure06_x-linux-rbt1_info_screen.png)
+![Figure 6: X-LINUX-RBT1 Info Screen](_htmresc/figure06_x-linux-rbt1_info_screen.png)
 
 The information screen includes:
 
@@ -136,7 +136,7 @@ The information screen includes:
 
 To control the rover remotely, the **remote control web app** is hosted through the embedded web server module of the X-LINUX-RBT1 software. Once the application is running, a URL is provided for accessing the web app. The URL is also presented as a QR code for user convenience in GUI mode.
 
-![X-LINUX-RBT1 Interface](/_htmresc/figure07_x-linux-rbt1_control_webapp.jpeg)
+![Figure 7: Remote Interface](_htmresc/figure07_x-linux-rbt1_control_webapp.jpeg)
 
 #### Features of the Remote Control Interface
 
