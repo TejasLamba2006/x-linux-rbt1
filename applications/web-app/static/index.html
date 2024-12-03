@@ -2,21 +2,32 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Robot Controller</title>
     <link rel="stylesheet" href="/static/css/styles.css">
     <script src="/static/js/script.js" defer></script>
 </head>
+
 <body>
     <div id="container">
         <!-- Left Joystick -->
         <div id="left-joystick" class="joystick">
-            <div class="outer-circle c4">
-                <div class="circle c3">
-                    <div class="arrows vertical-arrows"></div>
-                    <div class="circle c2">
-                        <div class="circle c1"></div>
+            <div class="dial-container">
+                <!-- Dummy Outer Dial -->
+                <div class="outer-dial">
+                    <div class="c5 dummy"></div>
+                </div>
+                <!-- Inner Joystick -->
+                <div class="joystick-inner">
+                    <div class="outer-circle c4">
+                        <div class="circle c3">
+                            <div class="arrows vertical-arrows"></div>
+                            <div class="circle c2">
+                                <div class="circle c1"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -68,4 +79,5 @@
         </div>
     </div>
 </body>
+
 </html>

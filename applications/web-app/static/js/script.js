@@ -1,7 +1,15 @@
 // application/web-app/static/js/script.js
 
+// Constants
+const WS_URL = 'ws://' + window.location.host + '/ws';
+const COMMAND_THROTTLE = 'throttle';
+const COMMAND_DIR_X = 'dir_x';
+const COMMAND_DIR_Y = 'dir_y';
+const COMMAND_DIR_ROT = 'dir_rot';
+const COMMAND_MODE = 'mode';
+
 // Establish WebSocket connection
-let ws = new WebSocket('ws://' + window.location.host + '/ws');
+let ws = new WebSocket(WS_URL);
 
 ws.onopen = function() {
     console.log('WebSocket connection established');
@@ -15,8 +23,11 @@ ws.onmessage = function(event) {
 let leftJoystick = {
     element: document.getElementById('left-joystick'),
     c1: document.querySelector('#left-joystick .c1'),
-    maxMovement: 80, // Doubled from 40
+    maxMovement: 80,
     verticalValue: 0,
+    lastVerticalValue: 0,
+    isMoving: false,
+    movementTimeout: null,
 };
 
 // Left joystick events
@@ -26,6 +37,8 @@ leftJoystick.c1.addEventListener('touchend', handleLeftJoystickEnd, false);
 
 function handleLeftJoystickStart(event) {
     event.preventDefault();
+    leftJoystick.isMoving = true;
+    clearTimeout(leftJoystick.movementTimeout);
 }
 
 function handleLeftJoystickMove(event) {
@@ -36,21 +49,33 @@ function handleLeftJoystickMove(event) {
     y = Math.max(-leftJoystick.maxMovement, Math.min(leftJoystick.maxMovement, y));
     leftJoystick.verticalValue = -Math.round((y / leftJoystick.maxMovement) * 100);
     leftJoystick.c1.style.transform = `translateY(${y}px)`;
+
+    leftJoystick.isMoving = true;
+    clearTimeout(leftJoystick.movementTimeout);
+    leftJoystick.movementTimeout = setTimeout(() => {
+        leftJoystick.isMoving = false;
+    }, 200);
 }
 
 function handleLeftJoystickEnd(event) {
     event.preventDefault();
     leftJoystick.verticalValue = 0;
     leftJoystick.c1.style.transform = `translateY(0px)`;
+
+    leftJoystick.isMoving = false;
 }
 
 // Right Joystick (Thumb)
 let rightJoystick = {
     element: document.querySelector('#right-joystick .joystick-inner'),
     c1: document.querySelector('#right-joystick .joystick-inner .c1'),
-    maxMovement: 80, // Doubled from 40
+    maxMovement: 80,
     horizontalValue: 0,
     verticalValue: 0,
+    lastHorizontalValue: 0,
+    lastVerticalValue: 0,
+    isMoving: false,
+    movementTimeout: null,
 };
 
 // Right joystick events
@@ -60,6 +85,8 @@ rightJoystick.c1.addEventListener('touchend', handleRightJoystickEnd, false);
 
 function handleRightJoystickStart(event) {
     event.preventDefault();
+    rightJoystick.isMoving = true;
+    clearTimeout(rightJoystick.movementTimeout);
 }
 
 function handleRightJoystickMove(event) {
@@ -73,6 +100,12 @@ function handleRightJoystickMove(event) {
     rightJoystick.horizontalValue = Math.round((x / rightJoystick.maxMovement) * 100);
     rightJoystick.verticalValue = -Math.round((y / rightJoystick.maxMovement) * 100);
     rightJoystick.c1.style.transform = `translate(${x}px, ${y}px)`;
+
+    rightJoystick.isMoving = true;
+    clearTimeout(rightJoystick.movementTimeout);
+    rightJoystick.movementTimeout = setTimeout(() => {
+        rightJoystick.isMoving = false;
+    }, 200);
 }
 
 function handleRightJoystickEnd(event) {
@@ -80,14 +113,18 @@ function handleRightJoystickEnd(event) {
     rightJoystick.horizontalValue = 0;
     rightJoystick.verticalValue = 0;
     rightJoystick.c1.style.transform = `translate(0px, 0px)`;
+
+    rightJoystick.isMoving = false;
 }
 
 // Right Joystick Dial Rotation
 let rightDial = {
     element: document.querySelector('#right-joystick .c5'),
     rotationValue: 0,
+    lastRotationValue: 0,
     isRotating: false,
-    startAngle: 0,
+    isMoving: false,
+    movementTimeout: null,
 };
 
 // Dial rotation events
@@ -107,6 +144,9 @@ function getAngle(center, point) {
 function handleDialStart(event) {
     event.preventDefault();
     rightDial.isRotating = true;
+    rightDial.isMoving = true;
+    clearTimeout(rightDial.movementTimeout);
+
     const touch = event.touches[0];
     const rect = rightDial.element.getBoundingClientRect();
     const center = {
@@ -136,11 +176,18 @@ function handleDialMove(event) {
     const angle = getAngle(center, point);
     rightDial.rotationValue = (angle - rightDial.startAngle + 360) % 360;
     rightDial.element.style.transform = `rotate(${rightDial.rotationValue}deg)`;
+
+    rightDial.isMoving = true;
+    clearTimeout(rightDial.movementTimeout);
+    rightDial.movementTimeout = setTimeout(() => {
+        rightDial.isMoving = false;
+    }, 200);
 }
 
 function handleDialEnd(event) {
     event.preventDefault();
     rightDial.isRotating = false;
+    rightDial.isMoving = false;
 }
 
 // Mode Selector
@@ -156,7 +203,7 @@ modeButtons.forEach(button => {
         // Get the mode from data attribute
         const mode = button.getAttribute('data-mode');
         // Send the mode command
-        const command = { "mode": mode };
+        const command = { [COMMAND_MODE]: mode };
         ws.send(JSON.stringify(command));
     });
 });
@@ -167,18 +214,23 @@ document.getElementById('mode-locked').classList.add('selected');
 // Sampling and sending commands every 200ms
 setInterval(() => {
     // Left joystick throttle command
-    const throttleCommand = { "throttle": leftJoystick.verticalValue };
-    ws.send(JSON.stringify(throttleCommand));
+    if (leftJoystick.isMoving) {
+        const throttleCommand = { [COMMAND_THROTTLE]: leftJoystick.verticalValue };
+        ws.send(JSON.stringify(throttleCommand));
+    }
 
     // Right joystick direction command
-    const directionCommand = {
-        "dir_x": rightJoystick.horizontalValue,
-        "dir_y": rightJoystick.verticalValue
-    };
-    ws.send(JSON.stringify(directionCommand));
+    if (rightJoystick.isMoving) {
+        const directionCommand = {
+            [COMMAND_DIR_X]: rightJoystick.horizontalValue,
+            [COMMAND_DIR_Y]: rightJoystick.verticalValue
+        };
+        ws.send(JSON.stringify(directionCommand));
+    }
 
     // Right joystick dial rotation command
-    const rotationCommand = { "dir_rot": Math.round(rightDial.rotationValue) };
-    ws.send(JSON.stringify(rotationCommand));
+    if (rightDial.isMoving) {
+        const rotationCommand = { [COMMAND_DIR_ROT]: Math.round(rightDial.rotationValue) };
+        ws.send(JSON.stringify(rotationCommand));
+    }
 }, 200);
-

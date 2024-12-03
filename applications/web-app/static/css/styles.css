@@ -1,5 +1,6 @@
 /* application/web-app/static/css/styles.css */
 
+/* Global Styles */
 body {
     margin: 0;
     background-color: #2c2c2c;
@@ -17,17 +18,20 @@ body {
     padding: 20px;
 }
 
+/* Joystick Styles */
 .joystick {
     position: relative;
     touch-action: none;
 }
 
+/* Dial Container (for both joysticks) */
 .dial-container {
     position: relative;
     width: 360px;
     height: 360px;
 }
 
+/* Outer Dial */
 .outer-dial {
     position: absolute;
     top: 0;
@@ -37,18 +41,27 @@ body {
     touch-action: none;
 }
 
-.c5 {
+/* Outer Dial Circle (Right Joystick) */
+#right-joystick .c5 {
     width: 360px;
     height: 360px;
     border: 2px solid #777;
     border-radius: 50%;
     position: relative;
     transform-origin: center center;
-    overflow: hidden;  /* Ensure no overflow */
+    overflow: hidden;
     box-sizing: border-box;
-    background: none;  /* Remove any background that might cause a rectangle */
+    background: none;
 }
 
+/* Dummy Outer Dial Circle (Left Joystick) */
+#left-joystick .c5.dummy {
+    width: 360px;
+    height: 360px;
+    visibility: hidden;
+}
+
+/* Dial Indicator */
 .dial-indicator {
     position: absolute;
     top: 0;
@@ -59,57 +72,62 @@ body {
     transform: translateX(-50%);
 }
 
+/* Joystick Inner Container */
 .joystick-inner {
     position: absolute;
-    top: 30px;  /* Adjust to center inside the dial */
+    top: 30px;
     left: 30px;
     width: 300px;
     height: 300px;
 }
 
-.outer-circle, .circle {
+/* Outer Circle and Circle Classes */
+.outer-circle,
+.circle {
     position: relative;
     border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
+/* Circle C4 */
 .c4 {
     width: 300px;
     height: 300px;
     border: 2px dotted #555;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
+/* Circle C3 */
 .c3 {
     width: 240px;
     height: 240px;
     background: radial-gradient(circle, #444, #222);
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
+/* Circle C2 */
 .c2 {
+    width: 140px;
+    height: 140px;
+    background: radial-gradient(circle, #666, #333);
+}
+
+/* Circle C1 (Thumb) */
+.c1 {
     width: 120px;
     height: 120px;
-    background: radial-gradient(circle, #666, #333);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.c1 {
-    width: 100px;
-    height: 100px;
     background: radial-gradient(circle, #eee, #aaa);
 }
 
+/* Arrows */
 .arrows {
     position: absolute;
 }
 
-.vertical-arrows::before, .vertical-arrows::after {
+.vertical-arrows::before,
+.vertical-arrows::after,
+.cross-arrows::before,
+.cross-arrows::after {
     content: '';
     position: absolute;
     width: 0;
@@ -117,6 +135,7 @@ body {
     border: 20px solid transparent;
 }
 
+/* Vertical Arrows */
 .vertical-arrows::before {
     bottom: 100%;
     left: 50%;
@@ -131,14 +150,7 @@ body {
     margin-left: -10px;
 }
 
-.cross-arrows::before, .cross-arrows::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 0;
-    border: 20px solid transparent;
-}
-
+/* Cross Arrows */
 .cross-arrows::before {
     top: 50%;
     left: 100%;
@@ -153,7 +165,6 @@ body {
     margin-top: -10px;
 }
 
-/* Mode Selector */
 /* Mode Selector */
 #mode-selector {
     position: absolute;
@@ -219,3 +230,27 @@ body {
     background-color: #555;
 }
 
+/* Increase touch area for the outer dial */
+#right-joystick .outer-dial {
+    width: 460px; /* Increased from 360px */
+    height: 460px;
+    top: -50px;   /* Adjusted to center */
+    left: -50px;
+}
+
+#right-joystick .c5 {
+    width: 360px;
+    height: 360px;
+    /* Center the dial within the increased touch area */
+    position: absolute;
+    top: 50px;
+    left: 50px;
+}
+
+/* Adjust the dial-indicator position */
+#right-joystick .dial-indicator {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
