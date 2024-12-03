@@ -1,0 +1,221 @@
+/* application/web-app/static/css/styles.css */
+
+body {
+    margin: 0;
+    background-color: #2c2c2c;
+    color: #ffffff;
+    overflow: hidden;
+}
+
+#container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+    width: 100vw;
+    height: 100vh;
+    padding: 20px;
+}
+
+.joystick {
+    position: relative;
+    touch-action: none;
+}
+
+.dial-container {
+    position: relative;
+    width: 360px;
+    height: 360px;
+}
+
+.outer-dial {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 360px;
+    height: 360px;
+    touch-action: none;
+}
+
+.c5 {
+    width: 360px;
+    height: 360px;
+    border: 2px solid #777;
+    border-radius: 50%;
+    position: relative;
+    transform-origin: center center;
+    overflow: hidden;  /* Ensure no overflow */
+    box-sizing: border-box;
+    background: none;  /* Remove any background that might cause a rectangle */
+}
+
+.dial-indicator {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 4px;
+    height: 40px;
+    background-color: #fff;
+    transform: translateX(-50%);
+}
+
+.joystick-inner {
+    position: absolute;
+    top: 30px;  /* Adjust to center inside the dial */
+    left: 30px;
+    width: 300px;
+    height: 300px;
+}
+
+.outer-circle, .circle {
+    position: relative;
+    border-radius: 50%;
+}
+
+.c4 {
+    width: 300px;
+    height: 300px;
+    border: 2px dotted #555;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.c3 {
+    width: 240px;
+    height: 240px;
+    background: radial-gradient(circle, #444, #222);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.c2 {
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, #666, #333);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.c1 {
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, #eee, #aaa);
+}
+
+.arrows {
+    position: absolute;
+}
+
+.vertical-arrows::before, .vertical-arrows::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border: 20px solid transparent;
+}
+
+.vertical-arrows::before {
+    bottom: 100%;
+    left: 50%;
+    border-bottom-color: #fff;
+    margin-left: -10px;
+}
+
+.vertical-arrows::after {
+    top: 100%;
+    left: 50%;
+    border-top-color: #fff;
+    margin-left: -10px;
+}
+
+.cross-arrows::before, .cross-arrows::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border: 20px solid transparent;
+}
+
+.cross-arrows::before {
+    top: 50%;
+    left: 100%;
+    border-left-color: #fff;
+    margin-top: -10px;
+}
+
+.cross-arrows::after {
+    top: 50%;
+    right: 100%;
+    border-right-color: #fff;
+    margin-top: -10px;
+}
+
+/* Mode Selector */
+/* Mode Selector */
+#mode-selector {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+}
+
+.mode-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+.mode-button {
+    background-color: #444;
+    border: 2px solid #777;
+    margin: 0 2px;
+    padding: 5px 2px;
+    border-radius: 5px;
+    cursor: pointer;
+    outline: none;
+    width: 50px;
+    height: 100px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.mode-button .button-icon {
+    width: 28px;
+    height: 28px;
+    background-color: #666;
+    border-radius: 50%;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+}
+
+.mode-button .button-label {
+    font-size: 11px;
+    color: #fff;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    flex-shrink: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mode-button.selected {
+    background-color: #1a73e8;
+    border-color: #1a73e8;
+}
+
+.mode-button.selected .button-icon {
+    background-color: #fff;
+}
+
+.mode-button:hover {
+    background-color: #555;
+}
+

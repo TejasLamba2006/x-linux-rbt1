@@ -1,0 +1,71 @@
+<!-- application/web-app/static/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Robot Controller</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <script src="/static/js/script.js" defer></script>
+</head>
+<body>
+    <div id="container">
+        <!-- Left Joystick -->
+        <div id="left-joystick" class="joystick">
+            <div class="outer-circle c4">
+                <div class="circle c3">
+                    <div class="arrows vertical-arrows"></div>
+                    <div class="circle c2">
+                        <div class="circle c1"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mode Selector -->
+        <div id="mode-selector">
+            <div class="mode-buttons">
+                <button class="mode-button" data-mode="locked" id="mode-locked">
+                    <div class="button-icon"></div>
+                    <div class="button-label">Locked&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </div>
+                </button>
+                <button class="mode-button" data-mode="controller" id="mode-controller">
+                    <div class="button-icon"></div>
+                    <div class="button-label">Controller</div>
+                </button>
+                <button class="mode-button" data-mode="follow-me" id="mode-follow-me">
+                    <div class="button-icon"></div>
+                    <div class="button-label">Follow-me</div>
+                </button>
+                <button class="mode-button" data-mode="autopilot" id="mode-autopilot">
+                    <div class="button-icon"></div>
+                    <div class="button-label">Autopilot</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Joystick -->
+        <div id="right-joystick" class="joystick">
+            <div class="dial-container">
+                <!-- Outer Dial -->
+                <div class="outer-dial">
+                    <div class="c5">
+                        <div class="dial-indicator"></div>
+                    </div>
+                </div>
+                <!-- Inner Joystick -->
+                <div class="joystick-inner">
+                    <div class="outer-circle c4">
+                        <div class="circle c3">
+                            <div class="arrows cross-arrows"></div>
+                            <div class="circle c2">
+                                <div class="circle c1"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
