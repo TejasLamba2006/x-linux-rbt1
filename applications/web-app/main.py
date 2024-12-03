@@ -6,7 +6,7 @@ import uvicorn
 
 app = FastAPI()
 
-# Mount the static directory to serve frontend files
+# Serve the static files from same backend
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
@@ -32,7 +32,8 @@ class ConnectionManager:
             while True:
                 data = await websocket.receive_text()
                 print(f"Received: {data}")
-                # Placeholder for robot control functions
+                # Put robot control functions here
+                
         except WebSocketDisconnect:
             self.disconnect(websocket)
 
