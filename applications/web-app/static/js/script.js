@@ -25,9 +25,9 @@ let leftJoystick = {
     c1: document.querySelector('#left-joystick .c1'),
     maxMovement: 80,
     verticalValue: 0,
-    lastVerticalValue: 0,
     isMoving: false,
     movementTimeout: null,
+    touchId: null, // Track the touch point
 };
 
 // Left joystick events
@@ -37,13 +37,24 @@ leftJoystick.c1.addEventListener('touchend', handleLeftJoystickEnd, false);
 
 function handleLeftJoystickStart(event) {
     event.preventDefault();
+    let touch = event.changedTouches[0];
+    leftJoystick.touchId = touch.identifier; // Store touch identifier
     leftJoystick.isMoving = true;
     clearTimeout(leftJoystick.movementTimeout);
 }
 
 function handleLeftJoystickMove(event) {
     event.preventDefault();
-    let touch = event.touches[0];
+    let touch = null;
+    // Find the touch that matches the stored identifier
+    for (let i = 0; i < event.touches.length; i++) {
+        if (event.touches[i].identifier === leftJoystick.touchId) {
+            touch = event.touches[i];
+            break;
+        }
+    }
+    if (!touch) return; // Exit if touch not found
+
     let rect = leftJoystick.element.getBoundingClientRect();
     let y = touch.clientY - rect.top - rect.height / 2;
     y = Math.max(-leftJoystick.maxMovement, Math.min(leftJoystick.maxMovement, y));
@@ -59,10 +70,21 @@ function handleLeftJoystickMove(event) {
 
 function handleLeftJoystickEnd(event) {
     event.preventDefault();
+    let touch = null;
+    // Find the touch that matches the stored identifier
+    for (let i = 0; i < event.changedTouches.length; i++) {
+        if (event.changedTouches[i].identifier === leftJoystick.touchId) {
+            touch = event.changedTouches[i];
+            break;
+        }
+    }
+    if (!touch) return;
+
     leftJoystick.verticalValue = 0;
     leftJoystick.c1.style.transform = `translateY(0px)`;
 
     leftJoystick.isMoving = false;
+    leftJoystick.touchId = null; // Reset touch identifier
 }
 
 // Right Joystick (Thumb)
@@ -72,10 +94,9 @@ let rightJoystick = {
     maxMovement: 80,
     horizontalValue: 0,
     verticalValue: 0,
-    lastHorizontalValue: 0,
-    lastVerticalValue: 0,
     isMoving: false,
     movementTimeout: null,
+    touchId: null, // Track the touch point
 };
 
 // Right joystick events
@@ -85,13 +106,24 @@ rightJoystick.c1.addEventListener('touchend', handleRightJoystickEnd, false);
 
 function handleRightJoystickStart(event) {
     event.preventDefault();
+    let touch = event.changedTouches[0];
+    rightJoystick.touchId = touch.identifier; // Store touch identifier
     rightJoystick.isMoving = true;
     clearTimeout(rightJoystick.movementTimeout);
 }
 
 function handleRightJoystickMove(event) {
     event.preventDefault();
-    let touch = event.touches[0];
+    let touch = null;
+    // Find the touch that matches the stored identifier
+    for (let i = 0; i < event.touches.length; i++) {
+        if (event.touches[i].identifier === rightJoystick.touchId) {
+            touch = event.touches[i];
+            break;
+        }
+    }
+    if (!touch) return;
+
     let rect = rightJoystick.element.getBoundingClientRect();
     let x = touch.clientX - rect.left - rect.width / 2;
     let y = touch.clientY - rect.top - rect.height / 2;
@@ -110,21 +142,32 @@ function handleRightJoystickMove(event) {
 
 function handleRightJoystickEnd(event) {
     event.preventDefault();
+    let touch = null;
+    // Find the touch that matches the stored identifier
+    for (let i = 0; i < event.changedTouches.length; i++) {
+        if (event.changedTouches[i].identifier === rightJoystick.touchId) {
+            touch = event.changedTouches[i];
+            break;
+        }
+    }
+    if (!touch) return;
+
     rightJoystick.horizontalValue = 0;
     rightJoystick.verticalValue = 0;
     rightJoystick.c1.style.transform = `translate(0px, 0px)`;
 
     rightJoystick.isMoving = false;
+    rightJoystick.touchId = null; // Reset touch identifier
 }
 
 // Right Joystick Dial Rotation
 let rightDial = {
     element: document.querySelector('#right-joystick .c5'),
     rotationValue: 0,
-    lastRotationValue: 0,
     isRotating: false,
     isMoving: false,
     movementTimeout: null,
+    touchId: null, // Track the touch point
 };
 
 // Dial rotation events
@@ -143,11 +186,12 @@ function getAngle(center, point) {
 
 function handleDialStart(event) {
     event.preventDefault();
+    let touch = event.changedTouches[0];
+    rightDial.touchId = touch.identifier; // Store touch identifier
     rightDial.isRotating = true;
     rightDial.isMoving = true;
     clearTimeout(rightDial.movementTimeout);
 
-    const touch = event.touches[0];
     const rect = rightDial.element.getBoundingClientRect();
     const center = {
         x: rect.left + rect.width / 2,
@@ -163,7 +207,16 @@ function handleDialStart(event) {
 function handleDialMove(event) {
     if (!rightDial.isRotating) return;
     event.preventDefault();
-    const touch = event.touches[0];
+    let touch = null;
+    // Find the touch that matches the stored identifier
+    for (let i = 0; i < event.touches.length; i++) {
+        if (event.touches[i].identifier === rightDial.touchId) {
+            touch = event.touches[i];
+            break;
+        }
+    }
+    if (!touch) return;
+
     const rect = rightDial.element.getBoundingClientRect();
     const center = {
         x: rect.left + rect.width / 2,
@@ -186,8 +239,19 @@ function handleDialMove(event) {
 
 function handleDialEnd(event) {
     event.preventDefault();
+    let touch = null;
+    // Find the touch that matches the stored identifier
+    for (let i = 0; i < event.changedTouches.length; i++) {
+        if (event.changedTouches[i].identifier === rightDial.touchId) {
+            touch = event.changedTouches[i];
+            break;
+        }
+    }
+    if (!touch) return;
+
     rightDial.isRotating = false;
     rightDial.isMoving = false;
+    rightDial.touchId = null; // Reset touch identifier
 }
 
 // Mode Selector
