@@ -1,4 +1,4 @@
-// application/web-app/static/js/script.js
+// applications/web-app/static/js/script.js
 
 // Constants
 const WS_URL = 'ws://' + window.location.host + '/ws';
