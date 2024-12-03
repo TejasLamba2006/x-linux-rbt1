@@ -254,3 +254,21 @@ body {
     left: 50%;
     transform: translateX(-50%);
 }
+
+/* Full-Screen Button Styles */
+.fullscreen-button {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 1000;
+    padding: 10px;
+    font-size: 32px; /* Adjust the font size for visibility */
+    color: #fff;     /* Set the color to white */
+}
+
+.fullscreen-button:focus {
+    outline: none; /* Remove focus outline */
+}

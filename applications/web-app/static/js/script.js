@@ -298,3 +298,79 @@ setInterval(() => {
         ws.send(JSON.stringify(rotationCommand));
     }
 }, 200);
+
+// Full-Screen Toggle Button
+const fullscreenButton = document.getElementById('fullscreen-button');
+let isFullscreen = false;
+
+fullscreenButton.addEventListener('click', () => {
+    if (!isFullscreen) {
+        enterFullscreen();
+    } else {
+        exitFullscreen();
+    }
+});
+
+function enterFullscreen() {
+    const elem = document.documentElement;
+
+    if (elem.requestFullscreen) {
+        elem.requestFullscreen().then(() => {
+            lockOrientation();
+        }).catch(err => {
+            console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+        });
+    } else if (elem.webkitRequestFullscreen) { /* Safari */
+        elem.webkitRequestFullscreen();
+        lockOrientation();
+    } else if (elem.msRequestFullscreen) { /* IE11 */
+        elem.msRequestFullscreen();
+        lockOrientation();
+    }
+
+    isFullscreen = true;
+}
+
+function exitFullscreen() {
+    if (document.exitFullscreen) {
+        document.exitFullscreen().then(() => {
+            unlockOrientation();
+        }).catch(err => {
+            console.error(`Error attempting to exit full-screen mode: ${err.message} (${err.name})`);
+        });
+    } else if (document.webkitExitFullscreen) { /* Safari */
+        document.webkitExitFullscreen();
+        unlockOrientation();
+    } else if (document.msExitFullscreen) { /* IE11 */
+        document.msExitFullscreen();
+        unlockOrientation();
+    }
+
+    isFullscreen = false;
+}
+
+function lockOrientation() {
+    if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').then(() => {
+            console.log('Orientation locked to landscape');
+        }).catch(err => {
+            console.error(`Error locking orientation: ${err.message} (${err.name})`);
+        });
+    } else {
+        console.warn('Orientation lock not supported on this device.');
+    }
+}
+
+function unlockOrientation() {
+    if (screen.orientation && screen.orientation.unlock) {
+        screen.orientation.unlock();
+        console.log('Orientation unlocked');
+    } else {
+        console.warn('Orientation unlock not supported on this device.');
+    }
+}
+
+// Listen for fullscreen change events to update button state
+document.addEventListener('fullscreenchange', () => {
+    isFullscreen = !!document.fullscreenElement;
+});
