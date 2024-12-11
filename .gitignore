@@ -348,6 +348,5 @@ dist
 # VS Code Extensions
 .vscode-ctags
 
-# Package specific
-__aside/
-__penv/
+# Temp Folders
+__*/

@@ -2,21 +2,33 @@
 
 // Constants
 const WS_URL = 'ws://' + window.location.host + '/ws';
-const COMMAND_THROTTLE = 'throttle';
-const COMMAND_DIR_X = 'dir_x';
-const COMMAND_DIR_Y = 'dir_y';
-const COMMAND_DIR_ROT = 'dir_rot';
-const COMMAND_MODE = 'mode';
+const FIELD_STR_THROTTLE = 'throttle';
+const FIELD_STR_DIR_X = 'dir_x';
+const FIELD_STR_DIR_Y = 'dir_y';
+const FIELD_STR_DIR_ROT = 'dir_rot';
+const FIELD_STR_MODE = 'mode';
+const FIELD_STR_AZIMUTH = 'azimuth';
+
+
+const DEBUG = false;
+const DATA_POLL_INTERVAL = 200;
+const DATA_POLL_TIMEOUT = 250;
+
+function debugLog(message) {
+    if (DEBUG) {
+        console.log(message);
+    }
+}
 
 // Establish WebSocket connection
 let ws = new WebSocket(WS_URL);
 
 ws.onopen = function() {
-    console.log('WebSocket connection established');
+    debugLog('WebSocket connection established');
 };
 
 ws.onmessage = function(event) {
-    console.log('Received message: ' + event.data);
+    debugLog('Received message: ' + event.data);
 };
 
 // Left Joystick
@@ -27,7 +39,7 @@ let leftJoystick = {
     verticalValue: 0,
     isMoving: false,
     movementTimeout: null,
-    touchId: null, // Track the touch point
+    touchId: null,
 };
 
 // Left joystick events
@@ -65,7 +77,7 @@ function handleLeftJoystickMove(event) {
     clearTimeout(leftJoystick.movementTimeout);
     leftJoystick.movementTimeout = setTimeout(() => {
         leftJoystick.isMoving = false;
-    }, 200);
+    }, DATA_POLL_TIMEOUT);
 }
 
 function handleLeftJoystickEnd(event) {
@@ -83,7 +95,11 @@ function handleLeftJoystickEnd(event) {
     leftJoystick.verticalValue = 0;
     leftJoystick.c1.style.transform = `translateY(0px)`;
 
-    leftJoystick.isMoving = false;
+    clearTimeout(leftJoystick.movementTimeout);
+    leftJoystick.movementTimeout = setTimeout(() => {
+        leftJoystick.isMoving = false;
+    }, DATA_POLL_TIMEOUT);
+
     leftJoystick.touchId = null; // Reset touch identifier
 }
 
@@ -137,7 +153,7 @@ function handleRightJoystickMove(event) {
     clearTimeout(rightJoystick.movementTimeout);
     rightJoystick.movementTimeout = setTimeout(() => {
         rightJoystick.isMoving = false;
-    }, 200);
+    }, DATA_POLL_TIMEOUT);
 }
 
 function handleRightJoystickEnd(event) {
@@ -155,8 +171,11 @@ function handleRightJoystickEnd(event) {
     rightJoystick.horizontalValue = 0;
     rightJoystick.verticalValue = 0;
     rightJoystick.c1.style.transform = `translate(0px, 0px)`;
-
-    rightJoystick.isMoving = false;
+    clearTimeout(rightJoystick.movementTimeout);
+    rightJoystick.movementTimeout = setTimeout(() => {
+        rightJoystick.isMoving = false;
+    }, DATA_POLL_TIMEOUT);
+ 
     rightJoystick.touchId = null; // Reset touch identifier
 }
 
@@ -165,14 +184,16 @@ let rightDial = {
     element: document.querySelector('#right-joystick .c5'),
     rotationValue: 0,
     isRotating: false,
-    isMoving: false,
-    movementTimeout: null,
+    //isMoving: false,
+    //movementTimeout: null,
+    rotationTimeout: null,
     touchId: null, // Track the touch point
+    startAngle: 0,
 };
 
 // Dial rotation events
 rightDial.element.addEventListener('touchstart', handleDialStart, false);
-rightDial.element.addEventListener('touchmove', handleDialMove, false);
+rightDial.element.addEventListener('touchmove', handleDialRotate, false);
 rightDial.element.addEventListener('touchend', handleDialEnd, false);
 
 function getAngle(center, point) {
@@ -189,8 +210,7 @@ function handleDialStart(event) {
     let touch = event.changedTouches[0];
     rightDial.touchId = touch.identifier; // Store touch identifier
     rightDial.isRotating = true;
-    rightDial.isMoving = true;
-    clearTimeout(rightDial.movementTimeout);
+    clearTimeout(rightDial.rotationTimeout);
 
     const rect = rightDial.element.getBoundingClientRect();
     const center = {
@@ -204,7 +224,7 @@ function handleDialStart(event) {
     rightDial.startAngle = getAngle(center, point) - rightDial.rotationValue;
 }
 
-function handleDialMove(event) {
+function handleDialRotate(event) {
     if (!rightDial.isRotating) return;
     event.preventDefault();
     let touch = null;
@@ -226,15 +246,23 @@ function handleDialMove(event) {
         x: touch.clientX,
         y: touch.clientY,
     };
-    const angle = getAngle(center, point);
-    rightDial.rotationValue = (angle - rightDial.startAngle + 360) % 360;
-    rightDial.element.style.transform = `rotate(${rightDial.rotationValue}deg)`;
+    let angle = getAngle(center, point);
+    let rotation = (angle - rightDial.startAngle + 360) % 360;
 
-    rightDial.isMoving = true;
-    clearTimeout(rightDial.movementTimeout);
-    rightDial.movementTimeout = setTimeout(() => {
-        rightDial.isMoving = false;
-    }, 200);
+    // Restrict rotation to 180 degrees in either direction
+    if (rotation > 180) {
+        rotation -= 360;
+    }
+    rotation = Math.max(-180, Math.min(180, rotation));
+
+    rightDial.rotationValue = rotation;
+    rightDial.element.style.transform = `rotate(${rotation}deg)`;
+
+    rightDial.isRotating = true;
+    clearTimeout(rightDial.rotationTimeout);
+    rightDial.rotationTimeout = setTimeout(() => {
+        rightDial.isRotating = false;
+    }, DATA_POLL_TIMEOUT);
 }
 
 function handleDialEnd(event) {
@@ -249,9 +277,16 @@ function handleDialEnd(event) {
     }
     if (!touch) return;
 
-    rightDial.isRotating = false;
-    rightDial.isMoving = false;
+    clearTimeout(rightDial.rotationTimeout);
+    rightDial.rotationTimeout = setTimeout(() => {
+        rightDial.isRotating = false;
+    }, DATA_POLL_TIMEOUT);
+
     rightDial.touchId = null; // Reset touch identifier
+
+    // Reset rotation to original position
+    rightDial.rotationValue = 0;
+    rightDial.element.style.transform = `rotate(0deg)`;
 }
 
 // Mode Selector
@@ -267,7 +302,7 @@ modeButtons.forEach(button => {
         // Get the mode from data attribute
         const mode = button.getAttribute('data-mode');
         // Send the mode command
-        const command = { [COMMAND_MODE]: mode };
+        const command = { [FIELD_STR_MODE]: mode };
         ws.send(JSON.stringify(command));
     });
 });
@@ -279,25 +314,26 @@ document.getElementById('mode-locked').classList.add('selected');
 setInterval(() => {
     // Left joystick throttle command
     if (leftJoystick.isMoving) {
-        const throttleCommand = { [COMMAND_THROTTLE]: leftJoystick.verticalValue };
+        const throttleCommand = { [FIELD_STR_THROTTLE]: leftJoystick.verticalValue };
         ws.send(JSON.stringify(throttleCommand));
     }
 
     // Right joystick direction command
     if (rightJoystick.isMoving) {
         const directionCommand = {
-            [COMMAND_DIR_X]: rightJoystick.horizontalValue,
-            [COMMAND_DIR_Y]: rightJoystick.verticalValue
+            [FIELD_STR_DIR_X]: rightJoystick.horizontalValue,
+            [FIELD_STR_DIR_Y]: rightJoystick.verticalValue
         };
         ws.send(JSON.stringify(directionCommand));
     }
 
     // Right joystick dial rotation command
-    if (rightDial.isMoving) {
-        const rotationCommand = { [COMMAND_DIR_ROT]: Math.round(rightDial.rotationValue) };
+    if (rightDial.isRotating) {
+        const rotationValue = Math.round((rightDial.rotationValue / 180) * 100);
+        const rotationCommand = { [FIELD_STR_DIR_ROT]: rotationValue };
         ws.send(JSON.stringify(rotationCommand));
     }
-}, 200);
+}, DATA_POLL_INTERVAL);
 
 // Full-Screen Toggle Button
 const fullscreenButton = document.getElementById('fullscreen-button');
