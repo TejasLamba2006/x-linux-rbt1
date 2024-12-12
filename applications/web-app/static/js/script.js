@@ -11,8 +11,8 @@ const FIELD_STR_AZIMUTH = 'azimuth';
 
 
 const DEBUG = false;
-const DATA_POLL_INTERVAL = 200;
-const DATA_POLL_TIMEOUT = 250;
+const DATA_POLL_INTERVAL = 150;
+const DATA_POLL_TIMEOUT = 350;
 
 function debugLog(message) {
     if (DEBUG) {
