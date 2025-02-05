@@ -28,7 +28,7 @@ PA13 USER2 user button (B4)
 PA14 USER1 user button (B3
 
 
-| GPIO Header | GPIO Signal | STM32MP Function      | STM32MP Board GPIO |  RBT Board Func          |
+| GPIO Header | GPIO Signal | STM32MP Function      | STM32MP1 Board GPIO |  RBT Board Func          |
 |-------------|-------------|-----------------------|--------------------|--------------------------|
 | 1           | 3V3         |                       |                    |                          |
 | 2           | 5V          |                       |                    |                          |
@@ -41,7 +41,7 @@ PA14 USER1 user button (B3
 | 9           | GND         |                       |                    |                          |
 | 10          | EXP_GPIO15  | USART3_RX             | PB12               |  ISM330DHC_INT2          |
 | 11          | EXP_GPIO17  | USART3_RTS            | PG8                |  LPS22HH_INT_DRDY        |
-| 12          | EXP_GPIO18  | SAI2_SCKA             | PI5                |  GPIO_LED2       |
+| 12          | EXP_GPIO18  | SAI2_SCKA             | PI5                |  GPIO_LED2               |
 | 13          | EXP_GPIO27  | SDMMC3_D3             | PD7                |  STSPIN948_1_ENA_nFAULTA |
 | 14          | GND         |                       |                    |                          |
 | 15          | EXP_GPIO22  | SDMMC3_CK             | PG15               |  STSPIN948_1_ENA_nFAULTB |
@@ -65,7 +65,7 @@ PA14 USER1 user button (B3
 | 33          | EXP_GPIO13  | TIM3_CH2              | PC7                |  STSPIN948_1_PWM1B       |
 | 34          | GND         |                       |                    |                          |
 | 35          | EXP_GPIO19  | SAI2_FSA              | PI7                |  VL53L5CX_INT            |
-| 36          | EXP_GPIO16  | USART3_CTS            | PB13               |  STSPIN948_2_PWM1B               |
+| 36          | EXP_GPIO16  | USART3_CTS            | PB13               |  STSPIN948_2_PWM1B       |
 | 37          | EXP_GPIO26  | SDMMC3_D2             | PF5                |  GPIO_LED1               |
 | 38          | EXP_GPIO20  | SAI2_SDA              | PI6                |  VL53L5CX_I2C_RST        |
 | 39          | GND         |                       |                    |                          |
@@ -83,4 +83,50 @@ PA14 USER1 user button (B3
 STM32MP257F-DK Pin Mapping
 ---------------------------------------
 
+
+
+
+| GPIO Header | GPIO Signal | STM32MP2 Function      | STM32MP2 Board GPIO |  RBT Board Func          |
+|-------------|-------------|-----------------------|--------------------|--------------------------|
+| 1           | 3V3         |                       |                    |                          |
+| 2           | 5V          |                       |                    |                          |
+| 3           | EXP_GPIO2   | I2C8_SDA              | PZ3                |  I2C8_SDA                |
+| 4           | 5V          |                       |                    |                          |
+| 5           | EXP_GPIO3   | I2C8_SCL              | PZ4                | I2C8_SCL                 |
+| 6           | GND         |                       |                    |                          |
+| 7           | EXP_GPIO4   | MCO1                  | PF11               |  IIS2MDC_INT_DRDY        |
+| 8           | EXP_GPIO14  | USART6_TX             | PF13               |  ISM330DHC_INT1          |
+| 9           | GND         |                       |                    |                          |
+| 10          | EXP_GPIO15  | USART6_RX             | PF14               |  ISM330DHC_INT2          |
+| 11          | EXP_GPIO17  | USART6_RTS            | PG5                |  LPS22HH_INT_DRDY        |
+| 12          | EXP_GPIO18  | SAI2_SCKA             | PD2                |  GPIO_LED2               |
+| 13          | EXP_GPIO27  |                       | PZ9                |  STSPIN948_1_ENA_nFAULTA |
+| 14          | GND         |                       |                    |                          |
+| 15          | EXP_GPIO22  | SDMMC3_CK             | PZ0                |  STSPIN948_1_ENA_nFAULTB |
+| 16          | EXP_GPIO23  | SDMMC3_CMD            | PZ1                |  STSPIN948_2_ENA_nFAULTA |
+| 17          | 3V3         |                       |                    |                          |
+| 18          | EXP_GPIO24  | SDMMC3_D0             | PZ6                |  STSPIN948_2_ENA_nFAULTB |
+| 19          | EXP_GPIO10  | SPI6_MOSI             | PC7                |  STSPIN948_2_GPIOA       |
+| 20          | GND         |                       |                    |                          |
+| 21          | EXP_GPIO9   | SPI6_MISO             | PC4                |  STSPIN948_2_GPIOB       |
+| 22          | EXP_GPIO25  | SDMMC3_D1             | PZ7                |  GPIO_LED5               |
+| 23          | EXP_GPIO11  | SPI6_SCK              | PF7                |  STSPIN948_1_GPIOA       |
+| 24          | EXP_GPIO8   | SPI6_NSS              | PF4                |  STSPIN948_1_GPIOB       |
+| 25          | GND         |                       |                    |                          |
+| 26          | EXP_GPIO7   | GPIO_STMOD_RI         | PG5                |  GPIO_LED4               |
+| 27          | ID_SD       | I2C2_SDA              | PF0                |  EEPROM_ID_SD            |
+| 28          | ID_SC       | I2C2_SCL              | PF2                |  EEPROM_ID_SC            |
+| 29          | EXP_GPIO5   | MCO2                  | PC10               |  GPIO_LED3               |
+| 30          | GND         |                       |                    |                          |
+| 31          | EXP_GPIO6   | TIM5_CH1              | PH8                |  STSPIN948_2_PWM1A       |
+| 32          | EXP_GPIO12  | TIM2_CH4              | PA5                |  STSPIN948_1_PWM1A       |
+| 33          | EXP_GPIO13  | TIM4_CH2              | PA1                |  STSPIN948_1_PWM1B       |
+| 34          | GND         |                       |                    |                          |
+| 35          | EXP_GPIO19  | SAI4_FSA              | PD0                |  VL53L5CX_INT            |
+| 36          | EXP_GPIO16  | USART6_CTS            | PF15               |  STSPIN948_2_PWM1B       |
+| 37          | EXP_GPIO26  | SDMMC3_D2             | PG8                |  GPIO_LED1               |
+| 38          | EXP_GPIO20  | SAI4_SDA              | PD1                |  VL53L5CX_I2C_RST        |
+| 39          | GND         |                       |                    |                          |
+| 40          | EXP_GPIO21  | SAI4_SDB              | PB5                |  VL53L5CX_LPn_GPIO_SW    |
+-----------------------------------------------------------------------------------------------------
 
