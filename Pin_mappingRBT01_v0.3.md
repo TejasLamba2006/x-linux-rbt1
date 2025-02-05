@@ -118,12 +118,12 @@ STM32MP257F-DK Pin Mapping
 | 28          | ID_SC       | I2C2_SCL              | PF2                |  EEPROM_ID_SC            |
 | 29          | EXP_GPIO5   | MCO2                  | PC10               |  GPIO_LED3               |
 | 30          | GND         |                       |                    |                          |
-| 31          | EXP_GPIO6   | TIM5_CH1              | PH8                |  STSPIN948_2_PWM1A       |
-| 32          | EXP_GPIO12  | TIM2_CH4              | PA5                |  STSPIN948_1_PWM1A       |
-| 33          | EXP_GPIO13  | TIM4_CH2              | PA1                |  STSPIN948_1_PWM1B       |
+| 31          | EXP_GPIO6   | TIM5_CH1    (AF9)     | PH8                |  STSPIN948_2_PWM1A       |
+| 32          | EXP_GPIO12  | TIM2_CH4    (AF8)     | PA5                |  STSPIN948_1_PWM1A       |
+| 33          | EXP_GPIO13  | TIM4_CH2    (AF7)     | PA1                |  STSPIN948_1_PWM1B       |
 | 34          | GND         |                       |                    |                          |
 | 35          | EXP_GPIO19  | SAI4_FSA              | PD0                |  VL53L5CX_INT            |
-| 36          | EXP_GPIO16  | USART6_CTS            | PF15               |  STSPIN948_2_PWM1B       |
+| 36          | EXP_GPIO16  | TIM2_CH2    (AF7)     | PF15               |  STSPIN948_2_PWM1B       |
 | 37          | EXP_GPIO26  | SDMMC3_D2             | PG8                |  GPIO_LED1               |
 | 38          | EXP_GPIO20  | SAI4_SDA              | PD1                |  VL53L5CX_I2C_RST        |
 | 39          | GND         |                       |                    |                          |
