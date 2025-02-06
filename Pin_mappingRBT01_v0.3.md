@@ -84,6 +84,19 @@ STM32MP257F-DK Pin Mapping
 ---------------------------------------
 
 
+STM32MP257F-DK2 device tree configuration
+
+Disable the follwing 
+SPI6, SAI4 -disable
+
+Enable the follwing 
+I2C8
+
+Put GPIO in Timer mode (PWM), alternate funtion given below
+TIM5_CH1 AF9 selected
+TIM2_CH4 AF8 selected
+TIM4_CH2 AF7 selected
+TIM2_CH2 AF7 selected
 
 
 | GPIO Header | GPIO Signal | STM32MP2 Function      | STM32MP2 Board GPIO |  RBT Board Func          |
