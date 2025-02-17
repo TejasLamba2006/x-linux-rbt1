@@ -118,7 +118,7 @@ chmod +x deploy.sh
 
 ### Launching the Application
 
-Once the files are deployed and the board is rebooted, the demo-launcher menu will display an option for **X-LINUX-RBT1**, as shown below.
+Once the files are deployed and the board is rebooted, You can run command **X-LINUX-RBT1**, as shown below.
 
 ![Figure 5: Application Launch Icon](_htmresc/figure05_x-linux-rbt1_icon_image.png)
 
