@@ -128,9 +128,9 @@ On launching the application application, users are presented with an **Informat
 
 The information screen includes:
 
-1. **Emergency Stop Button**: A critical feature for halting the system in case of an emergency.
-2. **Wi-Fi Hotspot Activation**: Allows the device to function as a hotspot, useful for outdoor environments without network access. Once activated, a QR code with SSID and password is displayed for easy connection.
-3. **Remote Control Interface**: The screen displays a QR code linking to the embedded web server hosting the remote control client application.
+1. **Mode Selection**: Allow user to choose between Wi-Fi and Hotspot Modes.
+2. **QR Code**: Once selected mode is activated, a QR code with SSID and password is displayed for easy connection.
+3. **Remote Control Interface**:  On scanning QR code with device on same network (hotspot or Wi-Fi) remote control client application will get open in browser.
 
 ### Remote Control Web App
 
