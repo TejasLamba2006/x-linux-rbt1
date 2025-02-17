@@ -7,7 +7,7 @@ import netifaces
 import qrcode
 import os
 import time
-import mechanum_api as motor_api
+import mechanumapi as motor_api
 from vl53l5cx.vl53l5cx import VL53L5CX
 import threading
 
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     print(f"\nYou have selected: {mode}.")
 
     if mode == "Hotspot Mode":
-        os.system("chmod +x st-hotspot-wifi-service.sh && ./st-hotspot-wifi-service.sh")
+        os.system("chmod +x st-hotspot-wifi-service.sh && ./st-hotspot-wifi-service.sh start")
         print("Initializing the selected mode... Please wait.") 
         print("Connect to the Hotspot") 
         print("" )
@@ -194,7 +194,7 @@ if __name__ == "__main__":
     else:
         print("Could not retrieve wlan0 address.")
     
-    collision_detect = threading.Thread(target=my_function)
+    collision_detect = threading.Thread(target=tof)
     collision_detect.start()
 
     uvicorn.run("main:app", host="0.0.0.0", port=8000)
