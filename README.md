@@ -12,7 +12,7 @@ The **X-LINUX-RBT1** is a Linux-based expansion software package designed for ro
 
 The **X-LINUX-RBT1** package includes a range of features for robotics control and development:
 
-1. GTK-based GUI application.
+1. Commandline based terminal application.
 2. Embedded web server with a web client for remote network control.
 3. Intuitive joystick-based remote control web app.
 4. Sensor fusion middleware for precise heading and orientation.
