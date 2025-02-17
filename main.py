@@ -1,4 +1,4 @@
-# application/web-app/main.py 
+# application/web-app/main.py
 import json
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
@@ -194,8 +194,8 @@ if __name__ == "__main__":
     else:
         print("Could not retrieve wlan0 address.")
     
-    collision_detect = threading.Thread(target=tof)
-    collision_detect.start()
+#    collision_detect = threading.Thread(target=my_function)
+#    collision_detect.start()
 
     uvicorn.run("main:app", host="0.0.0.0", port=8000)
     motor_api.release()
