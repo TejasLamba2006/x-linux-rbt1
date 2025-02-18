@@ -14,30 +14,30 @@ chip_f = "/dev/gpiochip5"
 chip_g = "/dev/gpiochip6"
 chip_h = "/dev/gpiochip7"
 chip_i = "/dev/gpiochip8"
-chip_z = "/dev/gpiochip9"
+
 
 pins_1 = {
-                "pwm_a": ("pwmchip0", 3),
-                "pwm_b": ("pwmchip4", 1),
-                "ref_a": (chip_e, "NA"),
-                "ref_b": (chip_a, "NA"),
-                "en_a" : (chip_z, 9),
-                "en_b" : (chip_z, 0),
-                "stdby": (chip_e, "NA"),
-                "dir_a": (chip_f, 7),
-                "dir_b": (chip_f, 4)
-            }
-
-pins_2 = {
-                "pwm_a": ("pwmchip8", 0),
+                "pwm_a": ("pwmchip4", 1),
                 "pwm_b": ("pwmchip0", 1),
                 "ref_a": (chip_e, "NA"),
                 "ref_b": (chip_a, "NA"),
-                "en_a" : (chip_z, 1),
-                "en_b" : (chip_z, 6),
+                "en_a" : (chip_d, 7),
+                "en_b" : (chip_g, 15),
                 "stdby": (chip_e, "NA"),
-                "dir_a": (chip_c, 7),
-                "dir_b": (chip_c, 4)
+                "dir_a": (chip_f, 7),
+                "dir_b": (chip_f, 6)
+            }
+
+pins_2 = {
+                "pwm_a": ("pwmchip8", 1),
+                "pwm_b": ("pwmchip12", 0),
+                "ref_a": (chip_e, "NA"),
+                "ref_b": (chip_a, "NA"),
+                "en_a" : (chip_f, 1),
+                "en_b" : (chip_f, 0),
+                "stdby": (chip_e, "NA"),
+                "dir_a": (chip_f, 9),
+                "dir_b": (chip_f, 8)
             }
 from motor.evspin948_driver import EVSPIN948Driver
 spn_motor_1 = EVSPIN948Driver(pins_1)
@@ -103,4 +103,23 @@ def motor_2b(duty = 50, dir =0 ):
         spn_motor_2.reverse_b()
         
         
+        
+        
+
+
+# motor_1a(50,0)
+# time.sleep(20)
+# motor_1a(70,1)
+
+# time.sleep(20)
+
+# time.sleep(10)
+# stop()
+
+
+    
+# spn_motor_1.end()
+# spn_motor_2.end()
+
+
 
