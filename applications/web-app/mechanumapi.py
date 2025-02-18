@@ -1,8 +1,19 @@
+#Mechanum wheel logic 
 
-Board = "MP2"
-if Board == "MP2":
+def read_board_compatibility_name():
+    try:
+        with open("/proc/device-tree/compatible") as fp:
+            string = fp.read()
+            return string.split(',')[-1].rstrip('\x00')
+    except:
+        return "all"
+
+Board = read_board_compatibility_name()
+
+
+if Board == "stm32mp257":
     import stm32mp2 as STSPIN
-elif Board == "MP1":
+elif Board == "stm32mp157":
     import stm32mp1 as STSPIN
 
 global active_mode
@@ -39,7 +50,7 @@ def throttle_value(value):
         else:
             STSPIN.motor_2a(value*abs(motor_2a_factor),1 )
 
-        if Board == "MP2":
+        if Board == "stm32mp257":
             if motor_2b_factor > 0:
                 STSPIN.motor_2b(value*abs(motor_2b_factor),1 )
             else:
