@@ -1,5 +1,9 @@
-import stm32mp as STSPIN
 
+Board = "MP2"
+if Board == "MP2":
+    import stm32mp2 as STSPIN
+elif Board == "MP1":
+    import stm32mp1 as STSPIN
 
 global active_mode
 active_mode = 'locked'
@@ -35,11 +39,19 @@ def throttle_value(value):
         else:
             STSPIN.motor_2a(value*abs(motor_2a_factor),1 )
 
-        if motor_2b_factor > 0:
-            STSPIN.motor_2b(100-(value*abs(motor_2b_factor)),0 )
-        else:
-            STSPIN.motor_2b(100-(value*abs(motor_2b_factor)),1 )
+        if Board == "MP2":
+            if motor_2b_factor > 0:
+                STSPIN.motor_2b(value*abs(motor_2b_factor),1 )
+            else:
+                STSPIN.motor_2b(value*abs(motor_2b_factor),0 )
 
+        else:
+            if motor_2b_factor > 0:
+                STSPIN.motor_2b(100-(value*abs(motor_2b_factor)),1 )
+            else:
+                STSPIN.motor_2b(100-(value*abs(motor_2b_factor)),0 )
+        
+    
 
 
 
@@ -59,10 +71,18 @@ def throttle_value(value):
         else:
             STSPIN.motor_2a(-value*abs(motor_2a_factor),0 )
 
-        if motor_2b_factor > 0:
-            STSPIN.motor_2b(100-(-value*abs(motor_2b_factor)),1 )
+
+        if Board == "MP2":
+            if motor_2b_factor > 0:
+                STSPIN.motor_2b(-value*abs(motor_2b_factor),1 )
+            else:
+                STSPIN.motor_2b(-value*abs(motor_2b_factor),0 )
+
         else:
-            STSPIN.motor_2b(100-(-value*abs(motor_2b_factor)),0 )
+            if motor_2b_factor > 0:
+                STSPIN.motor_2b(100-(-value*abs(motor_2b_factor)),1 )
+            else:
+                STSPIN.motor_2b(100-(-value*abs(motor_2b_factor)),0 )
         
     
 def rotate_angle(angle):
