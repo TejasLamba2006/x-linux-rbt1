@@ -83,7 +83,7 @@ def throttle_value(value):
             STSPIN.motor_2a(-value*abs(motor_2a_factor),0 )
 
 
-        if Board == "MP2":
+        if Board == "stm32mp257":
             if motor_2b_factor > 0:
                 STSPIN.motor_2b(-value*abs(motor_2b_factor),1 )
             else:
