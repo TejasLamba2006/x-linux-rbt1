@@ -8,7 +8,7 @@
 ##############################################################################
 # @attention
 #
-# Copyright (c) 2024 STMicroelectronics.
+# Copyright (c) 2025 STMicroelectronics.
 # All rights reserved.
 #
 # This software is licensed under terms that can be found in the LICENSE file
@@ -25,6 +25,5 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-ssh root@$1 "cd /usr/local/demo/application;rm -r x_linux_rbt1;mkdir -p x_linux_rbt1"
-scp -r ../application/x_linux_rbt1/* root@$1:/usr/local/demo/application/x_linux_rbt1/
-scp ../application/080-x-linux-rbt1.yaml root@$1:/usr/local/demo/application/
+ssh root@$1 "cd /usr/local/;rm -r x-linux-rbt1;mkdir -p x-linux-rbt1"
+scp -r ../application/x-linux-rbt1/* root@$1:/usr/local/x-linux-rbt1/

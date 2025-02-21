@@ -32,7 +32,7 @@ The package is composed of multiple layers and modules:
 - Compute useful metrics from raw sensor data, such as altitude from pressure readings, distances from ToF sensor data, and orientation using sensor fusion.
 
 #### 3. **Robotics Algorithms**
-- High-level algorithms tailored for robotics, including kinematics, obstacle detection, and path correction.
+- High-level algorithms tailored for robotics, including kinematics, obstacle detection etc.
 
 #### 4. **Applications**
 - Includes sample applications demonstrating practical use cases, such as remote rover control, integrating all modules into cohesive robotics solutions.
@@ -57,13 +57,17 @@ Key STMicroelectronics components available on this board are described below:
 
 The *X-STM32MP-RBT01* board can be plugged into the 40-pin connectors available on STM32MP discovery boards or Raspberry Pi, as shown below.
 
-![Figure 4: X-STM32MP-RBT01 with STM32MP157F-DK2](_htmresc/figure04_x-stm32mp-rbt01_stm32mp257f-dk.png)
+![Figure 4: X-STM32MP-RBT01 with STM32MP157F-DK2](_htmresc/figure04_x-stm32mp-rbt01_stm32mp157f-dk2.png)
+
+
+![Figure 5: X-STM32MP-RBT01 with STM32MP257F-DK](_htmresc/figure05_x-stm32mp-rbt01_stm32mp257f-dk.png)
+
 
 ### Important Setup Notes
 
-- Ensure correct board orientation when mounting on platforms like STM32MP discovery kits or Raspberry Pi. For example, the board mounts "inward" on STM32MP157F-DK2 but "outward" on STM32MP257F-DK.
+- Ensure correct board orientation when mounting on platforms like STM32MP discovery kits or Raspberry Pi. For example, the board mounts "inward" on STM32MP157F-DK2 & Raspberry Pi but "outward" on STM32MP257F-DK boards.
 - Verify jumper settings for the STSPIN948 to operate in "Dual Independent Full Bridge Mode" as configured in the provided software. For other configurations, modify the user-space driver code.
-- Some GPIOs connected to the 40-pin headers are shared with other peripherals on STM32MP boards and may require the connection/disconnection of solder bridges. Refer to the specific board user manual for details.
+- Some GPIOs connected to the 40-pin headers are shared with other peripherals on STM32MP boards and may require the connection/disconnection of solder bridges. For example, in the STM32MP157F-DK2 board SB13, SB14, SB15, SB16 should be closed and SB01, SB02, SB03 and SB04 should be opened by desoldering the 0 ohm resistor. Refer to the specific board user manual for details.
 
 ## Software Setup
 
@@ -103,7 +107,7 @@ To connect to a WLAN, refer to [How to Setup a WLAN Connection](https://wiki.st.
 - Details on transfer using the serial link, for Linux hosts, refer to [How to transfer a file over a serial console](https://wiki.st.com/stm32mpu/wiki/How_to_transfer_a_file_over_serial_console). For Windows hosts, refer to [How to transfer files to Discovery kit using Tera Term](https://wiki.st.com/stm32mpu/wiki/How_to_transfer_files_to_Discovery_kit_using_Tera_Term_on_Windows_PC).
 - Alternatively, user could transfer the files using an external USB drive.
 
-To quickly evaluate the X-LINUX-RBT1 package, developers may copy the contents of the "application" folder contained in the package to the `/usr/local/demo/application` folder on the STM32MP board using any of the above methods. To ease this action, the deployment script present inside the "scripts" folder of the X-LINUX-RBT1 package can be used (if using a network connection to transfer the files).
+To quickly evaluate the X-LINUX-RBT1 package, developers may copy the contents of the "applications" folder contained in the package to the `/usr/local/x-linux-rbt1` folder on the STM32MP board using any of the above methods. To ease this action, the deployment script present inside the "scripts" folder of the X-LINUX-RBT1 package can be used (if using a network connection to transfer the files).
 
 ```sh
 # Go to the scripts folder
@@ -118,25 +122,26 @@ chmod +x deploy.sh
 
 ### Launching the Application
 
-Once the files are deployed and the board is rebooted, You can run command **X-LINUX-RBT1**, as shown below.
+Once the files are deployed and the board is rebooted, You can explore **X-LINUX-RBT1**, by accesing the terminal through ssh and run the application using following command
 
-![Figure 5: Application Launch Icon](_htmresc/figure05_x-linux-rbt1_icon_image.png)
+`python3 /usr/local/x-linux-rbt1/run-app.py`
 
-On launching the application application, users are presented with an **Information Interface** screen.
+This open the command line interface (CLI) of the application, where various network configuration options are displayed.
 
-![Figure 6: X-LINUX-RBT1 Info Screen](_htmresc/figure06_x-linux-rbt1_info_screen.png)
+![Figure 6: Application Command Line Interface](_htmresc/figure06_x-linux-rbt1_cli.png)
 
-The information screen includes:
+After initial configuration, QR code is displayed which could be scanned on a mobile device to open the web-app to control the rover.
 
-1. **Mode Selection**: Allow user to choose between Wi-Fi and Hotspot Modes.
-2. **QR Code**: Once selected mode is activated, a QR code with SSID and password is displayed for easy connection.
-3. **Remote Control Interface**:  On scanning QR code with device on same network (hotspot or Wi-Fi) remote control client application will get open in browser.
+![Figure 7: X-LINUX-RBT1 QR Scanner](_htmresc/figure07_x-linux-rbt1_connection.png)
+
+
+After scanning the QR code on the mobile device **Remote Control Interface** would open (provided the device is connected to the same network as the board)
 
 ### Remote Control Web App
 
 To control the rover remotely, the **remote control web app** is hosted through the embedded web server module of the X-LINUX-RBT1 software. Once the application is running, a URL is provided for accessing the web app. The URL is also presented as a QR code for user convenience in GUI mode.
 
-![Figure 7: Remote Interface](_htmresc/figure07_x-linux-rbt1_control_webapp.jpeg)
+![Figure 8: Remote Interface](_htmresc/figure08_x-linux-rbt1_control_webapp.jpeg)
 
 #### Features of the Remote Control Interface
 
@@ -169,8 +174,8 @@ The content and changes included in this release are documented in the [Release 
 
 The **X-LINUX-RBT1** software package is validated for **[OpenSTLinux](https://www.st.com/en/embedded-software/stm32-mpu-openstlinux-distribution.html)** version 5.1. Running it on other ecosystem versions may require additional configuration. The software is tested on the following boards:
 
-1. **[STM32MP257F-DK](https://www.st.com/en/evaluation-tools/stm32mp257f-dk.html)**
-2. **[STM32MP157F-DK2](https://www.st.com/en/evaluation-tools/stm32mp157f-dk2.html)**
+1. **[STM32MP157F-DK2](https://www.st.com/en/evaluation-tools/stm32mp157f-dk2.html)**
+2. **[STM32MP257F-DK](https://www.st.com/en/evaluation-tools/stm32mp257f-dk.html)**
 
 ## Related Information and Documentation
 

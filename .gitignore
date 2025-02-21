@@ -350,3 +350,18 @@ dist
 
 # Temp Folders
 __*/
+
+# Logs and debugging
+*.log
+*.out
+*.err
+logs/
+
+# Temp files
+*.tmp
+*.swp
+*.swo
+*.bak
+*.orig
+.DS_Store
+Thumbs.db
