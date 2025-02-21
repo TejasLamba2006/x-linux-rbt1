@@ -12,7 +12,7 @@ header-includes: <link rel="icon" type="image/x-icon" href="_htmresc/favicon.png
 
 # <mark>package X-LINUX-RBT1</mark>
 
-Copyright &copy; 2024 STMicroelectronics
+Copyright &copy; 2025 STMicroelectronics
 
 All rights reserved
     

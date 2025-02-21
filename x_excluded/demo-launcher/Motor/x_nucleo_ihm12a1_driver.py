@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-# Copyright (c) 2024 STMicroelectronics. All rights reserved.
+# Copyright (c) 2025 STMicroelectronics. All rights reserved.
 #
 # This software component is licensed by ST under BSD 3-Clause license,
 # the "License"; You may not use this file except in compliance with the
