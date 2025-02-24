@@ -115,17 +115,24 @@ def rotate_angle(angle):
     
 
 def rotate_right(speed):
+    global Board
     STSPIN.motor_1a(speed,0 )
     STSPIN.motor_1b(speed,1 )
     STSPIN.motor_2a(speed,0 )
-    STSPIN.motor_2b(100-speed,1 )
+    if Board == "stm32mp257":
+        STSPIN.motor_2b(speed,1 )
+    elif Board == "stm32mp157"
+        STSPIN.motor_2b(100-speed,1 )
 
 def rotate_left(speed):
+    global Board
     STSPIN.motor_1a(speed,1 )
     STSPIN.motor_1b(speed,0 )
     STSPIN.motor_2a(speed,1 )
-    STSPIN.motor_2b(100-speed,0 )
-
+    if Board == "stm32mp257":
+        STSPIN.motor_2b(speed,0 )
+    elif Board == "stm32mp157"
+        STSPIN.motor_2b(100-speed,0 )
 
 
 
