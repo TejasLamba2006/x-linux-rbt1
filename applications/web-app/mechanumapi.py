@@ -1,3 +1,12 @@
+#!/usr/bin/python3
+
+# Copyright (c) 2025 STMicroelectronics. All rights reserved.
+#
+# This software component is licensed by ST under BSD 3-Clause license,
+# the "License"; You may not use this file except in compliance with the
+# License. You may obtain a copy of the License at:
+#                        opensource.org/licenses/BSD-3-Clause
+
 #Mechanum wheel logic 
 
 def read_board_compatibility_name():
@@ -144,7 +153,6 @@ def direction(x_axis,y_axis):
         v3 /=v_max
         v4 /=v_max
     
-
     motor_1a_factor = v1
     motor_1b_factor = v2
     motor_2a_factor = v3
