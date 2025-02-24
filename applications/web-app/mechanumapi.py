@@ -42,6 +42,7 @@ def mode_select(mode):
     print(active_mode)
 
 def throttle_value(value):
+    global Board
     print(value)
     if value >= 0:
         if motor_1a_factor > 0:
