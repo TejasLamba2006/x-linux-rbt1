@@ -68,9 +68,9 @@ def throttle_value(value):
 
         else:
             if motor_2b_factor > 0:
-                STSPIN.motor_2b(100-(value*abs(motor_2b_factor)),1 )
-            else:
                 STSPIN.motor_2b(100-(value*abs(motor_2b_factor)),0 )
+            else:
+                STSPIN.motor_2b(100-(value*abs(motor_2b_factor)),1 )
         
     
 
