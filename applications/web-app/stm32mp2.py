@@ -1,3 +1,12 @@
+#!/usr/bin/python3
+
+# Copyright (c) 2025 STMicroelectronics. All rights reserved.
+#
+# This software component is licensed by ST under BSD 3-Clause license,
+# the "License"; You may not use this file except in compliance with the
+# License. You may obtain a copy of the License at:
+#                        opensource.org/licenses/BSD-3-Clause
+
 import time
 #import pwm
 import threading
@@ -39,6 +48,7 @@ pins_2 = {
                 "dir_a": (chip_c, 7),
                 "dir_b": (chip_c, 4)
             }
+
 from motor.evspin948_driver import EVSPIN948Driver
 spn_motor_1 = EVSPIN948Driver(pins_1)
 spn_motor_1.setup_gpio()
@@ -46,29 +56,18 @@ spn_motor_1.setup_gpio()
 spn_motor_2 = EVSPIN948Driver(pins_2)
 spn_motor_2.setup_gpio()
 
-
-
-
-
 def stop():
     print("stop")
     spn_motor_1.stop()
     spn_motor_2.stop()
 
-
-
-
-
 def release():
     spn_motor_2.end()
     spn_motor_1.end()
     
-    
-    
 def rampUp():
     spn_motor_1.rampUp()
     spn_motor_2.rampUp()
-
 
 def rampDown():
     spn_motor_1.rampDown()

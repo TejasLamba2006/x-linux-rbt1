@@ -1,4 +1,16 @@
+#!/usr/bin/python3
+
+# Copyright (c) 2025 STMicroelectronics. All rights reserved.
+#
+# This software component is licensed by ST under BSD 3-Clause license,
+# the "License"; You may not use this file except in compliance with the
+# License. You may obtain a copy of the License at:
+#                        opensource.org/licenses/BSD-3-Clause
+
 # application/web-app/main.py
+
+PORT = 8000
+
 import json
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
@@ -12,9 +24,9 @@ from vl53l5cx.vl53l5cx import VL53L5CX
 import threading
 
 def show_introduction():
-    # Print introduction
+    # Print Intro Label
     print("=" * 50)
-    print("Welcome to the X-LINUX-RBT1 Software Package!")
+    print("Welcome to the X-LINUX-RBT1 Demo Application!")
     print("Developed for the X-STM32MP-RBT01 expansion board.")
     print("=" * 50)
     print("\nSelect the mode you want to use:")
@@ -28,7 +40,7 @@ driver = VL53L5CX()
 
 alive = driver.is_alive()
 if not alive:
-    raise IOError("VL53L5CX Device is not alive")
+    raise IOError("VL53L5CX Device is not responding")
 
 t = time.time()
 driver.init()
@@ -70,12 +82,6 @@ def get_user_choice():
 
 
 
-
-
-
-
-
-
 def generate_qr_code(data):
     try:
         qr = qrcode.QRCode(
@@ -90,8 +96,6 @@ def generate_qr_code(data):
     except Exception as e:
         print(f"Failed to generate QR Code: {e}")
 
-
-PORT = 8000
 
 def get_wlan0_address():
     interface = "wlan0"
