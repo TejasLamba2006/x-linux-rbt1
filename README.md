@@ -94,7 +94,7 @@ The following Python packages are required for the **X-LINUX-RBT1** software:
 ```sh
 # Install required packages
 apt-get install python3-gpiod
-pip install smbus2 fastapi uvicorn websockets
+pip install smbus2 fastapi uvicorn websockets netifaces qrcode
 ```
 
 ### Deploying the Files to the MPU Board
@@ -124,7 +124,7 @@ chmod +x deploy.sh
 
 Once the files are deployed and the board is rebooted, You can explore **X-LINUX-RBT1**, by accesing the terminal through ssh and run the application using following command
 
-`python3 /usr/local/x-linux-rbt1/run-app.py`
+`python3 /usr/local/x-linux-rbt1/main.py`
 
 This open the command line interface (CLI) of the application, where various network configuration options are displayed.
 

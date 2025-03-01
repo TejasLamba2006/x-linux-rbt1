@@ -26,4 +26,4 @@ if [ $# -eq 0 ]; then
 fi
 
 ssh root@$1 "cd /usr/local/;rm -r x-linux-rbt1;mkdir -p x-linux-rbt1"
-scp -r ../application/x-linux-rbt1/* root@$1:/usr/local/x-linux-rbt1/
+scp -r ../applications/web-app/* root@$1:/usr/local/x-linux-rbt1/

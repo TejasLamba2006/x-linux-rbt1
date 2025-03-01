@@ -177,7 +177,7 @@ if __name__ == "__main__":
         print("Initializing the selected mode... Please wait.") 
         print("Connect to the Hotspot") 
         print("" )
-        print("SSID=RBT01Demo" )
+        print("SSID=RBT1Demo" )
         print("PASSWORD=122345678")
         print("" )
     else:
