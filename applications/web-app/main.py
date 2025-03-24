@@ -50,20 +50,37 @@ driver.start_ranging()
 
 previous_time = 0
 loop = 1
-def tof():
-    if driver.check_data_ready():
-        ranging_data = driver.get_ranging_data()
-        now = time.time()
-        if previous_time != 0:
-            time_to_get_new_data = now - previous_time
-        zone = 7
-        Distance = ranging_data.distance_mm[driver.nb_target_per_zone * zone]
-        if Distance < 30 :
-            # motor_api.throttle(1)
-            print(Distance)
-        previous_time = now
 
-    time.sleep(0.005)
+def tof():
+    global previous_time
+    while True:
+        if driver.check_data_ready():
+            ranging_data = driver.get_ranging_data()
+            now = time.time()
+            if previous_time != 0:
+                time_to_get_new_data = now - previous_time
+
+            zone = 7
+            Distance = ranging_data.distance_mm[driver.nb_target_per_zone * zone]
+
+            if Distance < 20:
+                print(f"Obstacle detected! Distance: {Distance}mm. Stopping motors...")
+                motor_api.parser({"throttle": 0})  # Stop the motors
+                
+                # Wait until the obstacle is cleared (distance >= 20mm)
+                while True:
+                    ranging_data = driver.get_ranging_data()
+                    Distance = ranging_data.distance_mm[driver.nb_target_per_zone * zone]
+                    if Distance >= 20:
+                        print(f"Obstacle cleared! Distance: {Distance}mm. Resuming operations...")
+                        break
+                    time.sleep(0.1)  # Small delay to avoid busy-waiting
+            
+            previous_time = now
+
+        time.sleep(0.005)  # Allow time for sensor data to update
+
+# Run the TOF function in a separate thread
 
 
 def get_user_choice():
@@ -198,8 +215,8 @@ if __name__ == "__main__":
     else:
         print("Could not retrieve wlan0 address.")
     
-#    collision_detect = threading.Thread(target=my_function)
-#    collision_detect.start()
+    collision_detect = threading.Thread(target=tof, daemon=True)
+    collision_detect.start()
 
     uvicorn.run("main:app", host="0.0.0.0", port=8000)
     motor_api.release()
