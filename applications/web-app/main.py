@@ -1,11 +1,7 @@
 #!/usr/bin/python3
 
 # Copyright (c) 2025 STMicroelectronics. All rights reserved.
-#
-# This software component is licensed by ST under BSD 3-Clause license,
-# the "License"; You may not use this file except in compliance with the
-# License. You may obtain a copy of the License at:
-#                        opensource.org/licenses/BSD-3-Clause
+# BSD 3-Clause License - https://opensource.org/licenses/BSD-3-Clause
 
 # application/web-app/main.py
 
@@ -23,8 +19,11 @@ import mechanumapi as motor_api
 from vl53l5cx.vl53l5cx import VL53L5CX
 import threading
 
+# ============================== #
+#         Introduction           #
+# ============================== #
+
 def show_introduction():
-    # Print Intro Label
     print("=" * 50)
     print("Welcome to the X-LINUX-RBT1 Demo Application!")
     print("Developed for the X-STM32MP-RBT01 expansion board.")
@@ -33,23 +32,29 @@ def show_introduction():
     print("1. Wi-Fi Mode")
     print("2. Hotspot Mode")
 
-
-
+# ============================== #
+#       VL53L5CX Initialization  #
+# ============================== #
 
 driver = VL53L5CX()
 
-alive = driver.is_alive()
-if not alive:
+if not driver.is_alive():
     raise IOError("VL53L5CX Device is not responding")
 
-t = time.time()
+print("VL53L5CX detected.")
+print(f"Sensor reports {driver.nb_zones} zones and {driver.nb_target_per_zone} targets per zone.")
+
 driver.init()
-
-
 driver.start_ranging()
 
 previous_time = 0
-loop = 1
+
+# ============================== #
+#        TOF Collision Avoidance #
+# ============================== #
+
+OBSTACLE_THRESHOLD_MM = 20
+ZONE = 7 if driver.nb_zones > 7 else driver.nb_zones - 1  # Auto clamp
 
 def tof():
     global previous_time
@@ -60,31 +65,36 @@ def tof():
             if previous_time != 0:
                 time_to_get_new_data = now - previous_time
 
-            zone = 7
-            Distance = ranging_data.distance_mm[driver.nb_target_per_zone * zone]
+            # Safe indexing
+            index = driver.nb_target_per_zone * ZONE
+            if index >= len(ranging_data.distance_mm):
+                print("Warning: Index exceeds distance array length.")
+                time.sleep(0.05)
+                continue
 
-            if Distance < 20:
+            Distance = ranging_data.distance_mm[index]
+
+            if Distance < OBSTACLE_THRESHOLD_MM:
                 print(f"Obstacle detected! Distance: {Distance}mm. Stopping motors...")
-                motor_api.parser({"throttle": 0})  # Stop the motors
+                motor_api.parser({"throttle": 0})  # Stop motors
                 
-                # Wait until the obstacle is cleared (distance >= 20mm)
                 while True:
                     ranging_data = driver.get_ranging_data()
-                    Distance = ranging_data.distance_mm[driver.nb_target_per_zone * zone]
-                    if Distance >= 20:
+                    Distance = ranging_data.distance_mm[index]
+                    if Distance >= OBSTACLE_THRESHOLD_MM:
                         print(f"Obstacle cleared! Distance: {Distance}mm. Resuming operations...")
                         break
-                    time.sleep(0.1)  # Small delay to avoid busy-waiting
-            
+                    time.sleep(0.1)  # Avoid busy waiting
+
             previous_time = now
 
-        time.sleep(0.005)  # Allow time for sensor data to update
+        time.sleep(0.005)  # Sensor needs breathing room
 
-# Run the TOF function in a separate thread
-
+# ============================== #
+#        Mode Selection          #
+# ============================== #
 
 def get_user_choice():
-    # Prompt user for choice
     while True:
         try:
             choice = int(input("\nEnter your choice (1 or 2): "))
@@ -97,53 +107,56 @@ def get_user_choice():
         except ValueError:
             print("Invalid input. Please enter a numeric value (1 or 2).")
 
-
+# ============================== #
+#      QR Code Generation        #
+# ============================== #
 
 def generate_qr_code(data):
     try:
         qr = qrcode.QRCode(
-            version=1,  # Controls the size of the QR Code
+            version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=10,  # Size of each box in the QR Code
-            border=4,  # Thickness of the border
+            box_size=10,
+            border=4,
         )
         qr.add_data(data)
         qr.make(fit=True)
-        qr.print_ascii()  # Prints the QR code in the terminal
+        qr.print_ascii()
     except Exception as e:
         print(f"Failed to generate QR Code: {e}")
 
+# ============================== #
+#   Get wlan0 IP Address         #
+# ============================== #
 
 def get_wlan0_address():
     interface = "wlan0"
     try:
         addresses = netifaces.ifaddresses(interface)
-        # Get the IPv4 address of wlan0
         inet = addresses.get(netifaces.AF_INET)
         if inet:
             ip_address = inet[0]['addr']
-            # Combine IP and port into a single variable
-            wlan0_address = f"{ip_address}:{PORT}"
-            return wlan0_address
+            return f"{ip_address}:{PORT}"
         else:
-            return "No IPv4 address found for wlan0."
-    except ValueError:
-        return "wlan0 interface not found on this system."
+            return None
     except Exception as e:
-        return f"An error occurred: {e}"
+        return None
 
+# ============================== #
+#        FastAPI Setup           #
+# ============================== #
 
 app = FastAPI()
-
-
-# Serve the static files from same backend
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
 async def get():
     return StaticFiles(directory="static", html=True)
 
-# WebSocket connection manager
+# ============================== #
+#  WebSocket Connection Manager  #
+# ============================== #
+
 class ConnectionManager:
     def __init__(self):
         self.active_connections: list[WebSocket] = []
@@ -161,20 +174,15 @@ class ConnectionManager:
         try:
             while True:
                 data = await websocket.receive_text()
-                # print(f"Received: {data}")
                 json_strings = data.strip().split('\n')
                 for json_string in json_strings:
                     try:
-        # Parse the JSON string into a dictionary
                         parsed_data = json.loads(json_string)
                         motor_api.parser(parsed_data)  
-                        # print(parsed_data)
                     except json.JSONDecodeError as e:
                         print(f"Failed to decode JSON: {e}")
-                
         except WebSocketDisconnect:
             self.disconnect(websocket)
-            
 
 manager = ConnectionManager()
 
@@ -183,41 +191,34 @@ async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     await manager.receive(websocket)
 
-if __name__ == "__main__":
+# ============================== #
+#            Main                #
+# ============================== #
 
+if __name__ == "__main__":
     show_introduction()
     mode = get_user_choice()
     print(f"\nYou have selected: {mode}.")
 
     if mode == "Hotspot Mode":
         os.system("chmod +x st-hotspot-wifi-service.sh && ./st-hotspot-wifi-service.sh start")
-        print("Initializing the selected mode... Please wait.") 
-        print("Connect to the Hotspot") 
-        print("" )
-        print("SSID=RBT1Demo" )
-        print("PASSWORD=122345678")
-        print("" )
+        print("Initializing Hotspot Mode... Please wait.")
+        print("SSID=RBT1Demo\nPASSWORD=122345678\n")
     else:
-        print("Initializing the selected mode... Please wait.")
-    
-    
-    
-    
+        print("Initializing Wi-Fi Mode... Please wait.")
+
     wlan0_address = get_wlan0_address()
-    print(f"wlan0 Address: {wlan0_address}")
-    
-    
     if wlan0_address:
-        link = f"http://{wlan0_address}"  # Create a link with the address
+        link = f"http://{wlan0_address}"
+        print(f"wlan0 Address: {wlan0_address}")
         print(f"Link: {link}")
         print("QR Code:")
         generate_qr_code(link)
     else:
         print("Could not retrieve wlan0 address.")
-    
+
     collision_detect = threading.Thread(target=tof, daemon=True)
     collision_detect.start()
 
     uvicorn.run("main:app", host="0.0.0.0", port=8000)
     motor_api.release()
-
