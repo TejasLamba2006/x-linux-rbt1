@@ -122,7 +122,7 @@ def rotate_right(speed):
     STSPIN.motor_2a(speed,0 )
     if Board == "stm32mp257":
         STSPIN.motor_2b(speed,1 )
-    elif Board == "stm32mp157"
+    elif Board == "stm32mp157":
         STSPIN.motor_2b(100-speed,1 )
 
 def rotate_left(speed):
@@ -132,7 +132,7 @@ def rotate_left(speed):
     STSPIN.motor_2a(speed,1 )
     if Board == "stm32mp257":
         STSPIN.motor_2b(speed,0 )
-    elif Board == "stm32mp157"
+    elif Board == "stm32mp157":
         STSPIN.motor_2b(100-speed,0 )
 
 

@@ -208,7 +208,7 @@ if __name__ == "__main__":
     
     
     if wlan0_address:
-        link = f"http://{wlan0_address}"  # Create a link with the address
+        link = f"http://{wlan0_address}/static/index.html"  # Create a link with the address
         print(f"Link: {link}")
         print("QR Code:")
         generate_qr_code(link)
