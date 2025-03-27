@@ -215,8 +215,8 @@ if __name__ == "__main__":
     else:
         print("Could not retrieve wlan0 address.")
     
-    collision_detect = threading.Thread(target=tof, daemon=True)
-    collision_detect.start()
+    # collision_detect = threading.Thread(target=tof, daemon=True)
+    # collision_detect.start()
 
     uvicorn.run("main:app", host="0.0.0.0", port=8000)
     motor_api.release()
