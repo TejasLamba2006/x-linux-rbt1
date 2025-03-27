@@ -304,12 +304,21 @@ function sendCommands() {
     }, 3000);
 
     setTimeout(() => {
+        const throttleCommand = { [FIELD_STR_THROTTLE]: 0 };
+        ws.send(JSON.stringify(throttleCommand));
+    }, 6000);
+
+    setTimeout(() => {
         const directionCommand = {
             [FIELD_STR_DIR_X]: 100,
             [FIELD_STR_DIR_Y]: 0
         };
+        const throttleCommand = { [FIELD_STR_THROTTLE]: 50 };
+    
         ws.send(JSON.stringify(directionCommand));
-    }, 6000);
+        ws.send(JSON.stringify(throttleCommand));
+        
+    }, 7000);
 
     setTimeout(() => {
         const stopCommand = { [FIELD_STR_THROTTLE]: 0 };
@@ -319,13 +328,13 @@ function sendCommands() {
         };
         ws.send(JSON.stringify(directionCommandStop));
         ws.send(JSON.stringify(stopCommand));
-    }, 9000);
+    }, 10000);
 
     setTimeout(() => {
         const rotationValue = 50;
         const rotationCommand = { [FIELD_STR_DIR_ROT]: rotationValue };
         ws.send(JSON.stringify(rotationCommand));
-    }, 10000);
+    }, 12000);
 
     setTimeout(() => {
         const rotationValue = 0;
@@ -335,7 +344,7 @@ function sendCommands() {
 }
 
 // Run the sequence every 16 seconds (to repeat the entire cycle)
-setInterval(sendCommands, 16000);
+//setInterval(sendCommands, 16000);
 
 
 modeButtons.forEach(button => {
