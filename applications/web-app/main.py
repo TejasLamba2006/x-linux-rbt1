@@ -55,32 +55,49 @@ previous_time = 0
 
 OBSTACLE_THRESHOLD_MM = 20
 previous_time = 0
+# Global variable to track obstacle status
+obstacle_detected = False
 
 def tof():
+    global previous_time, obstacle_detected
+    
     while True:
         if driver.check_data_ready():
             ranging_data = driver.get_ranging_data()
 
-        # As the sensor is set in 4x4 mode by default, we have a total 
-        # of 16 zones to print. For this example, only the data of first zone are 
-        # print
-        now = time.time()
-        global previous_time
-        if previous_time != 0:
-            time_to_get_new_data = now - previous_time
-            print(f"Print data no : {driver.streamcount: >3d} ({time_to_get_new_data * 1000:.1f}ms)")
-        else:
-            print(f"Print data no : {driver.streamcount: >3d}")
+            # As the sensor is set in 4x4 mode by default, we have a total 
+            # of 16 zones to print. For this example, only the data of first zone are printed
+            now = time.time()
+            
+            if previous_time != 0:
+                time_to_get_new_data = now - previous_time
+                print(f"Print data no : {driver.streamcount: >3d} ({time_to_get_new_data * 1000:.1f}ms)")
+            else:
+                print(f"Print data no : {driver.streamcount: >3d}")
 
-        i = 8
-        print(f"Distance : {ranging_data.distance_mm[driver.nb_target_per_zone * i]: >4.0f} mm")
+            # Get the distance from zone 8 (middle front)
+            i = 8
+            current_distance = ranging_data.distance_mm[driver.nb_target_per_zone * i]
+            print(f"Distance : {current_distance: >4.0f} mm")
+            
+            # Check if obstacle is detected (distance less than threshold)
+            if current_distance < OBSTACLE_THRESHOLD_MM:
+                if not obstacle_detected:
+                    print("OBSTACLE DETECTED! Stopping vehicle.")
+                    # Send stop command to motors
+                    stop_command = {"throttle": 0, "steering": 0}
+                    motor_api.parser(stop_command)
+                    obstacle_detected = True
+            else:
+                # If we were in obstacle state and now it's clear
+                if obstacle_detected:
+                    print("Path clear, vehicle can move again.")
+                    obstacle_detected = False
+            
+            print("")
+            previous_time = now
 
-        print("")
-
-        previous_time = now
-
-        time.sleep(1)
-
+        time.sleep(0.2)  # More frequent checks (200ms instead of 1s)
 # ============================== #
 #        Mode Selection          #
 # ============================== #
@@ -161,20 +178,31 @@ class ConnectionManager:
         self.active_connections.remove(websocket)
         print("Client disconnected")
 
-    async def receive(self, websocket: WebSocket):
-        try:
-            while True:
-                data = await websocket.receive_text()
-                json_strings = data.strip().split('\n')
-                for json_string in json_strings:
-                    try:
-                        parsed_data = json.loads(json_string)
-                        motor_api.parser(parsed_data)  
-                    except json.JSONDecodeError as e:
-                        print(f"Failed to decode JSON: {e}")
-        except WebSocketDisconnect:
-            self.disconnect(websocket)
-
+async def receive(self, websocket: WebSocket):
+    global obstacle_detected
+    try:
+        while True:
+            data = await websocket.receive_text()
+            json_strings = data.strip().split('\n')
+            for json_string in json_strings:
+                try:
+                    parsed_data = json.loads(json_string)
+                    
+                    # If obstacle detected, override any throttle commands to 0
+                    if obstacle_detected and "throttle" in parsed_data:
+                        # Create a copy of parsed_data with throttle set to 0
+                        safe_data = parsed_data.copy()
+                        safe_data["throttle"] = 0
+                        motor_api.parser(safe_data)
+                        # Inform the client that movement is blocked
+                        await websocket.send_text(json.dumps({"status": "blocked", "reason": "obstacle_detected"}))
+                    else:
+                        # Process command normally
+                        motor_api.parser(parsed_data)
+                except json.JSONDecodeError as e:
+                    print(f"Failed to decode JSON: {e}")
+    except WebSocketDisconnect:
+        self.disconnect(websocket)
 manager = ConnectionManager()
 
 @app.websocket("/ws")
