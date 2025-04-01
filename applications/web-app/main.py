@@ -42,8 +42,8 @@ if not driver.is_alive():
     raise IOError("VL53L5CX Device is not responding")
 
 print("VL53L5CX detected.")
-print(f"Sensor reports {driver.nb_zones} zones and {driver.nb_target_per_zone} targets per zone.")
 
+t = time.time()
 driver.init()
 driver.start_ranging()
 
@@ -54,41 +54,32 @@ previous_time = 0
 # ============================== #
 
 OBSTACLE_THRESHOLD_MM = 20
-ZONE = 7 if driver.nb_zones > 7 else driver.nb_zones - 1  # Auto clamp
+
 
 def tof():
-    global previous_time
-    while True:
+    while loop < 10:
         if driver.check_data_ready():
             ranging_data = driver.get_ranging_data()
-            now = time.time()
-            if previous_time != 0:
-                time_to_get_new_data = now - previous_time
 
-            # Safe indexing
-            index = driver.nb_target_per_zone * ZONE
-            if index >= len(ranging_data.distance_mm):
-                print("Warning: Index exceeds distance array length.")
-                time.sleep(0.05)
-                continue
+        # As the sensor is set in 4x4 mode by default, we have a total 
+        # of 16 zones to print. For this example, only the data of first zone are 
+        # print
+        now = time.time()
+        if previous_time != 0:
+            time_to_get_new_data = now - previous_time
+            print(f"Print data no : {driver.streamcount: >3d} ({time_to_get_new_data * 1000:.1f}ms)")
+        else:
+            print(f"Print data no : {driver.streamcount: >3d}")
 
-            Distance = ranging_data.distance_mm[index]
+        i = 8
+        print(f"Distance : {ranging_data.distance_mm[driver.nb_target_per_zone * i]: >4.0f} mm")
 
-            if Distance < OBSTACLE_THRESHOLD_MM:
-                print(f"Obstacle detected! Distance: {Distance}mm. Stopping motors...")
-                motor_api.parser({"throttle": 0})  # Stop motors
-                
-                while True:
-                    ranging_data = driver.get_ranging_data()
-                    Distance = ranging_data.distance_mm[index]
-                    if Distance >= OBSTACLE_THRESHOLD_MM:
-                        print(f"Obstacle cleared! Distance: {Distance}mm. Resuming operations...")
-                        break
-                    time.sleep(0.1)  # Avoid busy waiting
+        print("")
 
-            previous_time = now
+        previous_time = now
+        loop += 1
 
-        time.sleep(0.005)  # Sensor needs breathing room
+    time.sleep(0.005)
 
 # ============================== #
 #        Mode Selection          #
