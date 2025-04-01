@@ -65,6 +65,7 @@ def tof():
         # of 16 zones to print. For this example, only the data of first zone are 
         # print
         now = time.time()
+        global previous_time
         if previous_time != 0:
             time_to_get_new_data = now - previous_time
             print(f"Print data no : {driver.streamcount: >3d} ({time_to_get_new_data * 1000:.1f}ms)")
@@ -77,7 +78,6 @@ def tof():
         print("")
 
         previous_time = now
-        loop += 1
 
     time.sleep(0.005)
 
