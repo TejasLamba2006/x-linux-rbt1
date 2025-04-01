@@ -57,7 +57,7 @@ OBSTACLE_THRESHOLD_MM = 20
 
 
 def tof():
-    while loop < 10:
+    while True:
         if driver.check_data_ready():
             ranging_data = driver.get_ranging_data()
 
