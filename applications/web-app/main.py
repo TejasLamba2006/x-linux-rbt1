@@ -79,7 +79,7 @@ def tof():
 
         previous_time = now
 
-    time.sleep(0.005)
+        time.sleep(1)
 
 # ============================== #
 #        Mode Selection          #
