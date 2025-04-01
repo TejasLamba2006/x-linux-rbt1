@@ -54,7 +54,7 @@ previous_time = 0
 # ============================== #
 
 OBSTACLE_THRESHOLD_MM = 20
-
+previous_time = 0
 
 def tof():
     while True:
