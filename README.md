@@ -10,7 +10,7 @@ The **X-LINUX-RBT1** is a Linux-based expansion software package designed for ro
 
 ### Software Features
 
-The **X-LINUX-RBT1** package includes a range of features for robotics control and development:
+The **X-LINUX-RBT1** package includes a range of features for robotics application development:
 
 1. Embedded web server with a web client for network based remote control.
 2. Intuitive remote control web app with joystick interface.
@@ -24,7 +24,7 @@ The **X-LINUX-RBT1** package includes a range of features for robotics control a
 The package is composed of multiple layers and modules:
 
 #### 1. **Hardware Drivers and APIs**
-- Kernel and device tree patches included in the package expose components like LSM6DSV16X (IMU), LPS22HH (Pressure Sensor), and IIS2MDC (Magnetometer) via the Linux IIO subsystem.
+- Kernel and device tree patches included in the package expose components like ISM330DHCX (IMU), LPS22HH (Pressure Sensor), and IIS2MDC (Magnetometer) via the Linux IIO subsystem.
 - User-space Python drivers are provided for components like STSPIN948 (Motor Driver) and VL53L5CX (ToF Sensor), with low-level I2C, PWM, and GPIO configurations handled via device tree patches.
 
 #### 2. **Sensor Algorithms**
@@ -147,7 +147,7 @@ To control the rover remotely, the **remote control web app** is hosted through 
 - **Joystick-based Control**: 
   - **Left Joystick**: Controls throttle for rover speed.
   - **Right Joystick**: 
-    - Middle stick controls lateral movement direction (for mecanum wheels).
+    - Middle stick controls omni-directional movement when using mecanum wheels.
     - Outer dial adjusts rover heading or rotation.
 
 - **Mode Selection**:
