@@ -85,7 +85,7 @@ def tof():
                 if not obstacle_detected:
                     print("OBSTACLE DETECTED! Stopping vehicle.")
                     # Send stop command to motors
-                    stop_command = {"throttle": 0, "steering": 0}
+                    stop_command = {"throttle": 0}
                     motor_api.parser(stop_command)
                     obstacle_detected = True
             else:
@@ -189,13 +189,12 @@ async def receive(self, websocket: WebSocket):
                     parsed_data = json.loads(json_string)
                     
                     # If obstacle detected, override any throttle commands to 0
-                    if obstacle_detected and "throttle" in parsed_data:
+                    if obstacle_detected:
                         # Create a copy of parsed_data with throttle set to 0
-                        safe_data = parsed_data.copy()
-                        safe_data["throttle"] = 0
+                        safe_data = {"throttle":0}
                         motor_api.parser(safe_data)
                         # Inform the client that movement is blocked
-                        await websocket.send_text(json.dumps({"status": "blocked", "reason": "obstacle_detected"}))
+                  #      await websocket.send_text(json.dumps({"status": "blocked", "reason": "obstacle_detected"}))
                     else:
                         # Process command normally
                         motor_api.parser(parsed_data)
