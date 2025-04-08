@@ -215,6 +215,7 @@ if __name__ == "__main__":
     else:
         print("Could not retrieve wlan0 address.")
     
+    # Please uncomment following 2 lines to enable collision avoidance feature
     # collision_detect = threading.Thread(target=tof, daemon=True)
     # collision_detect.start()
 
