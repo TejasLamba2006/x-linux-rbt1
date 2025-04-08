@@ -1,6 +1,6 @@
 # Release Notes
 
-### V 1.0.0 (20th February 2025)
+### V 1.0.0 (20th March 2025)
 **First release** 
 - API for dual STSPIN948 control
 - APIs for ToF access
