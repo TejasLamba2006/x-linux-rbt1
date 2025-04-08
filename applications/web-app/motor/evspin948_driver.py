@@ -17,7 +17,9 @@ from motor.configurePWM import PWMController
 project_name = "X-LINUX-RBT1"
 pwm_mode =1
 
-
+# This script is for controlling the EVSPIN948 motor driver using GPIO pins.
+# It provides methods to set up GPIO pins, control motor direction and speed,
+# and check the current state of the motor driver.
 class EVSPIN948Driver(STSpinDriver):
     def __init__(self, pins=None):
         super().__init__()
