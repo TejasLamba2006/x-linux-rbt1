@@ -10,29 +10,28 @@ The **X-LINUX-RBT1** is a Linux-based expansion software package designed for ro
 
 ### Software Features
 
-The **X-LINUX-RBT1** package includes a range of features for robotics control and development:
+The **X-LINUX-RBT1** package includes a range of features for robotics application development:
 
-1. Commandline based terminal application.
-2. Embedded web server with a web client for remote network control.
-3. Intuitive joystick-based remote control web app.
-4. Sensor fusion middleware for precise heading and orientation.
-5. ToF-based (Time-of-Flight) obstacle detection.
-6. Emergency stop functionality triggered by motor faults, user input, collisions, or topples.
-7. Data logging capabilities for debugging and AI training.
+1. Embedded web server with a web client for network based remote control.
+2. Intuitive remote control web app with joystick interface.
+3. Sensor fusion middleware for precise heading and orientation.
+4. ToF-based (Time-of-Flight) obstacle detection.
+5. Emergency stop functionality triggered by motor faults, user input, collisions, or topples.
+6. Data logging capabilities for debugging and AI training.
 
 ### X-LINUX-RBT1 Architecture
 
 The package is composed of multiple layers and modules:
 
 #### 1. **Hardware Drivers and APIs**
-- Kernel and device tree patches included in the package expose components like LSM6DSV16X (IMU), LPS22HH (Pressure Sensor), and IIS2MDC (Magnetometer) via the Linux IIO subsystem.
+- Kernel and device tree patches included in the package expose components like ISM330DHCX (IMU), LPS22HH (Pressure Sensor), and IIS2MDC (Magnetometer) via the Linux IIO subsystem.
 - User-space Python drivers are provided for components like STSPIN948 (Motor Driver) and VL53L5CX (ToF Sensor), with low-level I2C, PWM, and GPIO configurations handled via device tree patches.
 
 #### 2. **Sensor Algorithms**
 - Compute useful metrics from raw sensor data, such as altitude from pressure readings, distances from ToF sensor data, and orientation using sensor fusion.
 
 #### 3. **Robotics Algorithms**
-- High-level algorithms tailored for robotics, including kinematics, obstacle detection etc.
+- High-level algorithms tailored for robotics, including kinematics, obstacle detection, and path correction.
 
 #### 4. **Applications**
 - Includes sample applications demonstrating practical use cases, such as remote rover control, integrating all modules into cohesive robotics solutions.
@@ -49,11 +48,11 @@ The current package provides software support for [X-STM32MP-RBT01](https://www.
 
 Key STMicroelectronics components available on this board are described below:
 
-- [STSPIN948](https://www.st.com/en/motor-drivers/stspin948.html): A 4.5 A dual full-bridge driver for brushed DC motors or bipolar stepper motors. Amplifiers for current sensing and adjustable slew-rate for EMI performance tweaking are other notable features.
-- [VL53L5CX](https://www.st.com/en/imaging-and-photonics-solutions/vl53l5cx.html): A state-of-the-art, Time-of-Flight (ToF) multizone ranging sensor.
-- [LSM6DSV16X](https://www.st.com/en/mems-and-sensors/lsm6dsv16x.html): A high-performance, low-power 6-axis IMU. It incorporates edge computing features like a finite state machine (FSM) for motion tracking and a machine learning core (MLC) for AI-driven context awareness. The IMU also includes Qvar for gesture detection.
-- [LPS22HH](https://www.st.com/en/mems-and-sensors/lps22hh.html): An ultra-compact piezoresistive absolute pressure sensor.
-- [IIS2MDC](https://www.st.com/en/mems-and-sensors/iis2mdc.html): A high-accuracy, ultra-low-power 3-axis digital magnetic sensor.
+- [STSPIN948](https://www.st.com/en/product/stspin948.html): A 4.5 A dual full-bridge driver for brushed DC motors or bipolar stepper motors. Amplifiers for current sensing and adjustable slew-rate for EMI performance tweaking are other notable features.
+- [VL53L5CX](https://www.st.com/en/product/vl53l5cx.html): A state-of-the-art, Time-of-Flight (ToF) multizone ranging sensor.
+- [ISM330DHCX](https://www.st.com/en/product/ism330dhcx.html): The ISM330DHCX is a high-performance 3D digital accelerometer and gyroscope system-in-package designed for Industry 4.0 applications, offering superior stability, accuracy, and low noise. It includes embedded features such as a Machine Learning Core, programmable FSM, FIFO, sensor hub, event decoding, and interrupt.
+- [LPS22HH](https://www.st.com/en/product/lps22hh.html): An ultra-compact piezoresistive absolute pressure sensor.
+- [IIS2MDC](https://www.st.com/en/product/iis2mdc.html): A high-accuracy, ultra-low-power 3-axis digital magnetic sensor.
 
 The *X-STM32MP-RBT01* board can be plugged into the 40-pin connectors available on STM32MP discovery boards or Raspberry Pi, as shown below.
 
@@ -66,7 +65,7 @@ The *X-STM32MP-RBT01* board can be plugged into the 40-pin connectors available 
 ### Important Setup Notes
 
 - Ensure correct board orientation when mounting on platforms like STM32MP discovery kits or Raspberry Pi. For example, the board mounts "inward" on STM32MP157F-DK2 & Raspberry Pi but "outward" on STM32MP257F-DK boards.
-- Verify jumper settings for the STSPIN948 to operate in "Dual Independent Full Bridge Mode" as configured in the provided software. For other configurations, modify the user-space driver code.
+- Verify jumper settings for the STSPIN948 to operate in "Dual Independent Full Bridge Mode" as configured in the provided software. For other configurations, modify the motor driver code.
 - Some GPIOs connected to the 40-pin headers are shared with other peripherals on STM32MP boards and may require the connection/disconnection of solder bridges. For example, in the STM32MP157F-DK2 board SB13, SB14, SB15, SB16 should be closed and SB01, SB02, SB03 and SB04 should be opened by desoldering the 0 ohm resistor. Refer to the specific board user manual for details.
 
 ## Software Setup
@@ -139,7 +138,7 @@ After scanning the QR code on the mobile device **Remote Control Interface** wou
 
 ### Remote Control Web App
 
-To control the rover remotely, the **remote control web app** is hosted through the embedded web server module of the X-LINUX-RBT1 software. Once the application is running, a URL is provided for accessing the web app. The URL is also presented as a QR code for user convenience in GUI mode.
+To control the rover remotely, the **remote control web app** is hosted through the embedded web server module of the X-LINUX-RBT1 software. Once the application is running, a URL is provided for accessing the web app. The URL is also presented as a QR code to open the URL on a mobile device for user convenience.
 
 ![Figure 8: Remote Interface](_htmresc/figure08_x-linux-rbt1_control_webapp.jpeg)
 
@@ -148,7 +147,7 @@ To control the rover remotely, the **remote control web app** is hosted through 
 - **Joystick-based Control**: 
   - **Left Joystick**: Controls throttle for rover speed.
   - **Right Joystick**: 
-    - Middle stick controls lateral movement direction (for mecanum wheels).
+    - Middle stick controls omni-directional movement when using mecanum wheels.
     - Outer dial adjusts rover heading or rotation.
 
 - **Mode Selection**:
@@ -159,7 +158,7 @@ To control the rover remotely, the **remote control web app** is hosted through 
 
 - Prebuilt binaries such as device tree blobs (DTBs) and kernel modules are platform-dependent and are provided for specific MPU boards. Customization may be necessary for other platforms.
 - If kernel customization is needed, refer to [How to Customize the Linux Kernel](https://wiki.st.com/stm32mpu/wiki/How_to_customize_the_Linux_kernel).
-- On STM32MP boards, some GPIOs available on the 40-pin header are shared with other peripherals. To ensure exclusive access to the 40-pin header, certain solder bridges may need to be opened or closed. Refer to user manual of the specific MPU board. Also, look into the "Pin Mapping" section in the README.md file of the package for more information.
+- On STM32MP boards, some GPIOs available on the 40-pin header are shared with other peripherals. To ensure exclusive access to the 40-pin header, certain solder bridges may need to be opened or closed. Refer to user manual of the specific MPU board. Also, look into the board_pin_mapping.md file of the package for more information.
 
 
 ## License
@@ -172,7 +171,7 @@ The content and changes included in this release are documented in the [Release 
 
 ## Compatibility Information
 
-The **X-LINUX-RBT1** software package is validated for **[OpenSTLinux](https://www.st.com/en/embedded-software/stm32-mpu-openstlinux-distribution.html)** version 5.1. Running it on other ecosystem versions may require additional configuration. The software is tested on the following boards:
+The **X-LINUX-RBT1** software package is validated for **[OpenSTLinux](https://www.st.com/en/embedded-software/stm32-mpu-openstlinux-distribution.html)** version 6.0. Running it on other ecosystem versions may require additional configuration. The software is tested on the following boards:
 
 1. **[STM32MP157F-DK2](https://www.st.com/en/evaluation-tools/stm32mp157f-dk2.html)**
 2. **[STM32MP257F-DK](https://www.st.com/en/evaluation-tools/stm32mp257f-dk.html)**

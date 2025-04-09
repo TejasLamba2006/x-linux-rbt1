@@ -22,6 +22,7 @@ Board = read_board_compatibility_name()
 
 if Board == "stm32mp257":
     import stm32mp2 as STSPIN
+#    print(Board)
 elif Board == "stm32mp157":
     import stm32mp1 as STSPIN
 

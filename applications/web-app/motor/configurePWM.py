@@ -7,6 +7,10 @@
 # License. You may obtain a copy of the License at:
 #                        opensource.org/licenses/BSD-3-Clause
 
+# This script configures the PWM settings for a motor controller.
+# It sets the PWM period and duty cycle, and provides methods to enable
+# or disable the PWM signal. The script also includes methods to set
+# the motor speed and stop the motor.
 class PWMController:
     def __init__(self, pwm_chip, pwm_channel):
         self.pwm_chip = pwm_chip

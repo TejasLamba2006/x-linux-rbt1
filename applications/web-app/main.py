@@ -227,16 +227,16 @@ if __name__ == "__main__":
 
     wlan0_address = get_wlan0_address()
     if wlan0_address:
-        link = f"http://{wlan0_address}"
-        print(f"wlan0 Address: {wlan0_address}")
+        link = f"http://{wlan0_address}/static/index.html"  # Create a link with the address
         print(f"Link: {link}")
         print("QR Code:")
         generate_qr_code(link)
     else:
         print("Could not retrieve wlan0 address.")
-
-    collision_detect = threading.Thread(target=tof, daemon=True)
-    collision_detect.start()
+    
+    # Please uncomment following 2 lines to enable collision avoidance feature
+    # collision_detect = threading.Thread(target=tof, daemon=True)
+    # collision_detect.start()
 
     uvicorn.run("main:app", host="0.0.0.0", port=8000)
     motor_api.release()
