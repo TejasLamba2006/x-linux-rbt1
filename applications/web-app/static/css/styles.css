@@ -18,6 +18,48 @@ body {
     padding: 20px;
 }
 
+/* Portrait Mode Overlay */
+#orientation-lock {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #1a1a2e;
+    z-index: 9999;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+}
+
+#orientation-lock svg {
+    width: 100px;
+    height: 100px;
+    fill: white;
+    margin-bottom: 20px;
+    animation: rotate-phone 2s infinite ease-in-out;
+}
+
+@keyframes rotate-phone {
+    0% { transform: rotate(0deg); }
+    30% { transform: rotate(-90deg); }
+    70% { transform: rotate(-90deg); }
+    100% { transform: rotate(0deg); }
+}
+
+/* Only show overlay in portrait mode */
+@media screen and (orientation: portrait) {
+    #container {
+        display: none !important;
+    }
+    #orientation-lock {
+        display: flex;
+    }
+}
+
 /* Joystick Styles */
 .joystick {
     position: relative;
@@ -163,6 +205,41 @@ body {
     right: 100%;
     border-right-color: #fff;
     margin-top: -10px;
+}
+
+/* Drive Type Indicator */
+#drive-type-indicator {
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+#drive-type-label {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background-color: #555;
+    color: #fff;
+    border: 2px solid #777;
+    transition: all 0.3s ease;
+}
+
+#drive-type-label.mecanum {
+    background: linear-gradient(135deg, #1a73e8, #4285f4);
+    border-color: #1a73e8;
+}
+
+#drive-type-label.differential {
+    background: linear-gradient(135deg, #34a853, #4caf50);
+    border-color: #34a853;
+}
+
+#drive-type-label.error {
+    background: linear-gradient(135deg, #ea4335, #f44336);
+    border-color: #ea4335;
 }
 
 /* Mode Selector */

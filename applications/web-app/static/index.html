@@ -11,6 +11,14 @@
 </head>
 
 <body>
+    <!-- Orientation Lock Overlay -->
+    <div id="orientation-lock">
+        <svg viewBox="0 0 24 24">
+            <path d="M16 1H8C6.34 1 5 2.34 5 4v16c0 1.66 1.34 3 3 3h8c1.66 0 3-1.34 3-3V4c0-1.66-1.34-3-3-3zm-2 20h-4v-1h4v1zm3.25-3H6.75V4h10.5v14z"/>
+        </svg>
+        <p>Please rotate your device to landscape mode</p>
+    </div>
+
     <button id="fullscreen-button" class="fullscreen-button">
         &#x26F6;
     </button>
@@ -38,6 +46,10 @@
 
         <!-- Mode Selector -->
         <div id="mode-selector">
+            <!-- Drive Type Indicator -->
+            <div id="drive-type-indicator">
+                <span id="drive-type-label">Connecting...</span>
+            </div>
             <div class="mode-buttons">
                 <button class="mode-button" data-mode="locked" id="mode-locked">
                     <div class="button-icon"></div>

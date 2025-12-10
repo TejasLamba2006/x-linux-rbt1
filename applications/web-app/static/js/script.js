@@ -15,11 +15,15 @@ const FIELD_STR_DIR_Y = 'dir_y';
 const FIELD_STR_DIR_ROT = 'dir_rot';
 const FIELD_STR_MODE = 'mode';
 const FIELD_STR_AZIMUTH = 'azimuth';
-
+const FIELD_STR_DRIVE_TYPE = 'drive_type';
 
 const DEBUG = false;
 const DATA_POLL_INTERVAL = 150;
 const DATA_POLL_TIMEOUT = 350;
+const WS_RECONNECT_DELAY = 3000;
+
+// Drive Type Indicator Element
+const driveTypeLabel = document.getElementById('drive-type-label');
 
 function debugLog(message) {
     if (DEBUG) {
@@ -27,16 +31,84 @@ function debugLog(message) {
     }
 }
 
-// Establish WebSocket connection
-let ws = new WebSocket(WS_URL);
+// Update drive type indicator in UI
+function updateDriveTypeIndicator(driveType) {
+    if (!driveTypeLabel) return;
+    
+    // Remove all existing classes
+    driveTypeLabel.classList.remove('mecanum', 'differential', 'error');
+    
+    if (driveType === 'mecanum') {
+        driveTypeLabel.textContent = '🔄 Mecanum Drive';
+        driveTypeLabel.classList.add('mecanum');
+    } else if (driveType === 'differential') {
+        driveTypeLabel.textContent = '🚗 Differential Drive';
+        driveTypeLabel.classList.add('differential');
+    } else {
+        driveTypeLabel.textContent = driveType || 'Unknown';
+    }
+}
 
-ws.onopen = function() {
-    debugLog('WebSocket connection established');
-};
+// WebSocket connection with reconnection support
+let ws = null;
+let wsReconnectTimer = null;
 
-ws.onmessage = function(event) {
-    debugLog('Received message: ' + event.data);
-};
+function connectWebSocket() {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        return; // Already connected
+    }
+    
+    ws = new WebSocket(WS_URL);
+    
+    ws.onopen = function() {
+        debugLog('WebSocket connection established');
+        if (driveTypeLabel) {
+            driveTypeLabel.textContent = 'Connected';
+            driveTypeLabel.classList.remove('error');
+        }
+        // Request drive type info from server
+        ws.send(JSON.stringify({ request: 'drive_type' }));
+    };
+    
+    ws.onmessage = function(event) {
+        debugLog('Received message: ' + event.data);
+        try {
+            const data = JSON.parse(event.data);
+            // Handle drive type message from server
+            if (data.drive_type) {
+                updateDriveTypeIndicator(data.drive_type);
+            }
+        } catch (e) {
+            debugLog('Failed to parse message: ' + e);
+        }
+    };
+    
+    ws.onclose = function() {
+        debugLog('WebSocket connection closed');
+        if (driveTypeLabel) {
+            driveTypeLabel.textContent = 'Disconnected';
+            driveTypeLabel.classList.add('error');
+        }
+        // Attempt to reconnect
+        if (!wsReconnectTimer) {
+            wsReconnectTimer = setTimeout(function() {
+                wsReconnectTimer = null;
+                connectWebSocket();
+            }, WS_RECONNECT_DELAY);
+        }
+    };
+    
+    ws.onerror = function(error) {
+        debugLog('WebSocket error: ' + error);
+        if (driveTypeLabel) {
+            driveTypeLabel.textContent = 'Connection Error';
+            driveTypeLabel.classList.add('error');
+        }
+    };
+}
+
+// Initialize WebSocket connection
+connectWebSocket();
 
 // Left Joystick
 let leftJoystick = {

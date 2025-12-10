@@ -8,7 +8,6 @@
 #                        opensource.org/licenses/BSD-3-Clause
 
 import time
-#import pwm
 import threading
 
 exit_flag = False
@@ -56,13 +55,18 @@ spn_motor_2 = EVSPIN948Driver(pins_2)
 spn_motor_2.setup_gpio()
 
 def stop():
-    print("stop")
     spn_motor_1.stop()
     spn_motor_2.stop()
 
 def release():
-    spn_motor_2.end()
-    spn_motor_1.end()
+    try:
+        spn_motor_2.end()
+    except Exception:
+        pass
+    try:
+        spn_motor_1.end()
+    except Exception:
+        pass
     
 def rampUp():
     spn_motor_1.rampUp()
