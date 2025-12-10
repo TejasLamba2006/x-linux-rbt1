@@ -176,14 +176,7 @@ def direction(x_axis,y_axis):
         motor_1a_factor = 1
         motor_1b_factor = 1
         motor_2a_factor = 1
-        motor_2b_factor = 1
-
-    
-        
-    
-    
-    
-    
+        motor_2b_factor = 1 
     
     
     
