@@ -1,4 +1,4 @@
-# X-LINUX-RBT1 V1.0.0 Linux Package
+# X-LINUX-RBT1 V1.1 Linux Package
 
 ## Introduction
 
@@ -109,12 +109,10 @@ To connect to a WLAN, refer to [How to Setup a WLAN Connection](https://wiki.st.
 To quickly evaluate the X-LINUX-RBT1 package, developers may copy the contents of the "applications" folder contained in the package to the `/usr/local/x-linux-rbt1` folder on the STM32MP board using any of the above methods. To ease this action, the deployment script present inside the "scripts" folder of the X-LINUX-RBT1 package can be used (if using a network connection to transfer the files).
 
 ```sh
-# Go to the scripts folder
-cd scripts
 # Add execute permission to the deployment script
-chmod +x deploy.sh
-# Run the deployment script
-./deploy.sh <MPU board IP>
+chmod +x scripts/deploy_starter_package.sh
+# Run the deployment script from the package root
+./scripts/deploy_starter_package.sh -i <MPU board IP> -b <Board Name>
 ```
 
 ## Using the Application
@@ -147,7 +145,7 @@ To control the rover remotely, the **remote control web app** is hosted through 
 - **Joystick-based Control**: 
   - **Left Joystick**: Controls throttle for rover speed.
   - **Right Joystick**: 
-    - Middle stick controls omni-directional movement when using mecanum wheels.
+    - Middle stick controls omni-directional movement when using mecanum wheels, or steering factor for differential drive.
     - Outer dial adjusts rover heading or rotation.
 
 - **Mode Selection**:
