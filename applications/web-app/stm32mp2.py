@@ -24,9 +24,35 @@ chip_h = "/dev/gpiochip7"
 chip_i = "/dev/gpiochip8"
 chip_z = "/dev/gpiochip9"
 
+import os
+
+def get_pwmchip(timer_addr: str, fallback: str) -> str:
+    """
+    Dynamically find the pwmchip associated with a specific timer address.
+    Returns the fallback if not found.
+    """
+    pwm_dir = "/sys/class/pwm/"
+    if not os.path.exists(pwm_dir):
+        return fallback
+        
+    try:
+        for chip in os.listdir(pwm_dir):
+            if not chip.startswith("pwmchip"):
+                continue
+            chip_path = os.path.join(pwm_dir, chip)
+            real_path = os.path.realpath(chip_path)
+            
+            if f"{timer_addr}.timer" in real_path:
+                return chip
+    except Exception as e:
+        print(f"Error resolving PWM chip for {timer_addr}: {e}")
+        
+    print(f"Warning: Could not find pwmchip for timer {timer_addr}. Using fallback {fallback}.")
+    return fallback
+
 pins_1 = {
-                "pwm_a": ("pwmchip0", 3),
-                "pwm_b": ("pwmchip4", 1),
+                "pwm_a": (get_pwmchip("40000000", "pwmchip0"), 3),  # TIM2_CH4 -> PA5
+                "pwm_b": (get_pwmchip("40020000", "pwmchip8"), 1),  # TIM4_CH2 -> PA1
                 "ref_a": (chip_e, "NA"),
                 "ref_b": (chip_a, "NA"),
                 "en_a" : (chip_z, 9),
@@ -37,8 +63,8 @@ pins_1 = {
             }
 
 pins_2 = {
-                "pwm_a": ("pwmchip8", 0),
-                "pwm_b": ("pwmchip0", 1),
+                "pwm_a": (get_pwmchip("40030000", "pwmchip12"), 0), # TIM5_CH1 -> PH8
+                "pwm_b": (get_pwmchip("40000000", "pwmchip0"), 1),  # TIM2_CH2 -> PF15
                 "ref_a": (chip_e, "NA"),
                 "ref_b": (chip_a, "NA"),
                 "en_a" : (chip_z, 1),
