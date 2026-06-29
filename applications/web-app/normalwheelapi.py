@@ -350,7 +350,6 @@ def parser(parsed_data: Dict[str, Any]) -> None:
         return
     
     try:
-        logger.info(f"Parser received: {parsed_data}")
         # Handle mode change
         if "mode" in parsed_data:
             mode_select(parsed_data['mode'])
@@ -372,6 +371,10 @@ def parser(parsed_data: Dict[str, Any]) -> None:
         # Process rotation dial
         if "dir_rot" in parsed_data:
             rotate_angle(parsed_data['dir_rot'])
+        
+        # If direction changed but no throttle in this message, re-apply last throttle
+        if "dir_x" in parsed_data and "throttle" not in parsed_data and state.last_throttle != 0:
+            throttle_value(state.last_throttle)
             
     except Exception as e:
         logger.error(f"Error parsing command: {e}")

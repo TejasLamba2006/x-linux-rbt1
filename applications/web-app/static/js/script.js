@@ -516,9 +516,12 @@ function sendKeyboardCommands() {
     if (keyboardState.rotateLeft) dirRot = -KEY_SPEED;
     if (keyboardState.rotateRight) dirRot = KEY_SPEED;
 
-    sendCommand({ [FIELD_STR_THROTTLE]: throttle });
-    sendCommand({ [FIELD_STR_DIR_X]: dirX, [FIELD_STR_DIR_Y]: 0 });
-    sendCommand({ [FIELD_STR_DIR_ROT]: dirRot });
+    sendCommand({
+        [FIELD_STR_THROTTLE]: throttle,
+        [FIELD_STR_DIR_X]: dirX,
+        [FIELD_STR_DIR_Y]: 0,
+        [FIELD_STR_DIR_ROT]: dirRot
+    });
 }
 
 document.addEventListener('keydown', function(e) {
@@ -617,6 +620,13 @@ setInterval(() => {
     if (rightDial.isRotating) {
         const rotationValue = Math.round((rightDial.rotationValue / 180) * 100);
         sendCommand({ [FIELD_STR_DIR_ROT]: rotationValue });
+    }
+
+    // Keyboard state polling — send held keys at regular interval
+    if (keyboardState.forward || keyboardState.backward ||
+        keyboardState.turnLeft || keyboardState.turnRight ||
+        keyboardState.rotateLeft || keyboardState.rotateRight) {
+        sendKeyboardCommands();
     }
 }, DATA_POLL_INTERVAL);
 
