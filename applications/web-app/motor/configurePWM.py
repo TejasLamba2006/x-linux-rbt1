@@ -18,8 +18,16 @@ class PWMController:
         self.pwm_path = f"/sys/class/pwm/{pwm_chip}/pwm{pwm_channel}"
     
     def export_pwm(self):
-        with open(f"/sys/class/pwm/{self.pwm_chip}/export", "w") as f:
-            f.write(str(self.pwm_channel))
+        import os
+        if os.path.exists(self.pwm_path):
+            return
+        try:
+            with open(f"/sys/class/pwm/{self.pwm_chip}/export", "w") as f:
+                f.write(str(self.pwm_channel))
+        except OSError:
+            if os.path.exists(self.pwm_path):
+                return
+            raise
 
     def unexport_pwm(self):
         with open(f"/sys/class/pwm/{self.pwm_chip}/unexport", "w") as f:

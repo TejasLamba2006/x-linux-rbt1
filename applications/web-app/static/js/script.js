@@ -110,6 +110,13 @@ function connectWebSocket() {
 // Initialize WebSocket connection
 connectWebSocket();
 
+// Helper: send command if connected
+function sendCommand(cmd) {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(cmd));
+    }
+}
+
 // Left Joystick
 let leftJoystick = {
     element: document.getElementById('left-joystick'),
@@ -119,17 +126,22 @@ let leftJoystick = {
     isMoving: false,
     movementTimeout: null,
     touchId: null,
+    mouseActive: false,
 };
 
-// Left joystick events
+// Left joystick touch events
 leftJoystick.c1.addEventListener('touchstart', handleLeftJoystickStart, false);
 leftJoystick.c1.addEventListener('touchmove', handleLeftJoystickMove, false);
 leftJoystick.c1.addEventListener('touchend', handleLeftJoystickEnd, false);
+// Left joystick mouse events
+leftJoystick.c1.addEventListener('mousedown', handleLeftJoystickMouseDown, false);
+document.addEventListener('mousemove', handleLeftJoystickMouseMove, false);
+document.addEventListener('mouseup', handleLeftJoystickMouseUp, false);
 
 function handleLeftJoystickStart(event) {
     event.preventDefault();
     let touch = event.changedTouches[0];
-    leftJoystick.touchId = touch.identifier; // Store touch identifier
+    leftJoystick.touchId = touch.identifier;
     leftJoystick.isMoving = true;
     clearTimeout(leftJoystick.movementTimeout);
 }
@@ -137,14 +149,13 @@ function handleLeftJoystickStart(event) {
 function handleLeftJoystickMove(event) {
     event.preventDefault();
     let touch = null;
-    // Find the touch that matches the stored identifier
     for (let i = 0; i < event.touches.length; i++) {
         if (event.touches[i].identifier === leftJoystick.touchId) {
             touch = event.touches[i];
             break;
         }
     }
-    if (!touch) return; // Exit if touch not found
+    if (!touch) return;
 
     let rect = leftJoystick.element.getBoundingClientRect();
     let y = touch.clientY - rect.top - rect.height / 2;
@@ -162,7 +173,6 @@ function handleLeftJoystickMove(event) {
 function handleLeftJoystickEnd(event) {
     event.preventDefault();
     let touch = null;
-    // Find the touch that matches the stored identifier
     for (let i = 0; i < event.changedTouches.length; i++) {
         if (event.changedTouches[i].identifier === leftJoystick.touchId) {
             touch = event.changedTouches[i];
@@ -172,14 +182,46 @@ function handleLeftJoystickEnd(event) {
     if (!touch) return;
 
     leftJoystick.verticalValue = 0;
-    leftJoystick.c1.style.transform = `translateY(0px)`;
-
+    leftJoystick.c1.style.transform = 'translateY(0px)';
     clearTimeout(leftJoystick.movementTimeout);
     leftJoystick.movementTimeout = setTimeout(() => {
         leftJoystick.isMoving = false;
     }, DATA_POLL_TIMEOUT);
+    leftJoystick.touchId = null;
+}
 
-    leftJoystick.touchId = null; // Reset touch identifier
+// Mouse handlers for left joystick
+function handleLeftJoystickMouseDown(event) {
+    event.preventDefault();
+    leftJoystick.mouseActive = true;
+    leftJoystick.isMoving = true;
+    clearTimeout(leftJoystick.movementTimeout);
+}
+
+function handleLeftJoystickMouseMove(event) {
+    if (!leftJoystick.mouseActive) return;
+    event.preventDefault();
+    let rect = leftJoystick.element.getBoundingClientRect();
+    let y = event.clientY - rect.top - rect.height / 2;
+    y = Math.max(-leftJoystick.maxMovement, Math.min(leftJoystick.maxMovement, y));
+    leftJoystick.verticalValue = -Math.round((y / leftJoystick.maxMovement) * 100);
+    leftJoystick.c1.style.transform = `translateY(${y}px)`;
+    leftJoystick.isMoving = true;
+    clearTimeout(leftJoystick.movementTimeout);
+    leftJoystick.movementTimeout = setTimeout(() => {
+        leftJoystick.isMoving = false;
+    }, DATA_POLL_TIMEOUT);
+}
+
+function handleLeftJoystickMouseUp(event) {
+    if (!leftJoystick.mouseActive) return;
+    leftJoystick.mouseActive = false;
+    leftJoystick.verticalValue = 0;
+    leftJoystick.c1.style.transform = 'translateY(0px)';
+    clearTimeout(leftJoystick.movementTimeout);
+    leftJoystick.movementTimeout = setTimeout(() => {
+        leftJoystick.isMoving = false;
+    }, DATA_POLL_TIMEOUT);
 }
 
 // Right Joystick (Thumb)
@@ -191,18 +233,23 @@ let rightJoystick = {
     verticalValue: 0,
     isMoving: false,
     movementTimeout: null,
-    touchId: null, // Track the touch point
+    touchId: null,
+    mouseActive: false,
 };
 
-// Right joystick events
+// Right joystick touch events
 rightJoystick.c1.addEventListener('touchstart', handleRightJoystickStart, false);
 rightJoystick.c1.addEventListener('touchmove', handleRightJoystickMove, false);
 rightJoystick.c1.addEventListener('touchend', handleRightJoystickEnd, false);
+// Right joystick mouse events
+rightJoystick.c1.addEventListener('mousedown', handleRightJoystickMouseDown, false);
+document.addEventListener('mousemove', handleRightJoystickMouseMove, false);
+document.addEventListener('mouseup', handleRightJoystickMouseUp, false);
 
 function handleRightJoystickStart(event) {
     event.preventDefault();
     let touch = event.changedTouches[0];
-    rightJoystick.touchId = touch.identifier; // Store touch identifier
+    rightJoystick.touchId = touch.identifier;
     rightJoystick.isMoving = true;
     clearTimeout(rightJoystick.movementTimeout);
 }
@@ -210,7 +257,6 @@ function handleRightJoystickStart(event) {
 function handleRightJoystickMove(event) {
     event.preventDefault();
     let touch = null;
-    // Find the touch that matches the stored identifier
     for (let i = 0; i < event.touches.length; i++) {
         if (event.touches[i].identifier === rightJoystick.touchId) {
             touch = event.touches[i];
@@ -238,7 +284,6 @@ function handleRightJoystickMove(event) {
 function handleRightJoystickEnd(event) {
     event.preventDefault();
     let touch = null;
-    // Find the touch that matches the stored identifier
     for (let i = 0; i < event.changedTouches.length; i++) {
         if (event.changedTouches[i].identifier === rightJoystick.touchId) {
             touch = event.changedTouches[i];
@@ -249,13 +294,50 @@ function handleRightJoystickEnd(event) {
 
     rightJoystick.horizontalValue = 0;
     rightJoystick.verticalValue = 0;
-    rightJoystick.c1.style.transform = `translate(0px, 0px)`;
+    rightJoystick.c1.style.transform = 'translate(0px, 0px)';
     clearTimeout(rightJoystick.movementTimeout);
     rightJoystick.movementTimeout = setTimeout(() => {
         rightJoystick.isMoving = false;
     }, DATA_POLL_TIMEOUT);
- 
-    rightJoystick.touchId = null; // Reset touch identifier
+    rightJoystick.touchId = null;
+}
+
+// Mouse handlers for right joystick
+function handleRightJoystickMouseDown(event) {
+    event.preventDefault();
+    rightJoystick.mouseActive = true;
+    rightJoystick.isMoving = true;
+    clearTimeout(rightJoystick.movementTimeout);
+}
+
+function handleRightJoystickMouseMove(event) {
+    if (!rightJoystick.mouseActive) return;
+    event.preventDefault();
+    let rect = rightJoystick.element.getBoundingClientRect();
+    let x = event.clientX - rect.left - rect.width / 2;
+    let y = event.clientY - rect.top - rect.height / 2;
+    x = Math.max(-rightJoystick.maxMovement, Math.min(rightJoystick.maxMovement, x));
+    y = Math.max(-rightJoystick.maxMovement, Math.min(rightJoystick.maxMovement, y));
+    rightJoystick.horizontalValue = Math.round((x / rightJoystick.maxMovement) * 100);
+    rightJoystick.verticalValue = -Math.round((y / rightJoystick.maxMovement) * 100);
+    rightJoystick.c1.style.transform = `translate(${x}px, ${y}px)`;
+    rightJoystick.isMoving = true;
+    clearTimeout(rightJoystick.movementTimeout);
+    rightJoystick.movementTimeout = setTimeout(() => {
+        rightJoystick.isMoving = false;
+    }, DATA_POLL_TIMEOUT);
+}
+
+function handleRightJoystickMouseUp(event) {
+    if (!rightJoystick.mouseActive) return;
+    rightJoystick.mouseActive = false;
+    rightJoystick.horizontalValue = 0;
+    rightJoystick.verticalValue = 0;
+    rightJoystick.c1.style.transform = 'translate(0px, 0px)';
+    clearTimeout(rightJoystick.movementTimeout);
+    rightJoystick.movementTimeout = setTimeout(() => {
+        rightJoystick.isMoving = false;
+    }, DATA_POLL_TIMEOUT);
 }
 
 // Right Joystick Dial Rotation
@@ -263,31 +345,34 @@ let rightDial = {
     element: document.querySelector('#right-joystick .c5'),
     rotationValue: 0,
     isRotating: false,
-    //isMoving: false,
-    //movementTimeout: null,
     rotationTimeout: null,
-    touchId: null, // Track the touch point
+    touchId: null,
     startAngle: 0,
+    mouseActive: false,
 };
 
-// Dial rotation events
+// Dial rotation touch events
 rightDial.element.addEventListener('touchstart', handleDialStart, false);
 rightDial.element.addEventListener('touchmove', handleDialRotate, false);
 rightDial.element.addEventListener('touchend', handleDialEnd, false);
+// Dial rotation mouse events
+rightDial.element.addEventListener('mousedown', handleDialMouseDown, false);
+document.addEventListener('mousemove', handleDialMouseMove, false);
+document.addEventListener('mouseup', handleDialMouseUp, false);
 
 function getAngle(center, point) {
     const dy = point.y - center.y;
     const dx = point.x - center.x;
-    let theta = Math.atan2(dy, dx); // Radians
-    theta *= 180 / Math.PI; // Degrees
-    theta = (theta + 360) % 360; // Normalize
+    let theta = Math.atan2(dy, dx);
+    theta *= 180 / Math.PI;
+    theta = (theta + 360) % 360;
     return theta;
 }
 
 function handleDialStart(event) {
     event.preventDefault();
     let touch = event.changedTouches[0];
-    rightDial.touchId = touch.identifier; // Store touch identifier
+    rightDial.touchId = touch.identifier;
     rightDial.isRotating = true;
     clearTimeout(rightDial.rotationTimeout);
 
@@ -307,7 +392,6 @@ function handleDialRotate(event) {
     if (!rightDial.isRotating) return;
     event.preventDefault();
     let touch = null;
-    // Find the touch that matches the stored identifier
     for (let i = 0; i < event.touches.length; i++) {
         if (event.touches[i].identifier === rightDial.touchId) {
             touch = event.touches[i];
@@ -328,7 +412,6 @@ function handleDialRotate(event) {
     let angle = getAngle(center, point);
     let rotation = (angle - rightDial.startAngle + 360) % 360;
 
-    // Restrict rotation to 180 degrees in either direction
     if (rotation > 180) {
         rotation -= 360;
     }
@@ -347,7 +430,6 @@ function handleDialRotate(event) {
 function handleDialEnd(event) {
     event.preventDefault();
     let touch = null;
-    // Find the touch that matches the stored identifier
     for (let i = 0; i < event.changedTouches.length; i++) {
         if (event.changedTouches[i].identifier === rightDial.touchId) {
             touch = event.changedTouches[i];
@@ -361,114 +443,186 @@ function handleDialEnd(event) {
         rightDial.isRotating = false;
     }, DATA_POLL_TIMEOUT);
 
-    rightDial.touchId = null; // Reset touch identifier
-
-    // Reset rotation to original position
+    rightDial.touchId = null;
     rightDial.rotationValue = 0;
-    rightDial.element.style.transform = `rotate(0deg)`;
+    rightDial.element.style.transform = 'rotate(0deg)';
 }
 
-// Mode Selector
+// Mouse handlers for dial rotation
+function handleDialMouseDown(event) {
+    event.preventDefault();
+    rightDial.mouseActive = true;
+    rightDial.isRotating = true;
+    clearTimeout(rightDial.rotationTimeout);
+    const rect = rightDial.element.getBoundingClientRect();
+    const center = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    rightDial.startAngle = getAngle(center, { x: event.clientX, y: event.clientY }) - rightDial.rotationValue;
+}
+
+function handleDialMouseMove(event) {
+    if (!rightDial.mouseActive) return;
+    event.preventDefault();
+    const rect = rightDial.element.getBoundingClientRect();
+    const center = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    let angle = getAngle(center, { x: event.clientX, y: event.clientY });
+    let rotation = (angle - rightDial.startAngle + 360) % 360;
+    if (rotation > 180) rotation -= 360;
+    rotation = Math.max(-180, Math.min(180, rotation));
+    rightDial.rotationValue = rotation;
+    rightDial.element.style.transform = `rotate(${rotation}deg)`;
+    rightDial.isRotating = true;
+    clearTimeout(rightDial.rotationTimeout);
+    rightDial.rotationTimeout = setTimeout(() => {
+        rightDial.isRotating = false;
+    }, DATA_POLL_TIMEOUT);
+}
+
+function handleDialMouseUp(event) {
+    if (!rightDial.mouseActive) return;
+    rightDial.mouseActive = false;
+    clearTimeout(rightDial.rotationTimeout);
+    rightDial.rotationTimeout = setTimeout(() => {
+        rightDial.isRotating = false;
+    }, DATA_POLL_TIMEOUT);
+    rightDial.rotationValue = 0;
+    rightDial.element.style.transform = 'rotate(0deg)';
+}
+
+// =============================================================================
+// KEYBOARD CONTROLS
+// =============================================================================
+let keyboardState = {
+    forward: false,
+    backward: false,
+    turnLeft: false,
+    turnRight: false,
+    rotateLeft: false,
+    rotateRight: false,
+};
+
+const KEY_SPEED = 70;
+
+function sendKeyboardCommands() {
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+
+    let throttle = 0;
+    let dirX = 0;
+    let dirRot = 0;
+
+    if (keyboardState.forward) throttle = KEY_SPEED;
+    if (keyboardState.backward) throttle = -KEY_SPEED;
+    if (keyboardState.turnLeft) dirX = -KEY_SPEED;
+    if (keyboardState.turnRight) dirX = KEY_SPEED;
+    if (keyboardState.rotateLeft) dirRot = -KEY_SPEED;
+    if (keyboardState.rotateRight) dirRot = KEY_SPEED;
+
+    sendCommand({ [FIELD_STR_THROTTLE]: throttle });
+    sendCommand({ [FIELD_STR_DIR_X]: dirX, [FIELD_STR_DIR_Y]: 0 });
+    sendCommand({ [FIELD_STR_DIR_ROT]: dirRot });
+}
+
+document.addEventListener('keydown', function(e) {
+    let handled = true;
+    switch(e.key) {
+        case 'w': case 'W': case 'ArrowUp':
+            keyboardState.forward = true; break;
+        case 's': case 'S': case 'ArrowDown':
+            keyboardState.backward = true; break;
+        case 'a': case 'A': case 'ArrowLeft':
+            keyboardState.turnLeft = true; break;
+        case 'd': case 'D': case 'ArrowRight':
+            keyboardState.turnRight = true; break;
+        case 'q': case 'Q':
+            keyboardState.rotateLeft = true; break;
+        case 'e': case 'E':
+            keyboardState.rotateRight = true; break;
+        case '1':
+            selectMode('locked'); handled = false; break;
+        case '2':
+            selectMode('controller'); handled = false; break;
+        case '3':
+            selectMode('follow-me'); handled = false; break;
+        case '4':
+            selectMode('autopilot'); handled = false; break;
+        default:
+            handled = false;
+    }
+    if (handled) e.preventDefault();
+    sendKeyboardCommands();
+});
+
+document.addEventListener('keyup', function(e) {
+    let handled = true;
+    switch(e.key) {
+        case 'w': case 'W': case 'ArrowUp':
+            keyboardState.forward = false; break;
+        case 's': case 'S': case 'ArrowDown':
+            keyboardState.backward = false; break;
+        case 'a': case 'A': case 'ArrowLeft':
+            keyboardState.turnLeft = false; break;
+        case 'd': case 'D': case 'ArrowRight':
+            keyboardState.turnRight = false; break;
+        case 'q': case 'Q':
+            keyboardState.rotateLeft = false; break;
+        case 'e': case 'E':
+            keyboardState.rotateRight = false; break;
+        default:
+            handled = false;
+    }
+    if (handled) e.preventDefault();
+    sendKeyboardCommands();
+});
+
+// =============================================================================
+// MODE SELECTOR
+// =============================================================================
 const modes = ['locked', 'controller', 'follow-me', 'autopilot'];
 const modeButtons = document.querySelectorAll('.mode-button');
 
-
-function sendCommands() {
-    const command = { [FIELD_STR_MODE]: "controller" };
-    ws.send(JSON.stringify(command));
-
-    setTimeout(() => {
-        const throttleCommand = { [FIELD_STR_THROTTLE]: 50 };
-        ws.send(JSON.stringify(throttleCommand));
-    }, 3000);
-
-    setTimeout(() => {
-        const throttleCommand = { [FIELD_STR_THROTTLE]: 0 };
-        ws.send(JSON.stringify(throttleCommand));
-    }, 6000);
-
-    setTimeout(() => {
-        const directionCommand = {
-            [FIELD_STR_DIR_X]: 100,
-            [FIELD_STR_DIR_Y]: 0
-        };
-        const throttleCommand = { [FIELD_STR_THROTTLE]: 50 };
-    
-        ws.send(JSON.stringify(directionCommand));
-        ws.send(JSON.stringify(throttleCommand));
-        
-    }, 7000);
-
-    setTimeout(() => {
-        const stopCommand = { [FIELD_STR_THROTTLE]: 0 };
-        const directionCommandStop = {
-            [FIELD_STR_DIR_X]: 0,
-            [FIELD_STR_DIR_Y]: 0
-        };
-        ws.send(JSON.stringify(directionCommandStop));
-        ws.send(JSON.stringify(stopCommand));
-    }, 10000);
-
-    setTimeout(() => {
-        const rotationValue = 50;
-        const rotationCommand = { [FIELD_STR_DIR_ROT]: rotationValue };
-        ws.send(JSON.stringify(rotationCommand));
-    }, 12000);
-
-    setTimeout(() => {
-        const rotationValue = 0;
-        const rotationCommand = { [FIELD_STR_DIR_ROT]: rotationValue };
-        ws.send(JSON.stringify(rotationCommand));
-    }, 15000);
+function selectMode(mode) {
+    modeButtons.forEach(btn => btn.classList.remove('selected'));
+    const btn = document.querySelector(`[data-mode="${mode}"]`);
+    if (btn) btn.classList.add('selected');
+    sendCommand({ [FIELD_STR_MODE]: mode });
 }
-
-// Run the sequence every 16 seconds (to repeat the entire cycle)
-//setInterval(sendCommands, 16000);
-
 
 modeButtons.forEach(button => {
     button.addEventListener('click', () => {
-        // Remove 'selected' class from all buttons
-        modeButtons.forEach(btn => btn.classList.remove('selected'));
-        // Add 'selected' class to the clicked button
-        button.classList.add('selected');
-        // Get the mode from data attribute
         const mode = button.getAttribute('data-mode');
-        // Send the mode command
-        const command = { [FIELD_STR_MODE]: mode };
-        ws.send(JSON.stringify(command));
+        selectMode(mode);
     });
 });
 
 // Set default selected mode
 document.getElementById('mode-locked').classList.add('selected');
 
-// Sampling and sending commands every 200ms
+// =============================================================================
+// POLLING: Send joystick + dial state at regular interval
+// =============================================================================
 setInterval(() => {
     // Left joystick throttle command
     if (leftJoystick.isMoving) {
-        const throttleCommand = { [FIELD_STR_THROTTLE]: leftJoystick.verticalValue };
-        ws.send(JSON.stringify(throttleCommand));
+        sendCommand({ [FIELD_STR_THROTTLE]: leftJoystick.verticalValue });
     }
 
     // Right joystick direction command
     if (rightJoystick.isMoving) {
-        const directionCommand = {
+        sendCommand({
             [FIELD_STR_DIR_X]: rightJoystick.horizontalValue,
             [FIELD_STR_DIR_Y]: rightJoystick.verticalValue
-        };
-        ws.send(JSON.stringify(directionCommand));
+        });
     }
 
     // Right joystick dial rotation command
     if (rightDial.isRotating) {
         const rotationValue = Math.round((rightDial.rotationValue / 180) * 100);
-        const rotationCommand = { [FIELD_STR_DIR_ROT]: rotationValue };
-        ws.send(JSON.stringify(rotationCommand));
+        sendCommand({ [FIELD_STR_DIR_ROT]: rotationValue });
     }
 }, DATA_POLL_INTERVAL);
 
-// Full-Screen Toggle Button
+// =============================================================================
+// FULL-SCREEN TOGGLE
+// =============================================================================
 const fullscreenButton = document.getElementById('fullscreen-button');
 let isFullscreen = false;
 
@@ -482,39 +636,32 @@ fullscreenButton.addEventListener('click', () => {
 
 function enterFullscreen() {
     const elem = document.documentElement;
-
     if (elem.requestFullscreen) {
-        elem.requestFullscreen().then(() => {
-            lockOrientation();
-        }).catch(err => {
+        elem.requestFullscreen().then(() => { lockOrientation(); }).catch(err => {
             console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
         });
-    } else if (elem.webkitRequestFullscreen) { /* Safari */
+    } else if (elem.webkitRequestFullscreen) {
         elem.webkitRequestFullscreen();
         lockOrientation();
-    } else if (elem.msRequestFullscreen) { /* IE11 */
+    } else if (elem.msRequestFullscreen) {
         elem.msRequestFullscreen();
         lockOrientation();
     }
-
     isFullscreen = true;
 }
 
 function exitFullscreen() {
     if (document.exitFullscreen) {
-        document.exitFullscreen().then(() => {
-            unlockOrientation();
-        }).catch(err => {
+        document.exitFullscreen().then(() => { unlockOrientation(); }).catch(err => {
             console.error(`Error attempting to exit full-screen mode: ${err.message} (${err.name})`);
         });
-    } else if (document.webkitExitFullscreen) { /* Safari */
+    } else if (document.webkitExitFullscreen) {
         document.webkitExitFullscreen();
         unlockOrientation();
-    } else if (document.msExitFullscreen) { /* IE11 */
+    } else if (document.msExitFullscreen) {
         document.msExitFullscreen();
         unlockOrientation();
     }
-
     isFullscreen = false;
 }
 
@@ -533,13 +680,9 @@ function lockOrientation() {
 function unlockOrientation() {
     if (screen.orientation && screen.orientation.unlock) {
         screen.orientation.unlock();
-        console.log('Orientation unlocked');
-    } else {
-        console.warn('Orientation unlock not supported on this device.');
     }
 }
 
-// Listen for fullscreen change events to update button state
 document.addEventListener('fullscreenchange', () => {
     isFullscreen = !!document.fullscreenElement;
 });

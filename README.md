@@ -24,16 +24,20 @@ The **X-LINUX-RBT1** package includes a range of features for robotics applicati
 The package is composed of multiple layers and modules:
 
 #### 1. **Hardware Drivers and APIs**
+
 - Kernel and device tree patches included in the package expose components like ISM330DHCX (IMU), LPS22HH (Pressure Sensor), and IIS2MDC (Magnetometer) via the Linux IIO subsystem.
 - User-space Python drivers are provided for components like STSPIN948 (Motor Driver) and VL53L5CX (ToF Sensor), with low-level I2C, PWM, and GPIO configurations handled via device tree patches.
 
 #### 2. **Sensor Algorithms**
+
 - Compute useful metrics from raw sensor data, such as altitude from pressure readings, distances from ToF sensor data, and orientation using sensor fusion.
 
 #### 3. **Robotics Algorithms**
+
 - High-level algorithms tailored for robotics, including kinematics, obstacle detection, and path correction.
 
 #### 4. **Applications**
+
 - Includes sample applications demonstrating practical use cases, such as remote rover control, integrating all modules into cohesive robotics solutions.
 
 ![Figure 2: System Components](_htmresc/figure02_system_components.png)
@@ -58,9 +62,7 @@ The *X-STM32MP-RBT01* board can be plugged into the 40-pin connectors available 
 
 ![Figure 4: X-STM32MP-RBT01 with STM32MP157F-DK2](_htmresc/figure04_x-stm32mp-rbt01_stm32mp157f-dk2.png)
 
-
 ![Figure 5: X-STM32MP-RBT01 with STM32MP257F-DK](_htmresc/figure05_x-stm32mp-rbt01_stm32mp257f-dk.png)
-
 
 ### Important Setup Notes
 
@@ -85,15 +87,14 @@ Alternatively, a Windows or Mac computer can also be used; in that case, the fol
 - [TeraTerm](https://github.com/TeraTermProject/osdn-download/releases/) or [PuTTY](https://putty.org/) for console interface access.
 - [WinSCP](https://winscp.net/eng/index.php) for file transfer.
 
-
 ### STM32MPU Software Prerequisites
 
 The following Python packages are required for the **X-LINUX-RBT1** software:
 
 ```sh
 # Install required packages
-apt-get install python3-gpiod
-pip install smbus2 fastapi uvicorn websockets netifaces qrcode
+apt-get install python3-gpiod python3-netifaces
+pip install smbus2 fastapi uvicorn websockets qrcode
 ```
 
 ### Deploying the Files to the MPU Board
@@ -102,7 +103,7 @@ Transfer the binaries, Python scripts, and application resources to the STM32MP 
 
 To connect to a WLAN, refer to [How to Setup a WLAN Connection](https://wiki.st.com/stm32mpu/wiki/How_to_setup_a_WLAN_connection).
 
-- For details on how to transfer the files over network connection refer to [How to Transfer a File Over a Network](https://wiki.st.com/stm32mpu/wiki/How_to_transfer_a_file_over_network). 
+- For details on how to transfer the files over network connection refer to [How to Transfer a File Over a Network](https://wiki.st.com/stm32mpu/wiki/How_to_transfer_a_file_over_network).
 - Details on transfer using the serial link, for Linux hosts, refer to [How to transfer a file over a serial console](https://wiki.st.com/stm32mpu/wiki/How_to_transfer_a_file_over_serial_console). For Windows hosts, refer to [How to transfer files to Discovery kit using Tera Term](https://wiki.st.com/stm32mpu/wiki/How_to_transfer_files_to_Discovery_kit_using_Tera_Term_on_Windows_PC).
 - Alternatively, user could transfer the files using an external USB drive.
 
@@ -118,7 +119,7 @@ chmod +x scripts/deploy_starter_package.sh
 ## Using the Application
 
 ### Launching the Application
-
+  
 Once the files are deployed and the board is rebooted, You can explore **X-LINUX-RBT1**, by accesing the terminal through ssh and run the application using following command
 
 `python3 /usr/local/x-linux-rbt1/main.py`
@@ -131,7 +132,6 @@ After initial configuration, QR code is displayed which could be scanned on a mo
 
 ![Figure 7: X-LINUX-RBT1 QR Scanner](_htmresc/figure07_x-linux-rbt1_connection.png)
 
-
 After scanning the QR code on the mobile device **Remote Control Interface** would open (provided the device is connected to the same network as the board)
 
 ### Remote Control Web App
@@ -142,9 +142,9 @@ To control the rover remotely, the **remote control web app** is hosted through 
 
 #### Features of the Remote Control Interface
 
-- **Joystick-based Control**: 
+- **Joystick-based Control**:
   - **Left Joystick**: Controls throttle for rover speed.
-  - **Right Joystick**: 
+  - **Right Joystick**:
     - Middle stick controls omni-directional movement when using mecanum wheels, or steering factor for differential drive.
     - Outer dial adjusts rover heading or rotation.
 
@@ -157,7 +157,6 @@ To control the rover remotely, the **remote control web app** is hosted through 
 - Prebuilt binaries such as device tree blobs (DTBs) and kernel modules are platform-dependent and are provided for specific MPU boards. Customization may be necessary for other platforms.
 - If kernel customization is needed, refer to [How to Customize the Linux Kernel](https://wiki.st.com/stm32mpu/wiki/How_to_customize_the_Linux_kernel).
 - On STM32MP boards, some GPIOs available on the 40-pin header are shared with other peripherals. To ensure exclusive access to the 40-pin header, certain solder bridges may need to be opened or closed. Refer to user manual of the specific MPU board. Also, look into the board_pin_mapping.md file of the package for more information.
-
 
 ## License
 

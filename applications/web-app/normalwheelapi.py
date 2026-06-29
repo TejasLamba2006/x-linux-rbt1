@@ -350,6 +350,7 @@ def parser(parsed_data: Dict[str, Any]) -> None:
         return
     
     try:
+        logger.info(f"Parser received: {parsed_data}")
         # Handle mode change
         if "mode" in parsed_data:
             mode_select(parsed_data['mode'])
