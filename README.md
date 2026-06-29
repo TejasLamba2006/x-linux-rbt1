@@ -120,11 +120,11 @@ chmod +x scripts/deploy_starter_package.sh
 
 ### Launching the Application
   
-Once the files are deployed and the board is rebooted, You can explore **X-LINUX-RBT1**, by accesing the terminal through ssh and run the application using following command
+Once the files are deployed and the board is rebooted, you can explore **X-LINUX-RBT1**, by accessing the terminal through ssh and run the application using following command
 
 `python3 /usr/local/x-linux-rbt1/main.py`
 
-This open the command line interface (CLI) of the application, where various network configuration options are displayed.
+This opens the command line interface (CLI) of the application, where various network configuration options are displayed.
 
 ![Figure 6: Application Command Line Interface](_htmresc/figure06_x-linux-rbt1_cli.png)
 
@@ -133,6 +133,14 @@ After initial configuration, QR code is displayed which could be scanned on a mo
 ![Figure 7: X-LINUX-RBT1 QR Scanner](_htmresc/figure07_x-linux-rbt1_connection.png)
 
 After scanning the QR code on the mobile device **Remote Control Interface** would open (provided the device is connected to the same network as the board)
+
+But `main.py` supports these flags:
+- `--auto` — skip interactive prompts, use saved robot_config.json
+- `--install-service` — install systemd service
+- `--uninstall-service` — remove systemd service
+- `--generate-service` — generate .service file only
+
+Without `--auto`, the app enters interactive CLI mode asking for drive type and network mode each time. With `--auto`, it reads from robot_config.json and starts immediately, which is what you'd want for headless/production use or systemd startup.
 
 ### Remote Control Web App
 
