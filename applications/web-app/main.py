@@ -49,6 +49,8 @@ REPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
 CONFIG_FILE = os.path.join(SCRIPT_DIR, "robot_config.json")
 SERVICE_NAME = "x-linux-rbt1"
 SERVICE_FILE = os.path.join(SCRIPT_DIR, f"{SERVICE_NAME}.service")
+TLS_CERT_FILE = os.path.join(SCRIPT_DIR, "tls_cert.pem")
+TLS_KEY_FILE = os.path.join(SCRIPT_DIR, "tls_key.pem")
 
 # =============================================================================
 # VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)
@@ -740,6 +742,39 @@ def check_hotspot_status() -> dict:
 # =============================================================================
 # QR CODE & NETWORK UTILITIES
 # =============================================================================
+def ensure_tls_cert() -> bool:
+    """
+    Ensure a self-signed TLS cert/key pair exists for serving the app over
+    HTTPS. Required for microphone access (getUserMedia/SpeechRecognition) --
+    Chrome only allows those in a "secure context" (HTTPS or localhost), and
+    phones connect over plain LAN/hotspot IPs, not localhost.
+
+    Self-signed means each new device sees a one-time "connection not
+    private" warning to click through -- there's no real CA for a device
+    with no stable DNS name. Regenerated only if the files are missing.
+    """
+    import subprocess
+
+    if os.path.isfile(TLS_CERT_FILE) and os.path.isfile(TLS_KEY_FILE):
+        return True
+
+    try:
+        subprocess.run(
+            [
+                "openssl", "req", "-x509", "-newkey", "rsa:2048",
+                "-keyout", TLS_KEY_FILE, "-out", TLS_CERT_FILE,
+                "-days", "3650", "-nodes",
+                "-subj", "/CN=x-linux-rbt1",
+            ],
+            check=True, capture_output=True, timeout=30,
+        )
+        logger.info("Generated self-signed TLS certificate")
+        return True
+    except Exception as e:
+        logger.warning(f"Could not generate TLS certificate (openssl missing?): {e}")
+        return False
+
+
 def generate_qr_code(data: str) -> None:
     """Generate and print a QR code to the terminal."""
     try:
@@ -1031,6 +1066,9 @@ async def captive_portal_android():
 async def captive_portal_api():
     """RFC 8908 Captive Portal API."""
     from fastapi.responses import JSONResponse
+    # Deliberately http:// even when the app is served over https:// -- OS-level
+    # captive-portal mini-browsers (Android CaptivePortalLogin, iOS CNA) reject
+    # self-signed certs and won't show the auto sign-in popup if this is https.
     return JSONResponse(content={
         "captive": True,
         "user-portal-url": f"http://192.168.72.1:{PORT}/captive-portal"
@@ -1194,11 +1232,17 @@ def signal_handler(signum, frame):
 def run_server(drive_type: str, network_mode: str) -> None:
     """Run the web server with the specified configuration."""
     global motor_api
-    
+
     # Load motor API
     motor_api = load_motor_api(drive_type)
     print(f"\n✓ Drive Type: {'Mecanum (Omnidirectional)' if drive_type == 'mecanum' else 'Differential Drive'}")
-    
+
+    tls_ok = ensure_tls_cert()
+    scheme = "https" if tls_ok else "http"
+    if not tls_ok:
+        print("\n⚠ Could not set up HTTPS (openssl unavailable) — voice control's")
+        print("  microphone access will be blocked by the browser over plain HTTP.")
+
     server_address = None
     hotspot_hostname = None
     
@@ -1237,8 +1281,8 @@ def run_server(drive_type: str, network_mode: str) -> None:
             hotspot_hostname = "rbt20-demo"
         
         server_address = f"{hotspot_ip}:{PORT}"
-        link_ip = f"http://{server_address}/static/index.html"
-        link_hostname = f"http://{hotspot_hostname}.local:{PORT}/static/index.html"
+        link_ip = f"{scheme}://{server_address}/static/index.html"
+        link_hostname = f"{scheme}://{hotspot_hostname}.local:{PORT}/static/index.html"
         
         # Display all info BEFORE starting hotspot
         print("\n")
@@ -1318,19 +1362,19 @@ def run_server(drive_type: str, network_mode: str) -> None:
             except:
                 pass
 
-        ip_link = f"http://{ip_address}:{PORT}/static/index.html"
-        
+        ip_link = f"{scheme}://{ip_address}:{PORT}/static/index.html"
+
         print(f"\n" + "=" * 70)
         print("   🚀 SERVER RUNNING - CONNECTION OPTIONS")
         print("=" * 70)
         print("")
         print("   ┌────────────────────────────────────────────────────────────┐")
-        print(f"   │  📍 IP Address:   http://{ip_address}:{PORT:<27} │")
-        
+        print(f"   │  📍 IP Address:   {scheme}://{ip_address}:{PORT:<27} │")
+
         hostname_link = None
         if effective_hostname:
-            hostname_link = f"http://{effective_hostname}.local:{PORT}/static/index.html"
-            print(f"   │  🏷️  Hostname:     http://{effective_hostname}.local:{PORT:<17} │")
+            hostname_link = f"{scheme}://{effective_hostname}.local:{PORT}/static/index.html"
+            print(f"   │  🏷️  Hostname:     {scheme}://{effective_hostname}.local:{PORT:<17} │")
         else:
             print(f"   │  🏷️  Hostname:     (Not available)                          │")
             
@@ -1361,12 +1405,14 @@ def run_server(drive_type: str, network_mode: str) -> None:
         print("Please check your network connection.")
     
     # Start the web server
-    logger.info(f"Starting server on port {PORT}...")
+    logger.info(f"Starting server on port {PORT} ({scheme})...")
     uvicorn.run(
         app,
         host="0.0.0.0",
         port=PORT,
-        log_level="info"
+        log_level="info",
+        ssl_certfile=TLS_CERT_FILE if tls_ok else None,
+        ssl_keyfile=TLS_KEY_FILE if tls_ok else None,
     )
 
 

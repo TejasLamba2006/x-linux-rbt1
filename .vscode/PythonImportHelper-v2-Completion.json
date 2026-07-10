@@ -1441,6 +1441,15 @@
         "documentation": {}
     },
     {
+        "label": "ensure_tls_cert",
+        "kind": 2,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "def ensure_tls_cert() -> bool:\n    \"\"\"\n    Ensure a self-signed TLS cert/key pair exists for serving the app over\n    HTTPS. Required for microphone access (getUserMedia/SpeechRecognition) --\n    Chrome only allows those in a \"secure context\" (HTTPS or localhost), and\n    phones connect over plain LAN/hotspot IPs, not localhost.\n    Self-signed means each new device sees a one-time \"connection not\n    private\" warning to click through -- there's no real CA for a device\n    with no stable DNS name. Regenerated only if the files are missing.\n    \"\"\"",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
         "label": "generate_qr_code",
         "kind": 2,
         "importPath": "applications.web-app.main",
@@ -1490,7 +1499,7 @@
         "kind": 2,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "def run_server(drive_type: str, network_mode: str) -> None:\n    \"\"\"Run the web server with the specified configuration.\"\"\"\n    global motor_api\n    # Load motor API\n    motor_api = load_motor_api(drive_type)\n    print(f\"\\n✓ Drive Type: {'Mecanum (Omnidirectional)' if drive_type == 'mecanum' else 'Differential Drive'}\")\n    server_address = None\n    hotspot_hostname = None\n    if network_mode == \"hotspot\":\n        # Show connection info BEFORE starting hotspot (SSH will disconnect!)",
+        "peekOfCode": "def run_server(drive_type: str, network_mode: str) -> None:\n    \"\"\"Run the web server with the specified configuration.\"\"\"\n    global motor_api\n    # Load motor API\n    motor_api = load_motor_api(drive_type)\n    print(f\"\\n✓ Drive Type: {'Mecanum (Omnidirectional)' if drive_type == 'mecanum' else 'Differential Drive'}\")\n    tls_ok = ensure_tls_cert()\n    scheme = \"https\" if tls_ok else \"http\"\n    if not tls_ok:\n        print(\"\\n⚠ Could not set up HTTPS (openssl unavailable) — voice control's\")",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1508,7 +1517,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "PORT = 8000\nLOG_LEVEL = logging.INFO\nSCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))\nREPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================",
+        "peekOfCode": "PORT = 8000\nLOG_LEVEL = logging.INFO\nSCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))\nREPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\nTLS_CERT_FILE = os.path.join(SCRIPT_DIR, \"tls_cert.pem\")\nTLS_KEY_FILE = os.path.join(SCRIPT_DIR, \"tls_key.pem\")\n# =============================================================================",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1517,7 +1526,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "LOG_LEVEL = logging.INFO\nSCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))\nREPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100",
+        "peekOfCode": "LOG_LEVEL = logging.INFO\nSCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))\nREPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\nTLS_CERT_FILE = os.path.join(SCRIPT_DIR, \"tls_cert.pem\")\nTLS_KEY_FILE = os.path.join(SCRIPT_DIR, \"tls_key.pem\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1526,7 +1535,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))\nREPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value",
+        "peekOfCode": "SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))\nREPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\nTLS_CERT_FILE = os.path.join(SCRIPT_DIR, \"tls_cert.pem\")\nTLS_KEY_FILE = os.path.join(SCRIPT_DIR, \"tls_key.pem\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1535,7 +1544,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "REPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15",
+        "peekOfCode": "REPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\nTLS_CERT_FILE = os.path.join(SCRIPT_DIR, \"tls_cert.pem\")\nTLS_KEY_FILE = os.path.join(SCRIPT_DIR, \"tls_key.pem\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1544,7 +1553,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "CONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0",
+        "peekOfCode": "CONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\nTLS_CERT_FILE = os.path.join(SCRIPT_DIR, \"tls_cert.pem\")\nTLS_KEY_FILE = os.path.join(SCRIPT_DIR, \"tls_key.pem\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1553,7 +1562,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "SERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\nINTENT_AVAILABLE = False",
+        "peekOfCode": "SERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\nTLS_CERT_FILE = os.path.join(SCRIPT_DIR, \"tls_cert.pem\")\nTLS_KEY_FILE = os.path.join(SCRIPT_DIR, \"tls_key.pem\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1562,7 +1571,25 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "SERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\nINTENT_AVAILABLE = False\ntry:",
+        "peekOfCode": "SERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\nTLS_CERT_FILE = os.path.join(SCRIPT_DIR, \"tls_cert.pem\")\nTLS_KEY_FILE = os.path.join(SCRIPT_DIR, \"tls_key.pem\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "TLS_CERT_FILE",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "TLS_CERT_FILE = os.path.join(SCRIPT_DIR, \"tls_cert.pem\")\nTLS_KEY_FILE = os.path.join(SCRIPT_DIR, \"tls_key.pem\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\nINTENT_AVAILABLE = False",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "TLS_KEY_FILE",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "TLS_KEY_FILE = os.path.join(SCRIPT_DIR, \"tls_key.pem\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\nINTENT_AVAILABLE = False\ntry:",
         "detail": "applications.web-app.main",
         "documentation": {}
     },

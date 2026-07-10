@@ -8,7 +8,7 @@
 //                        opensource.org/licenses/BSD-3-Clause
 
 // Constants
-const WS_URL = 'ws://' + window.location.host + '/ws';
+const WS_URL = (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + '/ws';
 const FIELD_STR_THROTTLE = 'throttle';
 const FIELD_STR_DIR_X = 'dir_x';
 const FIELD_STR_DIR_Y = 'dir_y';
