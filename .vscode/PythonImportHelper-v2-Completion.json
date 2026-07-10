@@ -2435,7 +2435,7 @@
         "kind": 2,
         "importPath": "intent_classifier.infer",
         "description": "intent_classifier.infer",
-        "peekOfCode": "def classify_single_command(command: str) -> dict:\n    \"\"\"Classify one command string -> {\"intent\": str, \"value\": int}.\"\"\"\n    value = extract_value(command)\n    normalized = re.sub(r\"\\d+\", \"NUM\", command.lower())\n    for word in NUMBER_WORDS:\n        normalized = normalized.replace(word, \"NUM\")\n    X = np.array([[normalized]], dtype=object)\n    label = _session.run(None, {_input_name: X})[0][0]\n    return {\"intent\": str(label), \"value\": value}\nif __name__ == \"__main__\":",
+        "peekOfCode": "def classify_single_command(command: str) -> dict:\n    \"\"\"Classify one command string -> {\"intent\": str, \"value\": int}.\"\"\"\n    value = extract_value(command)\n    normalized = re.sub(r\"\\d+\", \"NUM\", command.lower())\n    normalized = _apply_word_variants(normalized)\n    for word in NUMBER_WORDS:\n        normalized = normalized.replace(word, \"NUM\")\n    X = np.array([[normalized]], dtype=object)\n    label = _session.run(None, {_input_name: X})[0][0]\n    return {\"intent\": str(label), \"value\": value}",
         "detail": "intent_classifier.infer",
         "documentation": {}
     },
@@ -2444,7 +2444,7 @@
         "kind": 5,
         "importPath": "intent_classifier.infer",
         "description": "intent_classifier.infer",
-        "peekOfCode": "MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), \"robot_intent_5.onnx\")\n_session = ort.InferenceSession(MODEL_PATH, providers=[\"CPUExecutionProvider\"])\n_input_name = _session.get_inputs()[0].name\nNUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,\n    \"sixty\": 60, \"seventy\": 70, \"eighty\": 80, \"ninety\": 90, \"hundred\": 100,\n}\ndef extract_value(command: str) -> int:",
+        "peekOfCode": "MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), \"robot_intent_5.onnx\")\n_session = ort.InferenceSession(MODEL_PATH, providers=[\"CPUExecutionProvider\"])\n_input_name = _session.get_inputs()[0].name\nNUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,\n    \"sixty\": 60, \"seventy\": 70, \"eighty\": 80, \"ninety\": 90, \"hundred\": 100,\n}\n# The model's TF-IDF vocab was built from exact training tokens (forward,",
         "detail": "intent_classifier.infer",
         "documentation": {}
     },
@@ -2453,7 +2453,7 @@
         "kind": 5,
         "importPath": "intent_classifier.infer",
         "description": "intent_classifier.infer",
-        "peekOfCode": "_session = ort.InferenceSession(MODEL_PATH, providers=[\"CPUExecutionProvider\"])\n_input_name = _session.get_inputs()[0].name\nNUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,\n    \"sixty\": 60, \"seventy\": 70, \"eighty\": 80, \"ninety\": 90, \"hundred\": 100,\n}\ndef extract_value(command: str) -> int:\n    \"\"\"Pull a numeric magnitude (digits or spelled-out) out of a command.\"\"\"",
+        "peekOfCode": "_session = ort.InferenceSession(MODEL_PATH, providers=[\"CPUExecutionProvider\"])\n_input_name = _session.get_inputs()[0].name\nNUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,\n    \"sixty\": 60, \"seventy\": 70, \"eighty\": 80, \"ninety\": 90, \"hundred\": 100,\n}\n# The model's TF-IDF vocab was built from exact training tokens (forward,\n# backward, left, right, ...). Web Speech API commonly transcribes these with",
         "detail": "intent_classifier.infer",
         "documentation": {}
     },
@@ -2462,7 +2462,7 @@
         "kind": 5,
         "importPath": "intent_classifier.infer",
         "description": "intent_classifier.infer",
-        "peekOfCode": "_input_name = _session.get_inputs()[0].name\nNUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,\n    \"sixty\": 60, \"seventy\": 70, \"eighty\": 80, \"ninety\": 90, \"hundred\": 100,\n}\ndef extract_value(command: str) -> int:\n    \"\"\"Pull a numeric magnitude (digits or spelled-out) out of a command.\"\"\"\n    match = re.search(r\"\\d+\", command)",
+        "peekOfCode": "_input_name = _session.get_inputs()[0].name\nNUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,\n    \"sixty\": 60, \"seventy\": 70, \"eighty\": 80, \"ninety\": 90, \"hundred\": 100,\n}\n# The model's TF-IDF vocab was built from exact training tokens (forward,\n# backward, left, right, ...). Web Speech API commonly transcribes these with\n# a trailing \"s\" (forwards/backwards); unseen tokens get zero TF-IDF weight",
         "detail": "intent_classifier.infer",
         "documentation": {}
     },
@@ -2471,7 +2471,16 @@
         "kind": 5,
         "importPath": "intent_classifier.infer",
         "description": "intent_classifier.infer",
-        "peekOfCode": "NUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,\n    \"sixty\": 60, \"seventy\": 70, \"eighty\": 80, \"ninety\": 90, \"hundred\": 100,\n}\ndef extract_value(command: str) -> int:\n    \"\"\"Pull a numeric magnitude (digits or spelled-out) out of a command.\"\"\"\n    match = re.search(r\"\\d+\", command)\n    if match:",
+        "peekOfCode": "NUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,\n    \"sixty\": 60, \"seventy\": 70, \"eighty\": 80, \"ninety\": 90, \"hundred\": 100,\n}\n# The model's TF-IDF vocab was built from exact training tokens (forward,\n# backward, left, right, ...). Web Speech API commonly transcribes these with\n# a trailing \"s\" (forwards/backwards); unseen tokens get zero TF-IDF weight\n# and the classifier falls back to its bias term, misfiring as BACKWARD/RIGHT.",
+        "detail": "intent_classifier.infer",
+        "documentation": {}
+    },
+    {
+        "label": "WORD_VARIANTS",
+        "kind": 5,
+        "importPath": "intent_classifier.infer",
+        "description": "intent_classifier.infer",
+        "peekOfCode": "WORD_VARIANTS = {\n    \"forwards\": \"forward\",\n    \"backwards\": \"backward\",\n    \"lefts\": \"left\",\n    \"rights\": \"right\",\n}\ndef _apply_word_variants(text: str) -> str:\n    return re.sub(\n        r\"\\b(\" + \"|\".join(WORD_VARIANTS) + r\")\\b\",\n        lambda m: WORD_VARIANTS[m.group(1)],",
         "detail": "intent_classifier.infer",
         "documentation": {}
     },
