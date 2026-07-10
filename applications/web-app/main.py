@@ -375,6 +375,7 @@ current_drive_type: str = "unknown"
 tof_driver = None
 shutdown_event = threading.Event()
 motor_released = False  # Flag to prevent double release
+odometry_process = None  # Companion odometry-map server subprocess (see start_odometry_server)
 
 
 def cleanup_motor_api() -> None:
@@ -387,6 +388,50 @@ def cleanup_motor_api() -> None:
             logger.info("Motor API released")
         except Exception:
             pass  # Silently ignore cleanup errors
+
+
+def start_odometry_server() -> None:
+    """Launch the mouse-odometry map server (odometry_locomization/run_linux.py)
+    as a companion background process alongside the main controller, so the
+    live map is collecting data for the whole session. Best-effort: if the
+    script or its sensor isn't available, the main controller still runs fine
+    without it (matches init_tof_sensor()'s "optional" pattern below)."""
+    global odometry_process
+    import subprocess
+
+    repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    odometry_script = os.path.join(repo_root, "odometry_locomization", "run_linux.py")
+
+    if not os.path.isfile(odometry_script):
+        logger.warning(f"Odometry map server not found at {odometry_script}, skipping.")
+        return
+
+    try:
+        odometry_process = subprocess.Popen(
+            [sys.executable, odometry_script],
+            cwd=os.path.dirname(odometry_script),
+        )
+        logger.info(f"Odometry map server started (pid={odometry_process.pid}, port 5000)")
+    except Exception as e:
+        logger.warning(f"Failed to start odometry map server: {e}")
+        odometry_process = None
+
+
+def stop_odometry_server() -> None:
+    """Terminate the companion odometry map server, if running (prevents orphaned process)."""
+    global odometry_process
+    if odometry_process and odometry_process.poll() is None:
+        try:
+            odometry_process.terminate()
+            odometry_process.wait(timeout=3)
+        except Exception:
+            try:
+                odometry_process.kill()
+            except Exception:
+                pass
+        finally:
+            logger.info("Odometry map server stopped")
+    odometry_process = None
 
 
 
@@ -1061,6 +1106,7 @@ def signal_handler(signum, frame):
     logger.info(f"Received signal {signum}. Shutting down...")
     shutdown_event.set()
     cleanup_motor_api()
+    stop_odometry_server()
     sys.exit(0)
 
 
@@ -1172,6 +1218,9 @@ def run_server(drive_type: str, network_mode: str) -> None:
     
     # Initialize ToF sensor (optional)
     tof_available = init_tof_sensor()
+
+    # Launch the odometry map server as a companion background process (optional)
+    start_odometry_server()
     
     # Display connection information
     if server_address:
@@ -1213,6 +1262,10 @@ def run_server(drive_type: str, network_mode: str) -> None:
         print(f"      → {ip_link}")
         if hostname_link:
             print(f"      → {hostname_link}")
+        if odometry_process:
+            print("")
+            print("   🗺️  Odometry Map (live):")
+            print(f"      → http://{ip_address}:5000/")
         print("")
         print("=" * 70)
         
@@ -1389,4 +1442,5 @@ if __name__ == "__main__":
     finally:
         shutdown_event.set()
         cleanup_motor_api()
+        stop_odometry_server()
 
