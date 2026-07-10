@@ -37,6 +37,26 @@ NUMBER_WORDS = {
     "sixty": 60, "seventy": 70, "eighty": 80, "ninety": 90, "hundred": 100,
 }
 
+# The model's TF-IDF vocab was built from exact training tokens (forward,
+# backward, left, right, ...). Web Speech API commonly transcribes these with
+# a trailing "s" (forwards/backwards); unseen tokens get zero TF-IDF weight
+# and the classifier falls back to its bias term, misfiring as BACKWARD/RIGHT.
+# Normalize known speech-recognition variants back to the trained tokens.
+WORD_VARIANTS = {
+    "forwards": "forward",
+    "backwards": "backward",
+    "lefts": "left",
+    "rights": "right",
+}
+
+
+def _apply_word_variants(text: str) -> str:
+    return re.sub(
+        r"\b(" + "|".join(WORD_VARIANTS) + r")\b",
+        lambda m: WORD_VARIANTS[m.group(1)],
+        text,
+    )
+
 
 def extract_value(command: str) -> int:
     """Pull a numeric magnitude (digits or spelled-out) out of a command."""
@@ -56,6 +76,7 @@ def classify_single_command(command: str) -> dict:
     value = extract_value(command)
 
     normalized = re.sub(r"\d+", "NUM", command.lower())
+    normalized = _apply_word_variants(normalized)
     for word in NUMBER_WORDS:
         normalized = normalized.replace(word, "NUM")
 
