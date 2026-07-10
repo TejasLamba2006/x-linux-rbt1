@@ -1432,7 +1432,7 @@
         "kind": 2,
         "importPath": "applications.web-app.mechanumapi",
         "description": "applications.web-app.mechanumapi",
-        "peekOfCode": "def mode_select(mode: str) -> None:\n    \"\"\"Select the operating mode ('locked', 'controller', 'follow-me', 'autopilot').\"\"\"\n    valid_modes = ['locked', 'controller', 'follow-me', 'autopilot']\n    if mode not in valid_modes:\n        logger.warning(f\"Invalid mode: {mode}. Valid modes: {valid_modes}\")\n        return\n    state.active_mode = mode\n    logger.info(f\"Mode changed to: {mode}\")\n    if mode == 'locked':\n        stop()",
+        "peekOfCode": "def mode_select(mode: str) -> None:\n    \"\"\"Select the operating mode ('locked', 'controller', 'hybrid', 'follow-me', 'autopilot').\"\"\"\n    valid_modes = ['locked', 'controller', 'hybrid', 'follow-me', 'autopilot']\n    if mode not in valid_modes:\n        logger.warning(f\"Invalid mode: {mode}. Valid modes: {valid_modes}\")\n        return\n    state.active_mode = mode\n    logger.info(f\"Mode changed to: {mode}\")\n    if mode == 'locked':\n        stop()",
         "detail": "applications.web-app.mechanumapi",
         "documentation": {}
     },
@@ -1468,7 +1468,7 @@
         "kind": 2,
         "importPath": "applications.web-app.mechanumapi",
         "description": "applications.web-app.mechanumapi",
-        "peekOfCode": "def apply_drive() -> None:\n    \"\"\"Recompute and apply all 4 wheel speeds from the current combined state.\"\"\"\n    if not validate_motor_driver():\n        return\n    try:\n        vy = state.throttle\n        vx = state.strafe\n        omega = state.rotation\n        fl = vy + vx + omega\n        fr = vy - vx - omega",
+        "peekOfCode": "def apply_drive() -> None:\n    \"\"\"Recompute and apply all 4 wheel speeds from the current combined state.\"\"\"\n    if not validate_motor_driver():\n        return\n    try:\n        vy = state.throttle\n        vx = state.strafe\n        omega = state.rotation\n        # Hybrid mode: blend car-like steering into the rotation term,\n        # scaled by how fast we're moving, on top of strafe (vx) staying",
         "detail": "applications.web-app.mechanumapi",
         "documentation": {}
     },
@@ -1576,7 +1576,7 @@
         "kind": 2,
         "importPath": "applications.web-app.normalwheelapi",
         "description": "applications.web-app.normalwheelapi",
-        "peekOfCode": "def mode_select(mode: str) -> None:\n    \"\"\"\n    Select the operating mode.\n    Args:\n        mode: Operating mode ('locked', 'controller', 'follow-me', 'autopilot')\n    \"\"\"\n    valid_modes = ['locked', 'controller', 'follow-me', 'autopilot']\n    if mode not in valid_modes:\n        logger.warning(f\"Invalid mode: {mode}. Valid modes: {valid_modes}\")\n        return",
+        "peekOfCode": "def mode_select(mode: str) -> None:\n    \"\"\"\n    Select the operating mode.\n    Args:\n        mode: Operating mode ('locked', 'controller', 'follow-me', 'autopilot')\n    \"\"\"\n    valid_modes = ['locked', 'controller', 'hybrid', 'follow-me', 'autopilot']\n    if mode not in valid_modes:\n        logger.warning(f\"Invalid mode: {mode}. Valid modes: {valid_modes}\")\n        return",
         "detail": "applications.web-app.normalwheelapi",
         "documentation": {}
     },

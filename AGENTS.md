@@ -60,8 +60,9 @@ tail -f /tmp/robot.log
 | E | Rotate Right (in-place) |
 | 1 | Locked mode |
 | 2 | Controller mode |
-| 3 | Follow-me mode |
-| 4 | Autopilot mode |
+| 3 | Hybrid mode |
+| 4 | Follow-me mode |
+| 5 | Autopilot mode |
 
 ## Known Issues
 

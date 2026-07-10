@@ -551,8 +551,10 @@ document.addEventListener('keydown', function(e) {
         case '2':
             selectMode('controller'); handled = false; break;
         case '3':
-            selectMode('follow-me'); handled = false; break;
+            selectMode('hybrid'); handled = false; break;
         case '4':
+            selectMode('follow-me'); handled = false; break;
+        case '5':
             selectMode('autopilot'); handled = false; break;
         default:
             handled = false;
@@ -586,7 +588,7 @@ document.addEventListener('keyup', function(e) {
 // =============================================================================
 // MODE SELECTOR
 // =============================================================================
-const modes = ['locked', 'controller', 'follow-me', 'autopilot'];
+const modes = ['locked', 'controller', 'hybrid', 'follow-me', 'autopilot'];
 const modeButtons = document.querySelectorAll('.mode-button');
 
 function selectMode(mode) {
