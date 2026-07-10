@@ -365,3 +365,7 @@ logs/
 *.orig
 .DS_Store
 Thumbs.db
+
+# Self-signed TLS cert/key generated at runtime by main.py (ensure_tls_cert)
+applications/web-app/tls_cert.pem
+applications/web-app/tls_key.pem
