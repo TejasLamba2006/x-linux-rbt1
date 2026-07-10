@@ -716,7 +716,7 @@ def tof_obstacle_detection():
                 if distance < 20:
                     logger.warning(f"Obstacle detected! Distance: {distance}mm. Stopping motors...")
                     if motor_api:
-                        motor_api.parser({"throttle": 0})
+                        motor_api.stop()
                     
                     # Wait until obstacle is cleared
                     while not shutdown_event.is_set():

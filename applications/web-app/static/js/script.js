@@ -341,8 +341,15 @@ function handleRightJoystickMouseUp(event) {
 }
 
 // Right Joystick Dial Rotation
+// hitElement is the enlarged touch target (.outer-dial, see styles.css);
+// visualElement (.c5) is the ring that actually shows the rotation. Both
+// are concentric, so angle calculations are identical for either, but
+// binding listeners to the larger hitElement makes the dial actually
+// grabbable instead of relying on the ~30px sliver of .c5 outside the
+// inner joystick.
 let rightDial = {
-    element: document.querySelector('#right-joystick .c5'),
+    element: document.querySelector('#right-joystick .outer-dial'),
+    visualElement: document.querySelector('#right-joystick .c5'),
     rotationValue: 0,
     isRotating: false,
     rotationTimeout: null,
@@ -418,7 +425,7 @@ function handleDialRotate(event) {
     rotation = Math.max(-180, Math.min(180, rotation));
 
     rightDial.rotationValue = rotation;
-    rightDial.element.style.transform = `rotate(${rotation}deg)`;
+    rightDial.visualElement.style.transform = `rotate(${rotation}deg)`;
 
     rightDial.isRotating = true;
     clearTimeout(rightDial.rotationTimeout);
@@ -445,7 +452,7 @@ function handleDialEnd(event) {
 
     rightDial.touchId = null;
     rightDial.rotationValue = 0;
-    rightDial.element.style.transform = 'rotate(0deg)';
+    rightDial.visualElement.style.transform = 'rotate(0deg)';
 }
 
 // Mouse handlers for dial rotation
@@ -469,7 +476,7 @@ function handleDialMouseMove(event) {
     if (rotation > 180) rotation -= 360;
     rotation = Math.max(-180, Math.min(180, rotation));
     rightDial.rotationValue = rotation;
-    rightDial.element.style.transform = `rotate(${rotation}deg)`;
+    rightDial.visualElement.style.transform = `rotate(${rotation}deg)`;
     rightDial.isRotating = true;
     clearTimeout(rightDial.rotationTimeout);
     rightDial.rotationTimeout = setTimeout(() => {
@@ -485,7 +492,7 @@ function handleDialMouseUp(event) {
         rightDial.isRotating = false;
     }, DATA_POLL_TIMEOUT);
     rightDial.rotationValue = 0;
-    rightDial.element.style.transform = 'rotate(0deg)';
+    rightDial.visualElement.style.transform = 'rotate(0deg)';
 }
 
 // =============================================================================
