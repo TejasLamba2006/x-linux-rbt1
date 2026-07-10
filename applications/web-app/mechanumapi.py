@@ -113,8 +113,8 @@ def validate_motor_driver() -> bool:
 # MODE CONTROL
 # =============================================================================
 def mode_select(mode: str) -> None:
-    """Select the operating mode ('locked', 'controller', 'follow-me', 'autopilot')."""
-    valid_modes = ['locked', 'controller', 'follow-me', 'autopilot']
+    """Select the operating mode ('locked', 'controller', 'hybrid', 'follow-me', 'autopilot')."""
+    valid_modes = ['locked', 'controller', 'hybrid', 'follow-me', 'autopilot']
 
     if mode not in valid_modes:
         logger.warning(f"Invalid mode: {mode}. Valid modes: {valid_modes}")
@@ -185,6 +185,13 @@ def apply_drive() -> None:
         vx = state.strafe
         omega = state.rotation
 
+        # Hybrid mode: blend car-like steering into the rotation term,
+        # scaled by how fast we're moving, on top of strafe (vx) staying
+        # fully available. Stationary -> pure strafe. Driving -> the same
+        # stick also arcs the heading like a car's steering wheel.
+        if state.active_mode == 'hybrid':
+            omega += vx * (abs(vy) / 100.0)
+
         fl = vy + vx + omega
         fr = vy - vx - omega
         rl = vy - vx + omega
@@ -234,7 +241,7 @@ def parser(parsed_data: Dict[str, Any]) -> None:
         if "mode" in parsed_data:
             mode_select(parsed_data['mode'])
 
-        if state.active_mode != 'controller':
+        if state.active_mode not in ('controller', 'hybrid'):
             return
 
         if "throttle" in parsed_data:

@@ -131,7 +131,7 @@ def mode_select(mode: str) -> None:
     Args:
         mode: Operating mode ('locked', 'controller', 'follow-me', 'autopilot')
     """
-    valid_modes = ['locked', 'controller', 'follow-me', 'autopilot']
+    valid_modes = ['locked', 'controller', 'hybrid', 'follow-me', 'autopilot']
     
     if mode not in valid_modes:
         logger.warning(f"Invalid mode: {mode}. Valid modes: {valid_modes}")
@@ -308,8 +308,10 @@ def parser(parsed_data: Dict[str, Any]) -> None:
         if "mode" in parsed_data:
             mode_select(parsed_data['mode'])
         
-        # Only process motor commands in controller mode
-        if state.active_mode != 'controller':
+        # Only process motor commands in controller/hybrid mode. Differential
+        # drive has no strafe hardware, so hybrid behaves identically to
+        # controller here (dir_x is already steering, not strafe).
+        if state.active_mode not in ('controller', 'hybrid'):
             return
         
         # Process direction (sets steering factors)
