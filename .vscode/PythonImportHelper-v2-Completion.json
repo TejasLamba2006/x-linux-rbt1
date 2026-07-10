@@ -389,6 +389,199 @@
         "documentation": {}
     },
     {
+        "label": "re",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "re",
+        "description": "re",
+        "detail": "re",
+        "documentation": {}
+    },
+    {
+        "label": "joblib",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "joblib",
+        "description": "joblib",
+        "detail": "joblib",
+        "documentation": {}
+    },
+    {
+        "label": "math",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "math",
+        "description": "math",
+        "detail": "math",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "mouse",
+        "importPath": "pynput",
+        "description": "pynput",
+        "isExtraImport": true,
+        "detail": "pynput",
+        "documentation": {}
+    },
+    {
+        "label": "mouse",
+        "importPath": "pynput",
+        "description": "pynput",
+        "isExtraImport": true,
+        "detail": "pynput",
+        "documentation": {}
+    },
+    {
+        "label": "hid",
+        "importPath": "pywinusb",
+        "description": "pywinusb",
+        "isExtraImport": true,
+        "detail": "pywinusb",
+        "documentation": {}
+    },
+    {
+        "label": "torch",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "torch",
+        "description": "torch",
+        "detail": "torch",
+        "documentation": {}
+    },
+    {
+        "label": "AutoTokenizer",
+        "importPath": "transformers",
+        "description": "transformers",
+        "isExtraImport": true,
+        "detail": "transformers",
+        "documentation": {}
+    },
+    {
+        "label": "AutoModelForCausalLM",
+        "importPath": "transformers",
+        "description": "transformers",
+        "isExtraImport": true,
+        "detail": "transformers",
+        "documentation": {}
+    },
+    {
+        "label": "tkinter",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "tkinter",
+        "description": "tkinter",
+        "detail": "tkinter",
+        "documentation": {}
+    },
+    {
+        "label": "socket",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "socket",
+        "description": "socket",
+        "detail": "socket",
+        "documentation": {}
+    },
+    {
+        "label": "struct",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "struct",
+        "description": "struct",
+        "detail": "struct",
+        "documentation": {}
+    },
+    {
+        "label": "deque",
+        "importPath": "collections",
+        "description": "collections",
+        "isExtraImport": true,
+        "detail": "collections",
+        "documentation": {}
+    },
+    {
+        "label": "deque",
+        "importPath": "collections",
+        "description": "collections",
+        "isExtraImport": true,
+        "detail": "collections",
+        "documentation": {}
+    },
+    {
+        "label": "Flask",
+        "importPath": "flask",
+        "description": "flask",
+        "isExtraImport": true,
+        "detail": "flask",
+        "documentation": {}
+    },
+    {
+        "label": "jsonify",
+        "importPath": "flask",
+        "description": "flask",
+        "isExtraImport": true,
+        "detail": "flask",
+        "documentation": {}
+    },
+    {
+        "label": "send_from_directory",
+        "importPath": "flask",
+        "description": "flask",
+        "isExtraImport": true,
+        "detail": "flask",
+        "documentation": {}
+    },
+    {
+        "label": "Flask",
+        "importPath": "flask",
+        "description": "flask",
+        "isExtraImport": true,
+        "detail": "flask",
+        "documentation": {}
+    },
+    {
+        "label": "jsonify",
+        "importPath": "flask",
+        "description": "flask",
+        "isExtraImport": true,
+        "detail": "flask",
+        "documentation": {}
+    },
+    {
+        "label": "send_from_directory",
+        "importPath": "flask",
+        "description": "flask",
+        "isExtraImport": true,
+        "detail": "flask",
+        "documentation": {}
+    },
+    {
+        "label": "ctypes",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "ctypes",
+        "description": "ctypes",
+        "detail": "ctypes",
+        "documentation": {}
+    },
+    {
+        "label": "ctypes.wintypes",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "ctypes.wintypes",
+        "description": "ctypes.wintypes",
+        "detail": "ctypes.wintypes",
+        "documentation": {}
+    },
+    {
         "label": "STSpinDriver",
         "importPath": "Motor.stspin_driver",
         "description": "Motor.stspin_driver",
@@ -1158,6 +1351,24 @@
         "documentation": {}
     },
     {
+        "label": "start_odometry_server",
+        "kind": 2,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "def start_odometry_server() -> None:\n    \"\"\"Launch the mouse-odometry map server (odometry_locomization/run_linux.py)\n    as a companion background process alongside the main controller, so the\n    live map is collecting data for the whole session. Best-effort: if the\n    script or its sensor isn't available, the main controller still runs fine\n    without it (matches init_tof_sensor()'s \"optional\" pattern below).\"\"\"\n    global odometry_process\n    import subprocess\n    repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))\n    odometry_script = os.path.join(repo_root, \"odometry_locomization\", \"run_linux.py\")",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "stop_odometry_server",
+        "kind": 2,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "def stop_odometry_server() -> None:\n    \"\"\"Terminate the companion odometry map server, if running (prevents orphaned process).\"\"\"\n    global odometry_process\n    if odometry_process and odometry_process.poll() is None:\n        try:\n            odometry_process.terminate()\n            odometry_process.wait(timeout=3)\n        except Exception:\n            try:\n                odometry_process.kill()",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
         "label": "get_drive_type_choice",
         "kind": 2,
         "importPath": "applications.web-app.main",
@@ -1243,7 +1454,7 @@
         "kind": 2,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "def signal_handler(signum, frame):\n    \"\"\"Handle shutdown signals gracefully.\"\"\"\n    logger.info(f\"Received signal {signum}. Shutting down...\")\n    shutdown_event.set()\n    cleanup_motor_api()\n    sys.exit(0)\n# =============================================================================\n# MAIN ENTRY POINT\n# =============================================================================\ndef run_server(drive_type: str, network_mode: str) -> None:",
+        "peekOfCode": "def signal_handler(signum, frame):\n    \"\"\"Handle shutdown signals gracefully.\"\"\"\n    logger.info(f\"Received signal {signum}. Shutting down...\")\n    shutdown_event.set()\n    cleanup_motor_api()\n    stop_odometry_server()\n    sys.exit(0)\n# =============================================================================\n# MAIN ENTRY POINT\n# =============================================================================",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1324,7 +1535,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "logger = logging.getLogger(__name__)\n# =============================================================================\n# GLOBAL STATE\n# =============================================================================\nmotor_api = None\ncurrent_drive_type: str = \"unknown\"\ntof_driver = None\nshutdown_event = threading.Event()\nmotor_released = False  # Flag to prevent double release\ndef cleanup_motor_api() -> None:",
+        "peekOfCode": "logger = logging.getLogger(__name__)\n# =============================================================================\n# GLOBAL STATE\n# =============================================================================\nmotor_api = None\ncurrent_drive_type: str = \"unknown\"\ntof_driver = None\nshutdown_event = threading.Event()\nmotor_released = False  # Flag to prevent double release\nodometry_process = None  # Companion odometry-map server subprocess (see start_odometry_server)",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1333,7 +1544,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "motor_api = None\ncurrent_drive_type: str = \"unknown\"\ntof_driver = None\nshutdown_event = threading.Event()\nmotor_released = False  # Flag to prevent double release\ndef cleanup_motor_api() -> None:\n    \"\"\"Safely release motor API resources (prevents double release).\"\"\"\n    global motor_released\n    if motor_api and not motor_released:\n        try:",
+        "peekOfCode": "motor_api = None\ncurrent_drive_type: str = \"unknown\"\ntof_driver = None\nshutdown_event = threading.Event()\nmotor_released = False  # Flag to prevent double release\nodometry_process = None  # Companion odometry-map server subprocess (see start_odometry_server)\ndef cleanup_motor_api() -> None:\n    \"\"\"Safely release motor API resources (prevents double release).\"\"\"\n    global motor_released\n    if motor_api and not motor_released:",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1342,7 +1553,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "tof_driver = None\nshutdown_event = threading.Event()\nmotor_released = False  # Flag to prevent double release\ndef cleanup_motor_api() -> None:\n    \"\"\"Safely release motor API resources (prevents double release).\"\"\"\n    global motor_released\n    if motor_api and not motor_released:\n        try:\n            motor_api.release()\n            motor_released = True",
+        "peekOfCode": "tof_driver = None\nshutdown_event = threading.Event()\nmotor_released = False  # Flag to prevent double release\nodometry_process = None  # Companion odometry-map server subprocess (see start_odometry_server)\ndef cleanup_motor_api() -> None:\n    \"\"\"Safely release motor API resources (prevents double release).\"\"\"\n    global motor_released\n    if motor_api and not motor_released:\n        try:\n            motor_api.release()",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1351,7 +1562,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "shutdown_event = threading.Event()\nmotor_released = False  # Flag to prevent double release\ndef cleanup_motor_api() -> None:\n    \"\"\"Safely release motor API resources (prevents double release).\"\"\"\n    global motor_released\n    if motor_api and not motor_released:\n        try:\n            motor_api.release()\n            motor_released = True\n            logger.info(\"Motor API released\")",
+        "peekOfCode": "shutdown_event = threading.Event()\nmotor_released = False  # Flag to prevent double release\nodometry_process = None  # Companion odometry-map server subprocess (see start_odometry_server)\ndef cleanup_motor_api() -> None:\n    \"\"\"Safely release motor API resources (prevents double release).\"\"\"\n    global motor_released\n    if motor_api and not motor_released:\n        try:\n            motor_api.release()\n            motor_released = True",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1360,7 +1571,16 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "motor_released = False  # Flag to prevent double release\ndef cleanup_motor_api() -> None:\n    \"\"\"Safely release motor API resources (prevents double release).\"\"\"\n    global motor_released\n    if motor_api and not motor_released:\n        try:\n            motor_api.release()\n            motor_released = True\n            logger.info(\"Motor API released\")\n        except Exception:",
+        "peekOfCode": "motor_released = False  # Flag to prevent double release\nodometry_process = None  # Companion odometry-map server subprocess (see start_odometry_server)\ndef cleanup_motor_api() -> None:\n    \"\"\"Safely release motor API resources (prevents double release).\"\"\"\n    global motor_released\n    if motor_api and not motor_released:\n        try:\n            motor_api.release()\n            motor_released = True\n            logger.info(\"Motor API released\")",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "odometry_process",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "odometry_process = None  # Companion odometry-map server subprocess (see start_odometry_server)\ndef cleanup_motor_api() -> None:\n    \"\"\"Safely release motor API resources (prevents double release).\"\"\"\n    global motor_released\n    if motor_api and not motor_released:\n        try:\n            motor_api.release()\n            motor_released = True\n            logger.info(\"Motor API released\")\n        except Exception:",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -2091,6 +2311,771 @@
         "description": "applications.web-app.stm32mp2",
         "peekOfCode": "spn_motor_2 = EVSPIN948Driver(pins_2)\nspn_motor_2.setup_gpio()\ndef stop():\n    spn_motor_1.stop()\n    spn_motor_2.stop()\ndef release():\n    try:\n        spn_motor_2.end()\n    except Exception:\n        pass",
         "detail": "applications.web-app.stm32mp2",
+        "documentation": {}
+    },
+    {
+        "label": "extract_value",
+        "kind": 2,
+        "importPath": "intent_classifier.mobile_code",
+        "description": "intent_classifier.mobile_code",
+        "peekOfCode": "def extract_value(command):\n    match = re.search(r\"\\d+\", command)\n    if match:\n        return int(match.group())\n    words = command.lower().split()\n    for word in words:\n        if word in NUMBER_WORDS:\n            return NUMBER_WORDS[word]\n    return 0\n# SINGLE COMMAND CLASSIFIER",
+        "detail": "intent_classifier.mobile_code",
+        "documentation": {}
+    },
+    {
+        "label": "classify_single_command",
+        "kind": 2,
+        "importPath": "intent_classifier.mobile_code",
+        "description": "intent_classifier.mobile_code",
+        "peekOfCode": "def classify_single_command(command):\n    value = extract_value(command)\n    normalized_command = re.sub(\n        r\"\\d+\",\n        \"NUM\",\n        command.lower()\n    )\n    for word in NUMBER_WORDS:\n        normalized_command = normalized_command.replace(\n            word,",
+        "detail": "intent_classifier.mobile_code",
+        "documentation": {}
+    },
+    {
+        "label": "split_commands",
+        "kind": 2,
+        "importPath": "intent_classifier.mobile_code",
+        "description": "intent_classifier.mobile_code",
+        "peekOfCode": "def split_commands(text):\n    separators = [\n        \" and then \",\n        \" then \",\n        \" after that \",\n        \" and \",\n        \",\",\n        \"also\",\n        \" followed by \",\n        \" next \",",
+        "detail": "intent_classifier.mobile_code",
+        "documentation": {}
+    },
+    {
+        "label": "classify_multiple_commands",
+        "kind": 2,
+        "importPath": "intent_classifier.mobile_code",
+        "description": "intent_classifier.mobile_code",
+        "peekOfCode": "def classify_multiple_commands(text):\n    commands = split_commands(text)\n    sequence = []\n    step = 1\n    for cmd in commands:\n        result = classify_single_command(cmd)\n        sequence.append(\n            {\n                \"step\": step,\n                \"intent\": result[\"intent\"],",
+        "detail": "intent_classifier.mobile_code",
+        "documentation": {}
+    },
+    {
+        "label": "model",
+        "kind": 5,
+        "importPath": "intent_classifier.mobile_code",
+        "description": "intent_classifier.mobile_code",
+        "peekOfCode": "model = joblib.load(\n    r\"intent_model1.pkl\"\n)\nvectorizer = joblib.load(\n    r\"vectorizer_unique1.pkl\"\n)\n# SPOKEN NUMBERS\nNUMBER_WORDS = {\n    \"zero\": 0,\n    \"one\": 1,",
+        "detail": "intent_classifier.mobile_code",
+        "documentation": {}
+    },
+    {
+        "label": "vectorizer",
+        "kind": 5,
+        "importPath": "intent_classifier.mobile_code",
+        "description": "intent_classifier.mobile_code",
+        "peekOfCode": "vectorizer = joblib.load(\n    r\"vectorizer_unique1.pkl\"\n)\n# SPOKEN NUMBERS\nNUMBER_WORDS = {\n    \"zero\": 0,\n    \"one\": 1,\n    \"two\": 2,\n    \"three\": 3,\n    \"four\": 4,",
+        "detail": "intent_classifier.mobile_code",
+        "documentation": {}
+    },
+    {
+        "label": "NUMBER_WORDS",
+        "kind": 5,
+        "importPath": "intent_classifier.mobile_code",
+        "description": "intent_classifier.mobile_code",
+        "peekOfCode": "NUMBER_WORDS = {\n    \"zero\": 0,\n    \"one\": 1,\n    \"two\": 2,\n    \"three\": 3,\n    \"four\": 4,\n    \"five\": 5,\n    \"six\": 6,\n    \"seven\": 7,\n    \"eight\": 8,",
+        "detail": "intent_classifier.mobile_code",
+        "documentation": {}
+    },
+    {
+        "label": "on_move",
+        "kind": 2,
+        "importPath": "odometry_locomization.calibrate",
+        "description": "odometry_locomization.calibrate",
+        "peekOfCode": "def on_move(x, y):\n    global last_x, last_y\n    global total_dx, total_dy\n    if last_x is None:\n        last_x = x\n        last_y = y\n        return\n    dx = x - last_x\n    dy = y - last_y\n    last_x = x",
+        "detail": "odometry_locomization.calibrate",
+        "documentation": {}
+    },
+    {
+        "label": "on_click",
+        "kind": 2,
+        "importPath": "odometry_locomization.calibrate",
+        "description": "odometry_locomization.calibrate",
+        "peekOfCode": "def on_click(x, y, button, pressed):\n    global recording\n    global total_dx\n    global total_dy\n    if button != mouse.Button.left:\n        return\n    if pressed:\n        total_dx = 0\n        total_dy = 0\n        recording = True",
+        "detail": "odometry_locomization.calibrate",
+        "documentation": {}
+    },
+    {
+        "label": "DISTANCE_CM",
+        "kind": 5,
+        "importPath": "odometry_locomization.calibrate",
+        "description": "odometry_locomization.calibrate",
+        "peekOfCode": "DISTANCE_CM = float(sys.argv[1])\nrecording = False\ntotal_dx = 0\ntotal_dy = 0\nlast_x = None\nlast_y = None\ndef on_move(x, y):\n    global last_x, last_y\n    global total_dx, total_dy\n    if last_x is None:",
+        "detail": "odometry_locomization.calibrate",
+        "documentation": {}
+    },
+    {
+        "label": "recording",
+        "kind": 5,
+        "importPath": "odometry_locomization.calibrate",
+        "description": "odometry_locomization.calibrate",
+        "peekOfCode": "recording = False\ntotal_dx = 0\ntotal_dy = 0\nlast_x = None\nlast_y = None\ndef on_move(x, y):\n    global last_x, last_y\n    global total_dx, total_dy\n    if last_x is None:\n        last_x = x",
+        "detail": "odometry_locomization.calibrate",
+        "documentation": {}
+    },
+    {
+        "label": "total_dx",
+        "kind": 5,
+        "importPath": "odometry_locomization.calibrate",
+        "description": "odometry_locomization.calibrate",
+        "peekOfCode": "total_dx = 0\ntotal_dy = 0\nlast_x = None\nlast_y = None\ndef on_move(x, y):\n    global last_x, last_y\n    global total_dx, total_dy\n    if last_x is None:\n        last_x = x\n        last_y = y",
+        "detail": "odometry_locomization.calibrate",
+        "documentation": {}
+    },
+    {
+        "label": "total_dy",
+        "kind": 5,
+        "importPath": "odometry_locomization.calibrate",
+        "description": "odometry_locomization.calibrate",
+        "peekOfCode": "total_dy = 0\nlast_x = None\nlast_y = None\ndef on_move(x, y):\n    global last_x, last_y\n    global total_dx, total_dy\n    if last_x is None:\n        last_x = x\n        last_y = y\n        return",
+        "detail": "odometry_locomization.calibrate",
+        "documentation": {}
+    },
+    {
+        "label": "last_x",
+        "kind": 5,
+        "importPath": "odometry_locomization.calibrate",
+        "description": "odometry_locomization.calibrate",
+        "peekOfCode": "last_x = None\nlast_y = None\ndef on_move(x, y):\n    global last_x, last_y\n    global total_dx, total_dy\n    if last_x is None:\n        last_x = x\n        last_y = y\n        return\n    dx = x - last_x",
+        "detail": "odometry_locomization.calibrate",
+        "documentation": {}
+    },
+    {
+        "label": "last_y",
+        "kind": 5,
+        "importPath": "odometry_locomization.calibrate",
+        "description": "odometry_locomization.calibrate",
+        "peekOfCode": "last_y = None\ndef on_move(x, y):\n    global last_x, last_y\n    global total_dx, total_dy\n    if last_x is None:\n        last_x = x\n        last_y = y\n        return\n    dx = x - last_x\n    dy = y - last_y",
+        "detail": "odometry_locomization.calibrate",
+        "documentation": {}
+    },
+    {
+        "label": "handler",
+        "kind": 2,
+        "importPath": "odometry_locomization.dpi",
+        "description": "odometry_locomization.dpi",
+        "peekOfCode": "def handler(data):\n    print(data)\nfor device in hid.HidDeviceFilter(\n    vendor_id=0x30FA,\n    product_id=0x1440\n).get_devices():\n    try:\n        device.open()\n        device.set_raw_data_handler(handler)\n        print(\"Opened:\", device)",
+        "detail": "odometry_locomization.dpi",
+        "documentation": {}
+    },
+    {
+        "label": "checkpoint",
+        "kind": 5,
+        "importPath": "odometry_locomization.main",
+        "description": "odometry_locomization.main",
+        "peekOfCode": "checkpoint = \"HuggingFaceTB/SmolLM2-360M\"\ntokenizer = AutoTokenizer.from_pretrained(checkpoint)\nmodel = AutoModelForCausalLM.from_pretrained(\n    checkpoint, device_map=\"auto\", torch_dtype=torch.float32)\ninputs = tokenizer.encode(\"Gravity is\", return_tensors=\"pt\")\noutputs = model.generate(inputs)\nprint(tokenizer.decode(outputs[0]))",
+        "detail": "odometry_locomization.main",
+        "documentation": {}
+    },
+    {
+        "label": "tokenizer",
+        "kind": 5,
+        "importPath": "odometry_locomization.main",
+        "description": "odometry_locomization.main",
+        "peekOfCode": "tokenizer = AutoTokenizer.from_pretrained(checkpoint)\nmodel = AutoModelForCausalLM.from_pretrained(\n    checkpoint, device_map=\"auto\", torch_dtype=torch.float32)\ninputs = tokenizer.encode(\"Gravity is\", return_tensors=\"pt\")\noutputs = model.generate(inputs)\nprint(tokenizer.decode(outputs[0]))",
+        "detail": "odometry_locomization.main",
+        "documentation": {}
+    },
+    {
+        "label": "model",
+        "kind": 5,
+        "importPath": "odometry_locomization.main",
+        "description": "odometry_locomization.main",
+        "peekOfCode": "model = AutoModelForCausalLM.from_pretrained(\n    checkpoint, device_map=\"auto\", torch_dtype=torch.float32)\ninputs = tokenizer.encode(\"Gravity is\", return_tensors=\"pt\")\noutputs = model.generate(inputs)\nprint(tokenizer.decode(outputs[0]))",
+        "detail": "odometry_locomization.main",
+        "documentation": {}
+    },
+    {
+        "label": "inputs",
+        "kind": 5,
+        "importPath": "odometry_locomization.main",
+        "description": "odometry_locomization.main",
+        "peekOfCode": "inputs = tokenizer.encode(\"Gravity is\", return_tensors=\"pt\")\noutputs = model.generate(inputs)\nprint(tokenizer.decode(outputs[0]))",
+        "detail": "odometry_locomization.main",
+        "documentation": {}
+    },
+    {
+        "label": "outputs",
+        "kind": 5,
+        "importPath": "odometry_locomization.main",
+        "description": "odometry_locomization.main",
+        "peekOfCode": "outputs = model.generate(inputs)\nprint(tokenizer.decode(outputs[0]))",
+        "detail": "odometry_locomization.main",
+        "documentation": {}
+    },
+    {
+        "label": "update",
+        "kind": 2,
+        "importPath": "odometry_locomization.random_motion",
+        "description": "odometry_locomization.random_motion",
+        "peekOfCode": "def update():\n    global x, frames, last\n    canvas.delete(\"all\")\n    canvas.create_rectangle(x, 100, x+100, 200, fill=\"white\")\n    x = (x + 20) % 2000\n    frames += 1\n    now = time.time()\n    if now - last >= 1:\n        print(\"FPS:\", frames)\n        frames = 0",
+        "detail": "odometry_locomization.random_motion",
+        "documentation": {}
+    },
+    {
+        "label": "root",
+        "kind": 5,
+        "importPath": "odometry_locomization.random_motion",
+        "description": "odometry_locomization.random_motion",
+        "peekOfCode": "root = tk.Tk()\nroot.attributes(\"-fullscreen\", True)\ncanvas = tk.Canvas(root, bg=\"black\")\ncanvas.pack(fill=\"both\", expand=True)\nx = 0\nframes = 0\nlast = time.time()\ndef update():\n    global x, frames, last\n    canvas.delete(\"all\")",
+        "detail": "odometry_locomization.random_motion",
+        "documentation": {}
+    },
+    {
+        "label": "canvas",
+        "kind": 5,
+        "importPath": "odometry_locomization.random_motion",
+        "description": "odometry_locomization.random_motion",
+        "peekOfCode": "canvas = tk.Canvas(root, bg=\"black\")\ncanvas.pack(fill=\"both\", expand=True)\nx = 0\nframes = 0\nlast = time.time()\ndef update():\n    global x, frames, last\n    canvas.delete(\"all\")\n    canvas.create_rectangle(x, 100, x+100, 200, fill=\"white\")\n    x = (x + 20) % 2000",
+        "detail": "odometry_locomization.random_motion",
+        "documentation": {}
+    },
+    {
+        "label": "x",
+        "kind": 5,
+        "importPath": "odometry_locomization.random_motion",
+        "description": "odometry_locomization.random_motion",
+        "peekOfCode": "x = 0\nframes = 0\nlast = time.time()\ndef update():\n    global x, frames, last\n    canvas.delete(\"all\")\n    canvas.create_rectangle(x, 100, x+100, 200, fill=\"white\")\n    x = (x + 20) % 2000\n    frames += 1\n    now = time.time()",
+        "detail": "odometry_locomization.random_motion",
+        "documentation": {}
+    },
+    {
+        "label": "frames",
+        "kind": 5,
+        "importPath": "odometry_locomization.random_motion",
+        "description": "odometry_locomization.random_motion",
+        "peekOfCode": "frames = 0\nlast = time.time()\ndef update():\n    global x, frames, last\n    canvas.delete(\"all\")\n    canvas.create_rectangle(x, 100, x+100, 200, fill=\"white\")\n    x = (x + 20) % 2000\n    frames += 1\n    now = time.time()\n    if now - last >= 1:",
+        "detail": "odometry_locomization.random_motion",
+        "documentation": {}
+    },
+    {
+        "label": "last",
+        "kind": 5,
+        "importPath": "odometry_locomization.random_motion",
+        "description": "odometry_locomization.random_motion",
+        "peekOfCode": "last = time.time()\ndef update():\n    global x, frames, last\n    canvas.delete(\"all\")\n    canvas.create_rectangle(x, 100, x+100, 200, fill=\"white\")\n    x = (x + 20) % 2000\n    frames += 1\n    now = time.time()\n    if now - last >= 1:\n        print(\"FPS:\", frames)",
+        "detail": "odometry_locomization.random_motion",
+        "documentation": {}
+    },
+    {
+        "label": "quaternion_to_yaw",
+        "kind": 2,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "def quaternion_to_yaw(x, y, z):\n    w = math.sqrt(max(0.0, 1.0 - x*x - y*y - z*z))\n    yaw = math.atan2(\n        2.0 * (w * z + x * y),\n        1.0 - 2.0 * (y * y + z * z)\n    )\n    return math.degrees(yaw)\ndef angle_diff(a, b):\n    return (a - b + 180) % 360 - 180\n# ── UDP Listener ──────────────────────────────────────────────────────────────",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "angle_diff",
+        "kind": 2,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "def angle_diff(a, b):\n    return (a - b + 180) % 360 - 180\n# ── UDP Listener ──────────────────────────────────────────────────────────────\ndef udp_listener():\n    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\n    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n    sock.bind((\"0.0.0.0\", UDP_PORT))\n    sock.settimeout(1.0)\n    print(f\"[UDP] Listening on port {UDP_PORT}\")\n    smoothed_yaw = None",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "udp_listener",
+        "kind": 2,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "def udp_listener():\n    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\n    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n    sock.bind((\"0.0.0.0\", UDP_PORT))\n    sock.settimeout(1.0)\n    print(f\"[UDP] Listening on port {UDP_PORT}\")\n    smoothed_yaw = None\n    while True:\n        try:\n            data, _ = sock.recvfrom(256)",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "index",
+        "kind": 2,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "def index():\n    return send_from_directory(\".\", \"index.html\")\n@app.route(\"/state\")\ndef get_state():\n    with lock:\n        return jsonify({\n            \"x\":         round(state[\"x\"], 2),\n            \"y\":         round(state[\"y\"], 2),\n            \"yaw\":       state[\"yaw\"],\n            \"distance\":  round(state[\"distance\"], 2),",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "get_state",
+        "kind": 2,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "def get_state():\n    with lock:\n        return jsonify({\n            \"x\":         round(state[\"x\"], 2),\n            \"y\":         round(state[\"y\"], 2),\n            \"yaw\":       state[\"yaw\"],\n            \"distance\":  round(state[\"distance\"], 2),\n            \"recording\": state[\"recording\"],\n            \"path\":      state[\"path\"][-500:],\n        })",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "COUNTS_PER_CM",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "COUNTS_PER_CM = 151\nUDP_PORT = 2055\nEMA_ALPHA = 0.3\nSMOOTHING_WIN = 5\n# Linux input_event layout (64-bit kernel, ARM64)\n# struct input_event { timeval(8+8), type(2), code(2), value(4) } = 24 bytes\nINPUT_EVENT_FMT = \"llHHi\"\nINPUT_EVENT_SIZE = struct.calcsize(INPUT_EVENT_FMT)\n# /linux/input-event-codes.h\nEV_SYN = 0x00",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "UDP_PORT",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "UDP_PORT = 2055\nEMA_ALPHA = 0.3\nSMOOTHING_WIN = 5\n# Linux input_event layout (64-bit kernel, ARM64)\n# struct input_event { timeval(8+8), type(2), code(2), value(4) } = 24 bytes\nINPUT_EVENT_FMT = \"llHHi\"\nINPUT_EVENT_SIZE = struct.calcsize(INPUT_EVENT_FMT)\n# /linux/input-event-codes.h\nEV_SYN = 0x00\nEV_KEY = 0x01",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "EMA_ALPHA",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "EMA_ALPHA = 0.3\nSMOOTHING_WIN = 5\n# Linux input_event layout (64-bit kernel, ARM64)\n# struct input_event { timeval(8+8), type(2), code(2), value(4) } = 24 bytes\nINPUT_EVENT_FMT = \"llHHi\"\nINPUT_EVENT_SIZE = struct.calcsize(INPUT_EVENT_FMT)\n# /linux/input-event-codes.h\nEV_SYN = 0x00\nEV_KEY = 0x01\nEV_REL = 0x02",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "SMOOTHING_WIN",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "SMOOTHING_WIN = 5\n# Linux input_event layout (64-bit kernel, ARM64)\n# struct input_event { timeval(8+8), type(2), code(2), value(4) } = 24 bytes\nINPUT_EVENT_FMT = \"llHHi\"\nINPUT_EVENT_SIZE = struct.calcsize(INPUT_EVENT_FMT)\n# /linux/input-event-codes.h\nEV_SYN = 0x00\nEV_KEY = 0x01\nEV_REL = 0x02\nREL_X = 0x00",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "INPUT_EVENT_FMT",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "INPUT_EVENT_FMT = \"llHHi\"\nINPUT_EVENT_SIZE = struct.calcsize(INPUT_EVENT_FMT)\n# /linux/input-event-codes.h\nEV_SYN = 0x00\nEV_KEY = 0x01\nEV_REL = 0x02\nREL_X = 0x00\nREL_Y = 0x01\nBTN_LEFT = 272\nBTN_RIGHT = 273",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "INPUT_EVENT_SIZE",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "INPUT_EVENT_SIZE = struct.calcsize(INPUT_EVENT_FMT)\n# /linux/input-event-codes.h\nEV_SYN = 0x00\nEV_KEY = 0x01\nEV_REL = 0x02\nREL_X = 0x00\nREL_Y = 0x01\nBTN_LEFT = 272\nBTN_RIGHT = 273\napp = Flask(__name__, static_folder=\".\")",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "EV_SYN",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "EV_SYN = 0x00\nEV_KEY = 0x01\nEV_REL = 0x02\nREL_X = 0x00\nREL_Y = 0x01\nBTN_LEFT = 272\nBTN_RIGHT = 273\napp = Flask(__name__, static_folder=\".\")\n# ── Shared State ──────────────────────────────────────────────────────────────\nlock = threading.Lock()",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "EV_KEY",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "EV_KEY = 0x01\nEV_REL = 0x02\nREL_X = 0x00\nREL_Y = 0x01\nBTN_LEFT = 272\nBTN_RIGHT = 273\napp = Flask(__name__, static_folder=\".\")\n# ── Shared State ──────────────────────────────────────────────────────────────\nlock = threading.Lock()\nstate = {",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "EV_REL",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "EV_REL = 0x02\nREL_X = 0x00\nREL_Y = 0x01\nBTN_LEFT = 272\nBTN_RIGHT = 273\napp = Flask(__name__, static_folder=\".\")\n# ── Shared State ──────────────────────────────────────────────────────────────\nlock = threading.Lock()\nstate = {\n    \"x\":         0.0,",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "REL_X",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "REL_X = 0x00\nREL_Y = 0x01\nBTN_LEFT = 272\nBTN_RIGHT = 273\napp = Flask(__name__, static_folder=\".\")\n# ── Shared State ──────────────────────────────────────────────────────────────\nlock = threading.Lock()\nstate = {\n    \"x\":         0.0,\n    \"y\":         0.0,",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "REL_Y",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "REL_Y = 0x01\nBTN_LEFT = 272\nBTN_RIGHT = 273\napp = Flask(__name__, static_folder=\".\")\n# ── Shared State ──────────────────────────────────────────────────────────────\nlock = threading.Lock()\nstate = {\n    \"x\":         0.0,\n    \"y\":         0.0,\n    \"yaw\":       0.0,",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "BTN_LEFT",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "BTN_LEFT = 272\nBTN_RIGHT = 273\napp = Flask(__name__, static_folder=\".\")\n# ── Shared State ──────────────────────────────────────────────────────────────\nlock = threading.Lock()\nstate = {\n    \"x\":         0.0,\n    \"y\":         0.0,\n    \"yaw\":       0.0,\n    \"distance\":  0.0,",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "BTN_RIGHT",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "BTN_RIGHT = 273\napp = Flask(__name__, static_folder=\".\")\n# ── Shared State ──────────────────────────────────────────────────────────────\nlock = threading.Lock()\nstate = {\n    \"x\":         0.0,\n    \"y\":         0.0,\n    \"yaw\":       0.0,\n    \"distance\":  0.0,\n    \"recording\": True,",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "app",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "app = Flask(__name__, static_folder=\".\")\n# ── Shared State ──────────────────────────────────────────────────────────────\nlock = threading.Lock()\nstate = {\n    \"x\":         0.0,\n    \"y\":         0.0,\n    \"yaw\":       0.0,\n    \"distance\":  0.0,\n    \"recording\": True,\n    \"path\":      [[0.0, 0.0]],",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "lock",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "lock = threading.Lock()\nstate = {\n    \"x\":         0.0,\n    \"y\":         0.0,\n    \"yaw\":       0.0,\n    \"distance\":  0.0,\n    \"recording\": True,\n    \"path\":      [[0.0, 0.0]],\n}\n_raw_dx_buf = deque(maxlen=SMOOTHING_WIN)",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "state",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "state = {\n    \"x\":         0.0,\n    \"y\":         0.0,\n    \"yaw\":       0.0,\n    \"distance\":  0.0,\n    \"recording\": True,\n    \"path\":      [[0.0, 0.0]],\n}\n_raw_dx_buf = deque(maxlen=SMOOTHING_WIN)\n_ema_distance = 0.0",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "_raw_dx_buf",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "_raw_dx_buf = deque(maxlen=SMOOTHING_WIN)\n_ema_distance = 0.0\n_click_count = 0\n_last_click = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef quaternion_to_yaw(x, y, z):\n    w = math.sqrt(max(0.0, 1.0 - x*x - y*y - z*z))\n    yaw = math.atan2(\n        2.0 * (w * z + x * y),\n        1.0 - 2.0 * (y * y + z * z)",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "_ema_distance",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "_ema_distance = 0.0\n_click_count = 0\n_last_click = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef quaternion_to_yaw(x, y, z):\n    w = math.sqrt(max(0.0, 1.0 - x*x - y*y - z*z))\n    yaw = math.atan2(\n        2.0 * (w * z + x * y),\n        1.0 - 2.0 * (y * y + z * z)\n    )",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "_click_count",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "_click_count = 0\n_last_click = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef quaternion_to_yaw(x, y, z):\n    w = math.sqrt(max(0.0, 1.0 - x*x - y*y - z*z))\n    yaw = math.atan2(\n        2.0 * (w * z + x * y),\n        1.0 - 2.0 * (y * y + z * z)\n    )\n    return math.degrees(yaw)",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "_last_click",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "_last_click = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef quaternion_to_yaw(x, y, z):\n    w = math.sqrt(max(0.0, 1.0 - x*x - y*y - z*z))\n    yaw = math.atan2(\n        2.0 * (w * z + x * y),\n        1.0 - 2.0 * (y * y + z * z)\n    )\n    return math.degrees(yaw)\ndef angle_diff(a, b):",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "RAWINPUTDEVICE",
+        "kind": 6,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "class RAWINPUTDEVICE(ctypes.Structure):\n    _fields_ = [\n        (\"usUsagePage\", wt.USHORT),\n        (\"usUsage\",     wt.USHORT),\n        (\"dwFlags\",     wt.DWORD),\n        (\"hwndTarget\",  wt.HWND),\n    ]\nclass RAWINPUTHEADER(ctypes.Structure):\n    _fields_ = [\n        (\"dwType\",  wt.DWORD),",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "RAWINPUTHEADER",
+        "kind": 6,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "class RAWINPUTHEADER(ctypes.Structure):\n    _fields_ = [\n        (\"dwType\",  wt.DWORD),\n        (\"dwSize\",  wt.DWORD),\n        (\"hDevice\", wt.HANDLE),\n        (\"wParam\",  wt.WPARAM),\n    ]\nclass RAWMOUSE(ctypes.Structure):\n    _fields_ = [\n        (\"usFlags\",             wt.USHORT),",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "RAWMOUSE",
+        "kind": 6,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "class RAWMOUSE(ctypes.Structure):\n    _fields_ = [\n        (\"usFlags\",             wt.USHORT),\n        (\"usButtonFlags\",       wt.USHORT),\n        (\"usButtonData\",        wt.USHORT),\n        (\"ulRawButtons\",        wt.ULONG),\n        (\"lLastX\",              ctypes.c_long),   # ← raw delta X\n        (\"lLastY\",              ctypes.c_long),   # ← raw delta Y\n        (\"ulExtraInformation\",  wt.ULONG),\n    ]",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "RAWINPUT",
+        "kind": 6,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "class RAWINPUT(ctypes.Structure):\n    class _data(ctypes.Union):\n        class _mouse_pad(ctypes.Structure):\n            _fields_ = [(\"_pad\", ctypes.c_byte * 8)]  # header alignment\n        _fields_ = [(\"mouse\", RAWMOUSE)]\n    _fields_ = [\n        (\"header\", RAWINPUTHEADER),\n        (\"data\",   _data),\n    ]\n# ── Raw Input window + pump ───────────────────────────────────────────────────",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "start_mouse_listener",
+        "kind": 2,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "def start_mouse_listener():\n    \"\"\"\n    Starts:\n      1. Raw Input thread  — for unbounded movement deltas (odometry)\n      2. pynput listener   — ONLY for click detection (start/stop/reset)\n    \"\"\"\n    # Raw Input for movement\n    t = threading.Thread(target=_raw_input_thread, daemon=True)\n    t.start()\n    # pynput only for clicks — on_move is intentionally omitted",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "quaternion_to_yaw",
+        "kind": 2,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "def quaternion_to_yaw(x, y, z):\n    w = math.sqrt(max(0.0, 1.0 - x*x - y*y - z*z))\n    yaw = math.atan2(\n        2.0 * (w * z + x * y),\n        1.0 - 2.0 * (y * y + z * z)\n    )\n    return math.degrees(yaw)\ndef angle_diff(a, b):\n    \"\"\"Shortest signed difference between two angles (degrees).\"\"\"\n    d = (a - b + 180) % 360 - 180",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "angle_diff",
+        "kind": 2,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "def angle_diff(a, b):\n    \"\"\"Shortest signed difference between two angles (degrees).\"\"\"\n    d = (a - b + 180) % 360 - 180\n    return d\n# ── UDP Listener Thread ───────────────────────────────────────────────────────\ndef udp_listener():\n    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\n    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n    sock.bind((\"0.0.0.0\", UDP_PORT))\n    sock.settimeout(1.0)",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "udp_listener",
+        "kind": 2,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "def udp_listener():\n    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\n    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n    sock.bind((\"0.0.0.0\", UDP_PORT))\n    sock.settimeout(1.0)\n    print(f\"[UDP] Listening on port {UDP_PORT}\")\n    smoothed_yaw = None\n    while True:\n        try:\n            data, _ = sock.recvfrom(256)",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "on_move",
+        "kind": 2,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "def on_move(x_abs, y_abs):\n    \"\"\"pynput calls this with ABSOLUTE coords; we need deltas.\"\"\"\n    pass   # handled via on_move_delta below\n_last_mouse_pos = [None, None]\n# ── Flask Routes ──────────────────────────────────────────────────────────────\n@app.route(\"/\")\ndef index():\n    return send_from_directory(\".\", \"index.html\")\n@app.route(\"/state\")\ndef get_state():",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "index",
+        "kind": 2,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "def index():\n    return send_from_directory(\".\", \"index.html\")\n@app.route(\"/state\")\ndef get_state():\n    with lock:\n        return jsonify({\n            \"x\":         round(state[\"x\"], 2),\n            \"y\":         round(state[\"y\"], 2),\n            \"yaw\":       state[\"yaw\"],\n            \"distance\":  round(state[\"distance\"], 2),",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "get_state",
+        "kind": 2,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "def get_state():\n    with lock:\n        return jsonify({\n            \"x\":         round(state[\"x\"], 2),\n            \"y\":         round(state[\"y\"], 2),\n            \"yaw\":       state[\"yaw\"],\n            \"distance\":  round(state[\"distance\"], 2),\n            \"recording\": state[\"recording\"],\n            \"path\":      state[\"path\"][-500:],   # last 500 points max\n        })",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "COUNTS_PER_CM",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "COUNTS_PER_CM = 151\nUDP_PORT = 2055\nEMA_ALPHA = 0.3          # Exponential moving average weight (0=smooth, 1=raw)\nSMOOTHING_WIN = 5            # Rolling window size for additional smoothing\nWM_INPUT = 0x00FF\nRID_INPUT = 0x10000003\nRIDEV_INPUTSINK = 0x00000100   # receive input even when not foreground\nHID_USAGE_PAGE_GENERIC = 0x01\nHID_USAGE_GENERIC_MOUSE = 0x02\napp = Flask(__name__, static_folder=\".\")",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "UDP_PORT",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "UDP_PORT = 2055\nEMA_ALPHA = 0.3          # Exponential moving average weight (0=smooth, 1=raw)\nSMOOTHING_WIN = 5            # Rolling window size for additional smoothing\nWM_INPUT = 0x00FF\nRID_INPUT = 0x10000003\nRIDEV_INPUTSINK = 0x00000100   # receive input even when not foreground\nHID_USAGE_PAGE_GENERIC = 0x01\nHID_USAGE_GENERIC_MOUSE = 0x02\napp = Flask(__name__, static_folder=\".\")\n# ── Shared State (protected by a lock) ───────────────────────────────────────",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "EMA_ALPHA",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "EMA_ALPHA = 0.3          # Exponential moving average weight (0=smooth, 1=raw)\nSMOOTHING_WIN = 5            # Rolling window size for additional smoothing\nWM_INPUT = 0x00FF\nRID_INPUT = 0x10000003\nRIDEV_INPUTSINK = 0x00000100   # receive input even when not foreground\nHID_USAGE_PAGE_GENERIC = 0x01\nHID_USAGE_GENERIC_MOUSE = 0x02\napp = Flask(__name__, static_folder=\".\")\n# ── Shared State (protected by a lock) ───────────────────────────────────────\nlock = threading.Lock()",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "SMOOTHING_WIN",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "SMOOTHING_WIN = 5            # Rolling window size for additional smoothing\nWM_INPUT = 0x00FF\nRID_INPUT = 0x10000003\nRIDEV_INPUTSINK = 0x00000100   # receive input even when not foreground\nHID_USAGE_PAGE_GENERIC = 0x01\nHID_USAGE_GENERIC_MOUSE = 0x02\napp = Flask(__name__, static_folder=\".\")\n# ── Shared State (protected by a lock) ───────────────────────────────────────\nlock = threading.Lock()\nstate = {",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "WM_INPUT",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "WM_INPUT = 0x00FF\nRID_INPUT = 0x10000003\nRIDEV_INPUTSINK = 0x00000100   # receive input even when not foreground\nHID_USAGE_PAGE_GENERIC = 0x01\nHID_USAGE_GENERIC_MOUSE = 0x02\napp = Flask(__name__, static_folder=\".\")\n# ── Shared State (protected by a lock) ───────────────────────────────────────\nlock = threading.Lock()\nstate = {\n    \"x\":         0.0,",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "RID_INPUT",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "RID_INPUT = 0x10000003\nRIDEV_INPUTSINK = 0x00000100   # receive input even when not foreground\nHID_USAGE_PAGE_GENERIC = 0x01\nHID_USAGE_GENERIC_MOUSE = 0x02\napp = Flask(__name__, static_folder=\".\")\n# ── Shared State (protected by a lock) ───────────────────────────────────────\nlock = threading.Lock()\nstate = {\n    \"x\":         0.0,\n    \"y\":         0.0,",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "RIDEV_INPUTSINK",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "RIDEV_INPUTSINK = 0x00000100   # receive input even when not foreground\nHID_USAGE_PAGE_GENERIC = 0x01\nHID_USAGE_GENERIC_MOUSE = 0x02\napp = Flask(__name__, static_folder=\".\")\n# ── Shared State (protected by a lock) ───────────────────────────────────────\nlock = threading.Lock()\nstate = {\n    \"x\":         0.0,\n    \"y\":         0.0,\n    \"yaw\":       0.0,",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "HID_USAGE_PAGE_GENERIC",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "HID_USAGE_PAGE_GENERIC = 0x01\nHID_USAGE_GENERIC_MOUSE = 0x02\napp = Flask(__name__, static_folder=\".\")\n# ── Shared State (protected by a lock) ───────────────────────────────────────\nlock = threading.Lock()\nstate = {\n    \"x\":         0.0,\n    \"y\":         0.0,\n    \"yaw\":       0.0,\n    \"distance\":  0.0,",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "HID_USAGE_GENERIC_MOUSE",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "HID_USAGE_GENERIC_MOUSE = 0x02\napp = Flask(__name__, static_folder=\".\")\n# ── Shared State (protected by a lock) ───────────────────────────────────────\nlock = threading.Lock()\nstate = {\n    \"x\":         0.0,\n    \"y\":         0.0,\n    \"yaw\":       0.0,\n    \"distance\":  0.0,\n    \"recording\": False,",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "app",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "app = Flask(__name__, static_folder=\".\")\n# ── Shared State (protected by a lock) ───────────────────────────────────────\nlock = threading.Lock()\nstate = {\n    \"x\":         0.0,\n    \"y\":         0.0,\n    \"yaw\":       0.0,\n    \"distance\":  0.0,\n    \"recording\": False,\n    \"path\":      [[0.0, 0.0]],   # list of (x, y) waypoints",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "lock",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "lock = threading.Lock()\nstate = {\n    \"x\":         0.0,\n    \"y\":         0.0,\n    \"yaw\":       0.0,\n    \"distance\":  0.0,\n    \"recording\": False,\n    \"path\":      [[0.0, 0.0]],   # list of (x, y) waypoints\n}\n# Internal accumulators (not exposed directly)",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "state",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "state = {\n    \"x\":         0.0,\n    \"y\":         0.0,\n    \"yaw\":       0.0,\n    \"distance\":  0.0,\n    \"recording\": False,\n    \"path\":      [[0.0, 0.0]],   # list of (x, y) waypoints\n}\n# Internal accumulators (not exposed directly)\n_raw_dx_buf = deque(maxlen=SMOOTHING_WIN)   # rolling window for mouse X",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "_raw_dx_buf",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "_raw_dx_buf = deque(maxlen=SMOOTHING_WIN)   # rolling window for mouse X\n_ema_distance = 0.0                            # EMA-smoothed cumulative distance\n_click_count = 0                              # for double-click detection\n_last_click = 0.0\n# ── ctypes structures ─────────────────────────────────────────────────────────\nclass RAWINPUTDEVICE(ctypes.Structure):\n    _fields_ = [\n        (\"usUsagePage\", wt.USHORT),\n        (\"usUsage\",     wt.USHORT),\n        (\"dwFlags\",     wt.DWORD),",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "_ema_distance",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "_ema_distance = 0.0                            # EMA-smoothed cumulative distance\n_click_count = 0                              # for double-click detection\n_last_click = 0.0\n# ── ctypes structures ─────────────────────────────────────────────────────────\nclass RAWINPUTDEVICE(ctypes.Structure):\n    _fields_ = [\n        (\"usUsagePage\", wt.USHORT),\n        (\"usUsage\",     wt.USHORT),\n        (\"dwFlags\",     wt.DWORD),\n        (\"hwndTarget\",  wt.HWND),",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "_click_count",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "_click_count = 0                              # for double-click detection\n_last_click = 0.0\n# ── ctypes structures ─────────────────────────────────────────────────────────\nclass RAWINPUTDEVICE(ctypes.Structure):\n    _fields_ = [\n        (\"usUsagePage\", wt.USHORT),\n        (\"usUsage\",     wt.USHORT),\n        (\"dwFlags\",     wt.DWORD),\n        (\"hwndTarget\",  wt.HWND),\n    ]",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "_last_click",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "_last_click = 0.0\n# ── ctypes structures ─────────────────────────────────────────────────────────\nclass RAWINPUTDEVICE(ctypes.Structure):\n    _fields_ = [\n        (\"usUsagePage\", wt.USHORT),\n        (\"usUsage\",     wt.USHORT),\n        (\"dwFlags\",     wt.DWORD),\n        (\"hwndTarget\",  wt.HWND),\n    ]\nclass RAWINPUTHEADER(ctypes.Structure):",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "_last_mouse_pos",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_windows",
+        "description": "odometry_locomization.run_windows",
+        "peekOfCode": "_last_mouse_pos = [None, None]\n# ── Flask Routes ──────────────────────────────────────────────────────────────\n@app.route(\"/\")\ndef index():\n    return send_from_directory(\".\", \"index.html\")\n@app.route(\"/state\")\ndef get_state():\n    with lock:\n        return jsonify({\n            \"x\":         round(state[\"x\"], 2),",
+        "detail": "odometry_locomization.run_windows",
+        "documentation": {}
+    },
+    {
+        "label": "HOST",
+        "kind": 5,
+        "importPath": "odometry_locomization.udp",
+        "description": "odometry_locomization.udp",
+        "peekOfCode": "HOST = \"0.0.0.0\"\nPORT = 2055\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\nsock.bind((HOST, PORT))\nprint(f\"Listening on UDP {PORT}\")\nlast_yaw = None\nTURN_THRESHOLD = 2.0  # degrees\nwhile True:\n    data, addr = sock.recvfrom(4096)\n    try:",
+        "detail": "odometry_locomization.udp",
+        "documentation": {}
+    },
+    {
+        "label": "PORT",
+        "kind": 5,
+        "importPath": "odometry_locomization.udp",
+        "description": "odometry_locomization.udp",
+        "peekOfCode": "PORT = 2055\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\nsock.bind((HOST, PORT))\nprint(f\"Listening on UDP {PORT}\")\nlast_yaw = None\nTURN_THRESHOLD = 2.0  # degrees\nwhile True:\n    data, addr = sock.recvfrom(4096)\n    try:\n        text = data.decode(errors=\"ignore\").strip()",
+        "detail": "odometry_locomization.udp",
+        "documentation": {}
+    },
+    {
+        "label": "sock",
+        "kind": 5,
+        "importPath": "odometry_locomization.udp",
+        "description": "odometry_locomization.udp",
+        "peekOfCode": "sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\nsock.bind((HOST, PORT))\nprint(f\"Listening on UDP {PORT}\")\nlast_yaw = None\nTURN_THRESHOLD = 2.0  # degrees\nwhile True:\n    data, addr = sock.recvfrom(4096)\n    try:\n        text = data.decode(errors=\"ignore\").strip()\n        x, y, z = map(float, text.split(\",\"))",
+        "detail": "odometry_locomization.udp",
+        "documentation": {}
+    },
+    {
+        "label": "last_yaw",
+        "kind": 5,
+        "importPath": "odometry_locomization.udp",
+        "description": "odometry_locomization.udp",
+        "peekOfCode": "last_yaw = None\nTURN_THRESHOLD = 2.0  # degrees\nwhile True:\n    data, addr = sock.recvfrom(4096)\n    try:\n        text = data.decode(errors=\"ignore\").strip()\n        x, y, z = map(float, text.split(\",\"))\n        # Reconstruct quaternion W\n        w_sq = 1.0 - (x * x + y * y + z * z)\n        w = math.sqrt(max(0.0, w_sq))",
+        "detail": "odometry_locomization.udp",
+        "documentation": {}
+    },
+    {
+        "label": "TURN_THRESHOLD",
+        "kind": 5,
+        "importPath": "odometry_locomization.udp",
+        "description": "odometry_locomization.udp",
+        "peekOfCode": "TURN_THRESHOLD = 2.0  # degrees\nwhile True:\n    data, addr = sock.recvfrom(4096)\n    try:\n        text = data.decode(errors=\"ignore\").strip()\n        x, y, z = map(float, text.split(\",\"))\n        # Reconstruct quaternion W\n        w_sq = 1.0 - (x * x + y * y + z * z)\n        w = math.sqrt(max(0.0, w_sq))\n        # Quaternion -> Yaw",
+        "detail": "odometry_locomization.udp",
         "documentation": {}
     },
     {
