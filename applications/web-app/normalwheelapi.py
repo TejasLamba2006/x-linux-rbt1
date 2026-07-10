@@ -77,13 +77,14 @@ except ImportError as e:
 # =============================================================================
 class MotorState:
     """Encapsulates the motor control state."""
-    
+
     def __init__(self):
         self.active_mode: str = 'locked'
         self.left_factor: float = 1.0   # Left side motor factor (0.0 to 1.0)
         self.right_factor: float = 1.0  # Right side motor factor (0.0 to 1.0)
-        self.last_throttle: int = 0     # Last throttle value for reference
-    
+        self.throttle: int = 0          # vy: forward(+)/backward(-), -100..100
+        self.rotation: int = 0          # omega: in-place rotation dial, -100..100
+
     def reset_factors(self) -> None:
         """Reset steering factors to default (straight)."""
         self.left_factor = 1.0
@@ -149,11 +150,9 @@ def mode_select(mode: str) -> None:
 # =============================================================================
 def direction(x_axis: int, y_axis: int) -> None:
     """
-    Set the steering factor based on right joystick position.
-    
-    This does NOT move the robot - it only sets the steering factor
-    that will be applied when throttle is used.
-    
+    Set the steering factor based on right joystick X-axis position and
+    re-apply the combined drive.
+
     Args:
         x_axis: Steering value (-100 to 100)
                 Positive (right) = slow down right wheels
@@ -163,10 +162,10 @@ def direction(x_axis: int, y_axis: int) -> None:
     try:
         # Validate input
         x_axis = int(clamp(x_axis, -100, 100))
-        
+
         # Normalize x_axis to -1.0 to 1.0
         steering = x_axis / 100.0
-        
+
         # Calculate wheel factors based on steering
         if steering >= 0:
             # Turning right: reduce right wheel speed
@@ -176,154 +175,109 @@ def direction(x_axis: int, y_axis: int) -> None:
             # Turning left: reduce left wheel speed
             state.left_factor = 1.0 + steering
             state.right_factor = 1.0
-        
+
         # Ensure factors are in valid range
         state.left_factor = clamp(state.left_factor, 0.0, 1.0)
         state.right_factor = clamp(state.right_factor, 0.0, 1.0)
-        
+
         logger.debug(f"Steering: L={state.left_factor:.2f}, R={state.right_factor:.2f}")
-        
+
         # Reset factors if joystick is centered
         if x_axis == 0 and y_axis == 0:
             state.reset_factors()
-            
+
+        apply_drive()
+
     except Exception as e:
         logger.error(f"Error in direction(): {e}")
         state.reset_factors()
 
 
 # =============================================================================
-# THROTTLE CONTROL
+# THROTTLE / ROTATION CONTROL (COMBINED DRIVE)
 # =============================================================================
 def throttle_value(value: int) -> None:
     """
-    Apply throttle with current steering factors.
-    
-    This is the main function that actually moves the robot.
-    Speed is determined by throttle value, direction by steering factors.
-    
+    Set forward/backward velocity (vy) and re-apply the combined drive.
+
     Args:
         value: Throttle value from -100 (full reverse) to 100 (full forward)
     """
-    if not validate_motor_driver():
-        return
-    
-    try:
-        # Validate and clamp input
-        value = int(clamp(value, -100, 100))
-        state.last_throttle = value
-        
-        # Calculate actual motor speeds
-        left_speed = int(abs(value) * state.left_factor)
-        right_speed = int(abs(value) * state.right_factor)
-        
-        # Determine direction (0 = forward, 1 = reverse)
-        direction_flag = 0 if value >= 0 else 1
-        
-        logger.debug(f"Throttle: {value}, L={left_speed}, R={right_speed}, dir={direction_flag}")
-        
-        # Apply to left side motors (motor_1a, motor_2a)
-        STSPIN.motor_1a(left_speed, direction_flag)
-        STSPIN.motor_2a(left_speed, direction_flag)
-        
-        # Apply to right side motors (motor_1b, motor_2b)
-        STSPIN.motor_1b(right_speed, direction_flag)
-        
-        # Handle motor_2b (STM32MP157 has inverted PWM)
-        if Board == "stm32mp257":
-            STSPIN.motor_2b(right_speed, direction_flag)
-        else:
-            # STM32MP157: inverted PWM
-            STSPIN.motor_2b(100 - right_speed, direction_flag)
-            
-    except Exception as e:
-        logger.error(f"Error in throttle_value(): {e}")
-        stop()
+    state.throttle = int(clamp(value, -100, 100))
+    apply_drive()
 
 
-# =============================================================================
-# ROTATION CONTROL
-# =============================================================================
 def rotate_angle(angle: int) -> None:
     """
-    Rotate the robot in place using rotation dial.
-    
-    This bypasses the steering factors and directly controls rotation.
-    
+    Set in-place rotation speed (omega) and re-apply the combined drive.
+
     Args:
         angle: Rotation speed from -100 to 100
                Positive = rotate right, Negative = rotate left
     """
+    state.rotation = int(clamp(angle, -100, 100))
+    apply_drive()
+
+
+def apply_drive() -> None:
+    """
+    Recompute and apply per-side wheel speeds from throttle, steering
+    factors, and rotation combined.
+
+    Steering factors (from direction()) only scale a side down when
+    driving straight; rotation is added on top so the rover can rotate
+    while stationary, while driving straight, or while steering.
+    """
     if not validate_motor_driver():
         return
-    
+
     try:
-        angle = int(clamp(angle, -100, 100))
-        
-        if angle >= 0:
-            rotate_right(abs(angle))
+        value = state.throttle
+        omega = state.rotation
+
+        # Steering factors scale drive speed per side (0.0 - 1.0).
+        left_drive = value * state.left_factor
+        right_drive = value * state.right_factor
+
+        # Rotation adds a spin component: right side backs off / reverses
+        # for positive omega (rotate right), left side for negative omega.
+        left_speed = left_drive + omega
+        right_speed = right_drive - omega
+
+        # Scale down (never up) so the combined value never exceeds
+        # +/-100 duty while preserving the ratio between sides.
+        side_max = max(abs(left_speed), abs(right_speed), 100)
+        scale = 100.0 / side_max
+        left_speed *= scale
+        right_speed *= scale
+
+        left_duty = int(clamp(abs(left_speed), 0, 100))
+        right_duty = int(clamp(abs(right_speed), 0, 100))
+        left_dir = 0 if left_speed >= 0 else 1
+        right_dir = 0 if right_speed >= 0 else 1
+
+        logger.debug(
+            f"Drive: throttle={value} omega={omega} -> "
+            f"L={left_duty}({left_dir}) R={right_duty}({right_dir})"
+        )
+
+        # Apply to left side motors (motor_1a, motor_2a)
+        STSPIN.motor_1a(left_duty, left_dir)
+        STSPIN.motor_2a(left_duty, left_dir)
+
+        # Apply to right side motors (motor_1b, motor_2b)
+        STSPIN.motor_1b(right_duty, right_dir)
+
+        # Handle motor_2b (STM32MP157 has inverted PWM)
+        if Board == "stm32mp257":
+            STSPIN.motor_2b(right_duty, right_dir)
         else:
-            rotate_left(abs(angle))
-            
+            # STM32MP157: inverted PWM
+            STSPIN.motor_2b(100 - right_duty, right_dir)
+
     except Exception as e:
-        logger.error(f"Error in rotate_angle(): {e}")
+        logger.error(f"Error in apply_drive(): {e}")
         stop()
-
-
-def rotate_right(speed: int) -> None:
-    """
-    Rotate right in place (clockwise when viewed from above).
-    
-    Args:
-        speed: Rotation speed (0 to 100)
-    """
-    if not validate_motor_driver():
-        return
-    
-    speed = int(clamp(speed, 0, 100))
-    
-    try:
-        # Left side forward
-        STSPIN.motor_1a(speed, 0)
-        STSPIN.motor_2a(speed, 0)
-        
-        # Right side backward
-        STSPIN.motor_1b(speed, 1)
-        if Board == "stm32mp257":
-            STSPIN.motor_2b(speed, 1)
-        else:
-            STSPIN.motor_2b(100 - speed, 1)
-            
-    except Exception as e:
-        logger.error(f"Error in rotate_right(): {e}")
-
-
-def rotate_left(speed: int) -> None:
-    """
-    Rotate left in place (counter-clockwise when viewed from above).
-    
-    Args:
-        speed: Rotation speed (0 to 100)
-    """
-    if not validate_motor_driver():
-        return
-    
-    speed = int(clamp(speed, 0, 100))
-    
-    try:
-        # Left side backward
-        STSPIN.motor_1a(speed, 1)
-        STSPIN.motor_2a(speed, 1)
-        
-        # Right side forward
-        STSPIN.motor_1b(speed, 0)
-        if Board == "stm32mp257":
-            STSPIN.motor_2b(speed, 0)
-        else:
-            STSPIN.motor_2b(100 - speed, 0)
-            
-    except Exception as e:
-        logger.error(f"Error in rotate_left(): {e}")
 
 
 # =============================================================================
@@ -332,12 +286,12 @@ def rotate_left(speed: int) -> None:
 def parser(parsed_data: Dict[str, Any]) -> None:
     """
     Parse incoming commands from the web interface.
-    
-    Control flow:
-        1. direction() sets steering factors (right joystick)
-        2. throttle_value() applies speed with those factors (left joystick)
-        3. rotate_angle() for in-place rotation (rotation dial)
-    
+
+    Each of dir_x, throttle and dir_rot independently updates one component
+    of the combined drive state (steering factors, throttle, rotation) and
+    immediately re-applies both wheel sides, so any combination of
+    driving/steering/rotating works without needing another input held.
+
     Args:
         parsed_data: Dictionary containing command data
             - mode: Operating mode
@@ -367,15 +321,11 @@ def parser(parsed_data: Dict[str, Any]) -> None:
         # Process throttle (applies speed with factors)
         if "throttle" in parsed_data:
             throttle_value(parsed_data['throttle'])
-        
+
         # Process rotation dial
         if "dir_rot" in parsed_data:
             rotate_angle(parsed_data['dir_rot'])
-        
-        # If direction changed but no throttle in this message, re-apply last throttle
-        if "dir_x" in parsed_data and "throttle" not in parsed_data and state.last_throttle != 0:
-            throttle_value(state.last_throttle)
-            
+
     except Exception as e:
         logger.error(f"Error parsing command: {e}")
 
@@ -387,11 +337,12 @@ def stop() -> None:
     """Stop all motors immediately."""
     if not validate_motor_driver():
         return
-    
+
     try:
         state.reset_factors()
-        state.last_throttle = 0
-        
+        state.throttle = 0
+        state.rotation = 0
+
         STSPIN.motor_1a(0, 0)
         STSPIN.motor_1b(0, 0)
         STSPIN.motor_2a(0, 0)
