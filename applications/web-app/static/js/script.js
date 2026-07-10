@@ -78,6 +78,10 @@ function connectWebSocket() {
             if (data.drive_type) {
                 updateDriveTypeIndicator(data.drive_type);
             }
+            // Handle voice command result from server
+            if (data.voice_result) {
+                handleVoiceResult(data.voice_result);
+            }
         } catch (e) {
             debugLog('Failed to parse message: ' + e);
         }
@@ -584,6 +588,72 @@ document.addEventListener('keyup', function(e) {
     if (handled) e.preventDefault();
     sendKeyboardCommands();
 });
+
+// =============================================================================
+// VOICE CONTROL (Web Speech API -> intent classifier on the board)
+// =============================================================================
+const voiceButton = document.getElementById('voice-button');
+const voiceStatus = document.getElementById('voice-status');
+const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+let voiceActive = false;
+
+function setVoiceStatus(text) {
+    if (voiceStatus) voiceStatus.textContent = text;
+}
+
+function handleVoiceResult(result) {
+    if (result.error) {
+        setVoiceStatus(result.error);
+    } else if (result.note === 'locked') {
+        setVoiceStatus('Locked - unlock to use voice');
+    } else if (result.intent) {
+        setVoiceStatus(`Heard: ${result.intent}${result.value ? ' ' + result.value : ''}`);
+    } else {
+        setVoiceStatus('Not understood');
+    }
+}
+
+if (SpeechRecognitionAPI && voiceButton) {
+    recognition = new SpeechRecognitionAPI();
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = function(event) {
+        const transcript = event.results[event.results.length - 1][0].transcript.trim();
+        if (!transcript) return;
+        debugLog('Voice heard: ' + transcript);
+        setVoiceStatus(`"${transcript}"`);
+        sendCommand({ voice_text: transcript });
+    };
+
+    recognition.onerror = function(e) {
+        debugLog('Speech recognition error: ' + e.error);
+        if (e.error === 'no-speech' || e.error === 'aborted') return;
+        setVoiceStatus('Mic error: ' + e.error);
+    };
+
+    recognition.onend = function() {
+        // Browsers auto-stop recognition periodically; restart while active.
+        if (voiceActive) recognition.start();
+    };
+
+    voiceButton.addEventListener('click', function() {
+        voiceActive = !voiceActive;
+        voiceButton.classList.toggle('active', voiceActive);
+        if (voiceActive) {
+            setVoiceStatus('Listening...');
+            recognition.start();
+        } else {
+            setVoiceStatus('Voice off');
+            recognition.stop();
+        }
+    });
+} else if (voiceButton) {
+    voiceButton.disabled = true;
+    setVoiceStatus('Voice not supported in this browser');
+}
 
 // =============================================================================
 // MODE SELECTOR

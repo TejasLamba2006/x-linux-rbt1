@@ -242,6 +242,46 @@ body {
     border-color: #ea4335;
 }
 
+/* Voice Control */
+#voice-control {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+#voice-button {
+    background-color: #444;
+    border: 2px solid #777;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+    cursor: pointer;
+    outline: none;
+    line-height: 1;
+}
+
+#voice-button.active {
+    background-color: #ea4335;
+    border-color: #ea4335;
+}
+
+#voice-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+#voice-status {
+    font-size: 11px;
+    color: #ccc;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* Mode Selector */
 #mode-selector {
     position: absolute;

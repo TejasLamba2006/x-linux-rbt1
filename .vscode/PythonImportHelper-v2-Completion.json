@@ -398,6 +398,24 @@
         "documentation": {}
     },
     {
+        "label": "numpy",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "numpy",
+        "description": "numpy",
+        "detail": "numpy",
+        "documentation": {}
+    },
+    {
+        "label": "onnxruntime",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "onnxruntime",
+        "description": "onnxruntime",
+        "detail": "onnxruntime",
+        "documentation": {}
+    },
+    {
         "label": "joblib",
         "kind": 6,
         "isExtraImport": true,
@@ -1355,7 +1373,7 @@
         "kind": 2,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "def start_odometry_server() -> None:\n    \"\"\"Launch the mouse-odometry map server (odometry_locomization/run_linux.py)\n    as a companion background process alongside the main controller, so the\n    live map is collecting data for the whole session. Best-effort: if the\n    script or its sensor isn't available, the main controller still runs fine\n    without it (matches init_tof_sensor()'s \"optional\" pattern below).\"\"\"\n    global odometry_process\n    import subprocess\n    repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))\n    odometry_script = os.path.join(repo_root, \"odometry_locomization\", \"run_linux.py\")",
+        "peekOfCode": "def start_odometry_server() -> None:\n    \"\"\"Launch the mouse-odometry map server (odometry_locomization/run_linux.py)\n    as a companion background process alongside the main controller, so the\n    live map is collecting data for the whole session. Best-effort: if the\n    script or its sensor isn't available, the main controller still runs fine\n    without it (matches init_tof_sensor()'s \"optional\" pattern below).\"\"\"\n    global odometry_process\n    import subprocess\n    odometry_script = os.path.join(REPO_ROOT, \"odometry_locomization\", \"run_linux.py\")\n    if not os.path.isfile(odometry_script):",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1365,6 +1383,15 @@
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
         "peekOfCode": "def stop_odometry_server() -> None:\n    \"\"\"Terminate the companion odometry map server, if running (prevents orphaned process).\"\"\"\n    global odometry_process\n    if odometry_process and odometry_process.poll() is None:\n        try:\n            odometry_process.terminate()\n            odometry_process.wait(timeout=3)\n        except Exception:\n            try:\n                odometry_process.kill()",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "handle_voice_command",
+        "kind": 2,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "def handle_voice_command(text: str) -> dict:\n    \"\"\"\n    Classify a transcribed voice command (text already recognized client-side\n    via the browser's Web Speech API) and pulse-drive the robot accordingly.\n    Voice commands act directly on the active drive module's throttle/\n    direction/rotate functions (bypassing mode_select's controller/hybrid\n    gate), so they work in any mode except 'locked' -- matching the joystick\n    being the \"hold to move\" analog, and voice being the \"say it once\" pulse.\n    \"\"\"\n    if not INTENT_AVAILABLE:",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1481,7 +1508,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "PORT = 8000\nLOG_LEVEL = logging.INFO\nSCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\n# =============================================================================\n# CONFIGURATION FILE MANAGEMENT\n# =============================================================================\ndef load_config() -> dict:",
+        "peekOfCode": "PORT = 8000\nLOG_LEVEL = logging.INFO\nSCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))\nREPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1490,7 +1517,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "LOG_LEVEL = logging.INFO\nSCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\n# =============================================================================\n# CONFIGURATION FILE MANAGEMENT\n# =============================================================================\ndef load_config() -> dict:\n    \"\"\"Load configuration from JSON file.\"\"\"",
+        "peekOfCode": "LOG_LEVEL = logging.INFO\nSCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))\nREPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1499,7 +1526,16 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\n# =============================================================================\n# CONFIGURATION FILE MANAGEMENT\n# =============================================================================\ndef load_config() -> dict:\n    \"\"\"Load configuration from JSON file.\"\"\"\n    default_config = {",
+        "peekOfCode": "SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))\nREPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "REPO_ROOT",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "REPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1508,7 +1544,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "CONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\n# =============================================================================\n# CONFIGURATION FILE MANAGEMENT\n# =============================================================================\ndef load_config() -> dict:\n    \"\"\"Load configuration from JSON file.\"\"\"\n    default_config = {\n        \"drive_type\": \"mecanum\",",
+        "peekOfCode": "CONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1517,7 +1553,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "SERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\n# =============================================================================\n# CONFIGURATION FILE MANAGEMENT\n# =============================================================================\ndef load_config() -> dict:\n    \"\"\"Load configuration from JSON file.\"\"\"\n    default_config = {\n        \"drive_type\": \"mecanum\",\n        \"network_mode\": \"wifi\"",
+        "peekOfCode": "SERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\nINTENT_AVAILABLE = False",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1526,7 +1562,52 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "SERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\n# =============================================================================\n# CONFIGURATION FILE MANAGEMENT\n# =============================================================================\ndef load_config() -> dict:\n    \"\"\"Load configuration from JSON file.\"\"\"\n    default_config = {\n        \"drive_type\": \"mecanum\",\n        \"network_mode\": \"wifi\"\n    }",
+        "peekOfCode": "SERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\nINTENT_AVAILABLE = False\ntry:",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "VOICE_SPEED",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "VOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\nINTENT_AVAILABLE = False\ntry:\n    sys.path.insert(0, os.path.join(REPO_ROOT, \"intent_classifier\"))\n    from infer import classify_single_command\n    INTENT_AVAILABLE = True\nexcept Exception as e:",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "VOICE_BASE_DURATION",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "VOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\nINTENT_AVAILABLE = False\ntry:\n    sys.path.insert(0, os.path.join(REPO_ROOT, \"intent_classifier\"))\n    from infer import classify_single_command\n    INTENT_AVAILABLE = True\nexcept Exception as e:\n    logging.getLogger(__name__).warning(f\"Intent classifier unavailable: {e}\")",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "VOICE_PER_UNIT_DURATION",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "VOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\nINTENT_AVAILABLE = False\ntry:\n    sys.path.insert(0, os.path.join(REPO_ROOT, \"intent_classifier\"))\n    from infer import classify_single_command\n    INTENT_AVAILABLE = True\nexcept Exception as e:\n    logging.getLogger(__name__).warning(f\"Intent classifier unavailable: {e}\")\n# =============================================================================",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "VOICE_MAX_DURATION",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "VOICE_MAX_DURATION = 5.0\nINTENT_AVAILABLE = False\ntry:\n    sys.path.insert(0, os.path.join(REPO_ROOT, \"intent_classifier\"))\n    from infer import classify_single_command\n    INTENT_AVAILABLE = True\nexcept Exception as e:\n    logging.getLogger(__name__).warning(f\"Intent classifier unavailable: {e}\")\n# =============================================================================\n# CONFIGURATION FILE MANAGEMENT",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "INTENT_AVAILABLE",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "INTENT_AVAILABLE = False\ntry:\n    sys.path.insert(0, os.path.join(REPO_ROOT, \"intent_classifier\"))\n    from infer import classify_single_command\n    INTENT_AVAILABLE = True\nexcept Exception as e:\n    logging.getLogger(__name__).warning(f\"Intent classifier unavailable: {e}\")\n# =============================================================================\n# CONFIGURATION FILE MANAGEMENT\n# =============================================================================",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -2311,6 +2392,60 @@
         "description": "applications.web-app.stm32mp2",
         "peekOfCode": "spn_motor_2 = EVSPIN948Driver(pins_2)\nspn_motor_2.setup_gpio()\ndef stop():\n    spn_motor_1.stop()\n    spn_motor_2.stop()\ndef release():\n    try:\n        spn_motor_2.end()\n    except Exception:\n        pass",
         "detail": "applications.web-app.stm32mp2",
+        "documentation": {}
+    },
+    {
+        "label": "extract_value",
+        "kind": 2,
+        "importPath": "intent_classifier.infer",
+        "description": "intent_classifier.infer",
+        "peekOfCode": "def extract_value(command: str) -> int:\n    \"\"\"Pull a numeric magnitude (digits or spelled-out) out of a command.\"\"\"\n    match = re.search(r\"\\d+\", command)\n    if match:\n        return int(match.group())\n    for word in command.lower().split():\n        if word in NUMBER_WORDS:\n            return NUMBER_WORDS[word]\n    return 0\ndef classify_single_command(command: str) -> dict:",
+        "detail": "intent_classifier.infer",
+        "documentation": {}
+    },
+    {
+        "label": "classify_single_command",
+        "kind": 2,
+        "importPath": "intent_classifier.infer",
+        "description": "intent_classifier.infer",
+        "peekOfCode": "def classify_single_command(command: str) -> dict:\n    \"\"\"Classify one command string -> {\"intent\": str, \"value\": int}.\"\"\"\n    value = extract_value(command)\n    normalized = re.sub(r\"\\d+\", \"NUM\", command.lower())\n    for word in NUMBER_WORDS:\n        normalized = normalized.replace(word, \"NUM\")\n    X = np.array([[normalized]], dtype=object)\n    label = _session.run(None, {_input_name: X})[0][0]\n    return {\"intent\": str(label), \"value\": value}\nif __name__ == \"__main__\":",
+        "detail": "intent_classifier.infer",
+        "documentation": {}
+    },
+    {
+        "label": "MODEL_PATH",
+        "kind": 5,
+        "importPath": "intent_classifier.infer",
+        "description": "intent_classifier.infer",
+        "peekOfCode": "MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), \"robot_intent_5.onnx\")\n_session = ort.InferenceSession(MODEL_PATH, providers=[\"CPUExecutionProvider\"])\n_input_name = _session.get_inputs()[0].name\nNUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,\n    \"sixty\": 60, \"seventy\": 70, \"eighty\": 80, \"ninety\": 90, \"hundred\": 100,\n}\ndef extract_value(command: str) -> int:",
+        "detail": "intent_classifier.infer",
+        "documentation": {}
+    },
+    {
+        "label": "_session",
+        "kind": 5,
+        "importPath": "intent_classifier.infer",
+        "description": "intent_classifier.infer",
+        "peekOfCode": "_session = ort.InferenceSession(MODEL_PATH, providers=[\"CPUExecutionProvider\"])\n_input_name = _session.get_inputs()[0].name\nNUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,\n    \"sixty\": 60, \"seventy\": 70, \"eighty\": 80, \"ninety\": 90, \"hundred\": 100,\n}\ndef extract_value(command: str) -> int:\n    \"\"\"Pull a numeric magnitude (digits or spelled-out) out of a command.\"\"\"",
+        "detail": "intent_classifier.infer",
+        "documentation": {}
+    },
+    {
+        "label": "_input_name",
+        "kind": 5,
+        "importPath": "intent_classifier.infer",
+        "description": "intent_classifier.infer",
+        "peekOfCode": "_input_name = _session.get_inputs()[0].name\nNUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,\n    \"sixty\": 60, \"seventy\": 70, \"eighty\": 80, \"ninety\": 90, \"hundred\": 100,\n}\ndef extract_value(command: str) -> int:\n    \"\"\"Pull a numeric magnitude (digits or spelled-out) out of a command.\"\"\"\n    match = re.search(r\"\\d+\", command)",
+        "detail": "intent_classifier.infer",
+        "documentation": {}
+    },
+    {
+        "label": "NUMBER_WORDS",
+        "kind": 5,
+        "importPath": "intent_classifier.infer",
+        "description": "intent_classifier.infer",
+        "peekOfCode": "NUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,\n    \"sixty\": 60, \"seventy\": 70, \"eighty\": 80, \"ninety\": 90, \"hundred\": 100,\n}\ndef extract_value(command: str) -> int:\n    \"\"\"Pull a numeric magnitude (digits or spelled-out) out of a command.\"\"\"\n    match = re.search(r\"\\d+\", command)\n    if match:",
+        "detail": "intent_classifier.infer",
         "documentation": {}
     },
     {

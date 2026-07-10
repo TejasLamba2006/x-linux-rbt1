@@ -45,9 +45,26 @@ import qrcode
 PORT = 8000
 LOG_LEVEL = logging.INFO
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
 CONFIG_FILE = os.path.join(SCRIPT_DIR, "robot_config.json")
 SERVICE_NAME = "x-linux-rbt1"
 SERVICE_FILE = os.path.join(SCRIPT_DIR, f"{SERVICE_NAME}.service")
+
+# =============================================================================
+# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)
+# =============================================================================
+VOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100
+VOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value
+VOICE_PER_UNIT_DURATION = 0.15
+VOICE_MAX_DURATION = 5.0
+
+INTENT_AVAILABLE = False
+try:
+    sys.path.insert(0, os.path.join(REPO_ROOT, "intent_classifier"))
+    from infer import classify_single_command
+    INTENT_AVAILABLE = True
+except Exception as e:
+    logging.getLogger(__name__).warning(f"Intent classifier unavailable: {e}")
 
 
 # =============================================================================
@@ -399,8 +416,7 @@ def start_odometry_server() -> None:
     global odometry_process
     import subprocess
 
-    repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    odometry_script = os.path.join(repo_root, "odometry_locomization", "run_linux.py")
+    odometry_script = os.path.join(REPO_ROOT, "odometry_locomization", "run_linux.py")
 
     if not os.path.isfile(odometry_script):
         logger.warning(f"Odometry map server not found at {odometry_script}, skipping.")
@@ -432,6 +448,62 @@ def stop_odometry_server() -> None:
         finally:
             logger.info("Odometry map server stopped")
     odometry_process = None
+
+
+def handle_voice_command(text: str) -> dict:
+    """
+    Classify a transcribed voice command (text already recognized client-side
+    via the browser's Web Speech API) and pulse-drive the robot accordingly.
+
+    Voice commands act directly on the active drive module's throttle/
+    direction/rotate functions (bypassing mode_select's controller/hybrid
+    gate), so they work in any mode except 'locked' -- matching the joystick
+    being the "hold to move" analog, and voice being the "say it once" pulse.
+    """
+    if not INTENT_AVAILABLE:
+        return {"error": "voice control unavailable (intent classifier not loaded)"}
+    if motor_api is None:
+        return {"error": "motor API not initialized"}
+    if getattr(motor_api.state, "active_mode", "locked") == "locked":
+        return {"intent": None, "note": "locked"}
+
+    result = classify_single_command(text)
+    intent, value = result["intent"], result["value"]
+
+    if intent == "STOP":
+        motor_api.stop()
+        return {"intent": intent, "value": value}
+
+    drive = {
+        "FORWARD":      {"throttle": VOICE_SPEED},
+        "BACKWARD":     {"throttle": -VOICE_SPEED},
+        "LEFT":         {"dir_x": -VOICE_SPEED},
+        "RIGHT":        {"dir_x": VOICE_SPEED},
+        "TURN_LEFT":    {"dir_x": -VOICE_SPEED},
+        "TURN_RIGHT":   {"dir_x": VOICE_SPEED},
+        "ROTATE_LEFT":  {"dir_rot": -VOICE_SPEED},
+        "ROTATE_RIGHT": {"dir_rot": VOICE_SPEED},
+    }.get(intent)
+
+    if drive is None:
+        return {"intent": intent, "value": value, "note": "unrecognized intent"}
+
+    if "throttle" in drive:
+        motor_api.throttle_value(drive["throttle"])
+    if "dir_x" in drive:
+        motor_api.direction(drive["dir_x"], 0)
+    if "dir_rot" in drive:
+        motor_api.rotate_angle(drive["dir_rot"])
+
+    duration = min(VOICE_MAX_DURATION, VOICE_BASE_DURATION + value * VOICE_PER_UNIT_DURATION)
+
+    def _stop_after(d):
+        time.sleep(d)
+        motor_api.stop()
+
+    threading.Thread(target=_stop_after, args=(duration,), daemon=True).start()
+
+    return {"intent": intent, "value": value, "duration": round(duration, 2)}
 
 
 
@@ -1069,7 +1141,13 @@ class ConnectionManager:
                         if parsed_data.get('request') == 'drive_type':
                             await websocket.send_json({"drive_type": current_drive_type})
                             continue
-                        
+
+                        # Handle voice command (text already transcribed client-side)
+                        if 'voice_text' in parsed_data:
+                            result = handle_voice_command(parsed_data['voice_text'])
+                            await websocket.send_json({"voice_result": result})
+                            continue
+
                         # Process motor commands
                         if motor_api:
                             motor_api.parser(parsed_data)

@@ -75,5 +75,11 @@ tail -f /tmp/robot.log
 
 ```bash
 apt-get install python3-gpiod python3-netifaces
-pip3 install smbus2 fastapi uvicorn websockets qrcode 'pydantic<2.12'
+pip3 install smbus2 fastapi uvicorn websockets qrcode 'pydantic<2.12' onnxruntime numpy flask
 ```
+
+Voice control: `intent_classifier/robot_intent_5.onnx` runs via `onnxruntime` (loaded lazily by
+`applications/web-app/main.py`; if unavailable, voice control is silently disabled and everything
+else still works). `flask` is only needed for the odometry map server
+(`odometry_locomization/run_linux.py`), which `main.py` also launches automatically.
+
