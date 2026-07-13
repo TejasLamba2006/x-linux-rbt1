@@ -2888,6 +2888,96 @@
         "documentation": {}
     },
     {
+        "label": "IIS2MDC",
+        "kind": 6,
+        "importPath": "odometry_locomization.imu_iis2mdc",
+        "description": "odometry_locomization.imu_iis2mdc",
+        "peekOfCode": "class IIS2MDC:\n    def __init__(self, bus_num=I2C_BUS, addr=DEVICE_ADDR):\n        self.addr = addr\n        self.fd = os.open(f\"/dev/i2c-{bus_num}\", os.O_RDWR)\n        fcntl.ioctl(self.fd, I2C_SLAVE, self.addr)\n    def _read_byte(self, reg):\n        os.write(self.fd, bytes([reg]))\n        return os.read(self.fd, 1)[0]\n    def _write_byte(self, reg, value):\n        os.write(self.fd, bytes([reg, value]))",
+        "detail": "odometry_locomization.imu_iis2mdc",
+        "documentation": {}
+    },
+    {
+        "label": "I2C_BUS",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_iis2mdc",
+        "description": "odometry_locomization.imu_iis2mdc",
+        "peekOfCode": "I2C_BUS = 1                 # board_utils.sh: I2C_BUS_PRIMARY (same bus as the IMU)\nDEVICE_ADDR = 0x1E          # fixed address, confirmed via i2cdetect -y 1\nI2C_SLAVE = 0x0703          # linux/i2c-dev.h ioctl request\nWHO_AM_I_REG = 0x4F\nWHO_AM_I_EXPECTED = 0x40    # confirmed via i2cget during bring-up\nCFG_REG_A = 0x60             # MD (mode) + ODR + COMP_TEMP_EN\nCFG_REG_C = 0x62             # BDU\nOUTX_L_REG = 0x68            # X low byte; Y/Z follow at +2/+4\nSENSITIVITY_MGAUSS = 1.5    # mgauss/LSB, fixed full-scale +-50 gauss\nclass IIS2MDC:",
+        "detail": "odometry_locomization.imu_iis2mdc",
+        "documentation": {}
+    },
+    {
+        "label": "DEVICE_ADDR",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_iis2mdc",
+        "description": "odometry_locomization.imu_iis2mdc",
+        "peekOfCode": "DEVICE_ADDR = 0x1E          # fixed address, confirmed via i2cdetect -y 1\nI2C_SLAVE = 0x0703          # linux/i2c-dev.h ioctl request\nWHO_AM_I_REG = 0x4F\nWHO_AM_I_EXPECTED = 0x40    # confirmed via i2cget during bring-up\nCFG_REG_A = 0x60             # MD (mode) + ODR + COMP_TEMP_EN\nCFG_REG_C = 0x62             # BDU\nOUTX_L_REG = 0x68            # X low byte; Y/Z follow at +2/+4\nSENSITIVITY_MGAUSS = 1.5    # mgauss/LSB, fixed full-scale +-50 gauss\nclass IIS2MDC:\n    def __init__(self, bus_num=I2C_BUS, addr=DEVICE_ADDR):",
+        "detail": "odometry_locomization.imu_iis2mdc",
+        "documentation": {}
+    },
+    {
+        "label": "I2C_SLAVE",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_iis2mdc",
+        "description": "odometry_locomization.imu_iis2mdc",
+        "peekOfCode": "I2C_SLAVE = 0x0703          # linux/i2c-dev.h ioctl request\nWHO_AM_I_REG = 0x4F\nWHO_AM_I_EXPECTED = 0x40    # confirmed via i2cget during bring-up\nCFG_REG_A = 0x60             # MD (mode) + ODR + COMP_TEMP_EN\nCFG_REG_C = 0x62             # BDU\nOUTX_L_REG = 0x68            # X low byte; Y/Z follow at +2/+4\nSENSITIVITY_MGAUSS = 1.5    # mgauss/LSB, fixed full-scale +-50 gauss\nclass IIS2MDC:\n    def __init__(self, bus_num=I2C_BUS, addr=DEVICE_ADDR):\n        self.addr = addr",
+        "detail": "odometry_locomization.imu_iis2mdc",
+        "documentation": {}
+    },
+    {
+        "label": "WHO_AM_I_REG",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_iis2mdc",
+        "description": "odometry_locomization.imu_iis2mdc",
+        "peekOfCode": "WHO_AM_I_REG = 0x4F\nWHO_AM_I_EXPECTED = 0x40    # confirmed via i2cget during bring-up\nCFG_REG_A = 0x60             # MD (mode) + ODR + COMP_TEMP_EN\nCFG_REG_C = 0x62             # BDU\nOUTX_L_REG = 0x68            # X low byte; Y/Z follow at +2/+4\nSENSITIVITY_MGAUSS = 1.5    # mgauss/LSB, fixed full-scale +-50 gauss\nclass IIS2MDC:\n    def __init__(self, bus_num=I2C_BUS, addr=DEVICE_ADDR):\n        self.addr = addr\n        self.fd = os.open(f\"/dev/i2c-{bus_num}\", os.O_RDWR)",
+        "detail": "odometry_locomization.imu_iis2mdc",
+        "documentation": {}
+    },
+    {
+        "label": "WHO_AM_I_EXPECTED",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_iis2mdc",
+        "description": "odometry_locomization.imu_iis2mdc",
+        "peekOfCode": "WHO_AM_I_EXPECTED = 0x40    # confirmed via i2cget during bring-up\nCFG_REG_A = 0x60             # MD (mode) + ODR + COMP_TEMP_EN\nCFG_REG_C = 0x62             # BDU\nOUTX_L_REG = 0x68            # X low byte; Y/Z follow at +2/+4\nSENSITIVITY_MGAUSS = 1.5    # mgauss/LSB, fixed full-scale +-50 gauss\nclass IIS2MDC:\n    def __init__(self, bus_num=I2C_BUS, addr=DEVICE_ADDR):\n        self.addr = addr\n        self.fd = os.open(f\"/dev/i2c-{bus_num}\", os.O_RDWR)\n        fcntl.ioctl(self.fd, I2C_SLAVE, self.addr)",
+        "detail": "odometry_locomization.imu_iis2mdc",
+        "documentation": {}
+    },
+    {
+        "label": "CFG_REG_A",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_iis2mdc",
+        "description": "odometry_locomization.imu_iis2mdc",
+        "peekOfCode": "CFG_REG_A = 0x60             # MD (mode) + ODR + COMP_TEMP_EN\nCFG_REG_C = 0x62             # BDU\nOUTX_L_REG = 0x68            # X low byte; Y/Z follow at +2/+4\nSENSITIVITY_MGAUSS = 1.5    # mgauss/LSB, fixed full-scale +-50 gauss\nclass IIS2MDC:\n    def __init__(self, bus_num=I2C_BUS, addr=DEVICE_ADDR):\n        self.addr = addr\n        self.fd = os.open(f\"/dev/i2c-{bus_num}\", os.O_RDWR)\n        fcntl.ioctl(self.fd, I2C_SLAVE, self.addr)\n    def _read_byte(self, reg):",
+        "detail": "odometry_locomization.imu_iis2mdc",
+        "documentation": {}
+    },
+    {
+        "label": "CFG_REG_C",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_iis2mdc",
+        "description": "odometry_locomization.imu_iis2mdc",
+        "peekOfCode": "CFG_REG_C = 0x62             # BDU\nOUTX_L_REG = 0x68            # X low byte; Y/Z follow at +2/+4\nSENSITIVITY_MGAUSS = 1.5    # mgauss/LSB, fixed full-scale +-50 gauss\nclass IIS2MDC:\n    def __init__(self, bus_num=I2C_BUS, addr=DEVICE_ADDR):\n        self.addr = addr\n        self.fd = os.open(f\"/dev/i2c-{bus_num}\", os.O_RDWR)\n        fcntl.ioctl(self.fd, I2C_SLAVE, self.addr)\n    def _read_byte(self, reg):\n        os.write(self.fd, bytes([reg]))",
+        "detail": "odometry_locomization.imu_iis2mdc",
+        "documentation": {}
+    },
+    {
+        "label": "OUTX_L_REG",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_iis2mdc",
+        "description": "odometry_locomization.imu_iis2mdc",
+        "peekOfCode": "OUTX_L_REG = 0x68            # X low byte; Y/Z follow at +2/+4\nSENSITIVITY_MGAUSS = 1.5    # mgauss/LSB, fixed full-scale +-50 gauss\nclass IIS2MDC:\n    def __init__(self, bus_num=I2C_BUS, addr=DEVICE_ADDR):\n        self.addr = addr\n        self.fd = os.open(f\"/dev/i2c-{bus_num}\", os.O_RDWR)\n        fcntl.ioctl(self.fd, I2C_SLAVE, self.addr)\n    def _read_byte(self, reg):\n        os.write(self.fd, bytes([reg]))\n        return os.read(self.fd, 1)[0]",
+        "detail": "odometry_locomization.imu_iis2mdc",
+        "documentation": {}
+    },
+    {
+        "label": "SENSITIVITY_MGAUSS",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_iis2mdc",
+        "description": "odometry_locomization.imu_iis2mdc",
+        "peekOfCode": "SENSITIVITY_MGAUSS = 1.5    # mgauss/LSB, fixed full-scale +-50 gauss\nclass IIS2MDC:\n    def __init__(self, bus_num=I2C_BUS, addr=DEVICE_ADDR):\n        self.addr = addr\n        self.fd = os.open(f\"/dev/i2c-{bus_num}\", os.O_RDWR)\n        fcntl.ioctl(self.fd, I2C_SLAVE, self.addr)\n    def _read_byte(self, reg):\n        os.write(self.fd, bytes([reg]))\n        return os.read(self.fd, 1)[0]\n    def _write_byte(self, reg, value):",
+        "detail": "odometry_locomization.imu_iis2mdc",
+        "documentation": {}
+    },
+    {
         "label": "LSM6DSV16X",
         "kind": 6,
         "importPath": "odometry_locomization.imu_lsm6dsv16x",
@@ -2901,7 +2991,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_lsm6dsv16x",
         "description": "odometry_locomization.imu_lsm6dsv16x",
-        "peekOfCode": "I2C_BUS = 1                 # board_utils.sh: I2C_BUS_PRIMARY\nDEVICE_ADDR = 0x6B          # board_utils.sh: DEVICE_ADDR_LSM6DV16X (SA0 tied high)\nI2C_SLAVE = 0x0703          # linux/i2c-dev.h ioctl request\nWHO_AM_I_REG = 0x0F\nWHO_AM_I_EXPECTED = 0x70    # 112 decimal, per lsm6dsv16x.sh\nCTRL1 = 0x10                 # ODR_XL / OP_MODE_XL (accelerometer)\nCTRL2 = 0x11                 # ODR_G / OP_MODE_G (gyroscope)\nCTRL3 = 0x12                 # BDU | IF_INC\nCTRL6 = 0x15                 # FS_G full-scale bits (gyroscope)\nCTRL8 = 0x17                 # FS_XL full-scale bits (accelerometer)",
+        "peekOfCode": "I2C_BUS = 1                 # board_utils.sh: I2C_BUS_PRIMARY\nDEVICE_ADDR = 0x6B          # board_utils.sh: DEVICE_ADDR_LSM6DV16X (SA0 tied high)\nI2C_SLAVE = 0x0703          # linux/i2c-dev.h ioctl request\nWHO_AM_I_REG = 0x0F\nWHO_AM_I_EXPECTED = 0x6B    # ISM330DHCX (the chip ST's RBT01 datasheet actually\n                            # lists), NOT LSM6DSV16X's 0x70 used by the reference script\nCTRL1 = 0x10                 # ODR_XL / OP_MODE_XL (accelerometer)\nCTRL2 = 0x11                 # ODR_G / OP_MODE_G (gyroscope)\nCTRL3 = 0x12                 # BDU | IF_INC\nCTRL6 = 0x15                 # FS_G full-scale bits (gyroscope)",
         "detail": "odometry_locomization.imu_lsm6dsv16x",
         "documentation": {}
     },
@@ -2910,7 +3000,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_lsm6dsv16x",
         "description": "odometry_locomization.imu_lsm6dsv16x",
-        "peekOfCode": "DEVICE_ADDR = 0x6B          # board_utils.sh: DEVICE_ADDR_LSM6DV16X (SA0 tied high)\nI2C_SLAVE = 0x0703          # linux/i2c-dev.h ioctl request\nWHO_AM_I_REG = 0x0F\nWHO_AM_I_EXPECTED = 0x70    # 112 decimal, per lsm6dsv16x.sh\nCTRL1 = 0x10                 # ODR_XL / OP_MODE_XL (accelerometer)\nCTRL2 = 0x11                 # ODR_G / OP_MODE_G (gyroscope)\nCTRL3 = 0x12                 # BDU | IF_INC\nCTRL6 = 0x15                 # FS_G full-scale bits (gyroscope)\nCTRL8 = 0x17                 # FS_XL full-scale bits (accelerometer)\nOUTX_L_A = 0x28               # accelerometer X low byte; Y/Z follow at +2/+4",
+        "peekOfCode": "DEVICE_ADDR = 0x6B          # board_utils.sh: DEVICE_ADDR_LSM6DV16X (SA0 tied high)\nI2C_SLAVE = 0x0703          # linux/i2c-dev.h ioctl request\nWHO_AM_I_REG = 0x0F\nWHO_AM_I_EXPECTED = 0x6B    # ISM330DHCX (the chip ST's RBT01 datasheet actually\n                            # lists), NOT LSM6DSV16X's 0x70 used by the reference script\nCTRL1 = 0x10                 # ODR_XL / OP_MODE_XL (accelerometer)\nCTRL2 = 0x11                 # ODR_G / OP_MODE_G (gyroscope)\nCTRL3 = 0x12                 # BDU | IF_INC\nCTRL6 = 0x15                 # FS_G full-scale bits (gyroscope)\nCTRL8 = 0x17                 # FS_XL full-scale bits (accelerometer)",
         "detail": "odometry_locomization.imu_lsm6dsv16x",
         "documentation": {}
     },
@@ -2919,7 +3009,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_lsm6dsv16x",
         "description": "odometry_locomization.imu_lsm6dsv16x",
-        "peekOfCode": "I2C_SLAVE = 0x0703          # linux/i2c-dev.h ioctl request\nWHO_AM_I_REG = 0x0F\nWHO_AM_I_EXPECTED = 0x70    # 112 decimal, per lsm6dsv16x.sh\nCTRL1 = 0x10                 # ODR_XL / OP_MODE_XL (accelerometer)\nCTRL2 = 0x11                 # ODR_G / OP_MODE_G (gyroscope)\nCTRL3 = 0x12                 # BDU | IF_INC\nCTRL6 = 0x15                 # FS_G full-scale bits (gyroscope)\nCTRL8 = 0x17                 # FS_XL full-scale bits (accelerometer)\nOUTX_L_A = 0x28               # accelerometer X low byte; Y/Z follow at +2/+4\nOUTZ_L_G = 0x26               # gyroscope Z low byte, OUTZ_H_G follows at +1",
+        "peekOfCode": "I2C_SLAVE = 0x0703          # linux/i2c-dev.h ioctl request\nWHO_AM_I_REG = 0x0F\nWHO_AM_I_EXPECTED = 0x6B    # ISM330DHCX (the chip ST's RBT01 datasheet actually\n                            # lists), NOT LSM6DSV16X's 0x70 used by the reference script\nCTRL1 = 0x10                 # ODR_XL / OP_MODE_XL (accelerometer)\nCTRL2 = 0x11                 # ODR_G / OP_MODE_G (gyroscope)\nCTRL3 = 0x12                 # BDU | IF_INC\nCTRL6 = 0x15                 # FS_G full-scale bits (gyroscope)\nCTRL8 = 0x17                 # FS_XL full-scale bits (accelerometer)\nOUTX_L_A = 0x28               # accelerometer X low byte; Y/Z follow at +2/+4",
         "detail": "odometry_locomization.imu_lsm6dsv16x",
         "documentation": {}
     },
@@ -2928,7 +3018,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_lsm6dsv16x",
         "description": "odometry_locomization.imu_lsm6dsv16x",
-        "peekOfCode": "WHO_AM_I_REG = 0x0F\nWHO_AM_I_EXPECTED = 0x70    # 112 decimal, per lsm6dsv16x.sh\nCTRL1 = 0x10                 # ODR_XL / OP_MODE_XL (accelerometer)\nCTRL2 = 0x11                 # ODR_G / OP_MODE_G (gyroscope)\nCTRL3 = 0x12                 # BDU | IF_INC\nCTRL6 = 0x15                 # FS_G full-scale bits (gyroscope)\nCTRL8 = 0x17                 # FS_XL full-scale bits (accelerometer)\nOUTX_L_A = 0x28               # accelerometer X low byte; Y/Z follow at +2/+4\nOUTZ_L_G = 0x26               # gyroscope Z low byte, OUTZ_H_G follows at +1\nFS_500DPS_SENSITIVITY_MDPS = 17.50  # mdps/LSB @ +-500 dps (ST 16-bit gyro standard table)",
+        "peekOfCode": "WHO_AM_I_REG = 0x0F\nWHO_AM_I_EXPECTED = 0x6B    # ISM330DHCX (the chip ST's RBT01 datasheet actually\n                            # lists), NOT LSM6DSV16X's 0x70 used by the reference script\nCTRL1 = 0x10                 # ODR_XL / OP_MODE_XL (accelerometer)\nCTRL2 = 0x11                 # ODR_G / OP_MODE_G (gyroscope)\nCTRL3 = 0x12                 # BDU | IF_INC\nCTRL6 = 0x15                 # FS_G full-scale bits (gyroscope)\nCTRL8 = 0x17                 # FS_XL full-scale bits (accelerometer)\nOUTX_L_A = 0x28               # accelerometer X low byte; Y/Z follow at +2/+4\nOUTZ_L_G = 0x26               # gyroscope Z low byte, OUTZ_H_G follows at +1",
         "detail": "odometry_locomization.imu_lsm6dsv16x",
         "documentation": {}
     },
@@ -2937,7 +3027,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_lsm6dsv16x",
         "description": "odometry_locomization.imu_lsm6dsv16x",
-        "peekOfCode": "WHO_AM_I_EXPECTED = 0x70    # 112 decimal, per lsm6dsv16x.sh\nCTRL1 = 0x10                 # ODR_XL / OP_MODE_XL (accelerometer)\nCTRL2 = 0x11                 # ODR_G / OP_MODE_G (gyroscope)\nCTRL3 = 0x12                 # BDU | IF_INC\nCTRL6 = 0x15                 # FS_G full-scale bits (gyroscope)\nCTRL8 = 0x17                 # FS_XL full-scale bits (accelerometer)\nOUTX_L_A = 0x28               # accelerometer X low byte; Y/Z follow at +2/+4\nOUTZ_L_G = 0x26               # gyroscope Z low byte, OUTZ_H_G follows at +1\nFS_500DPS_SENSITIVITY_MDPS = 17.50  # mdps/LSB @ +-500 dps (ST 16-bit gyro standard table)\nFS_2G_SENSITIVITY_MG = 0.061        # mg/LSB @ +-2 g, per lsm6dsv16x.sh",
+        "peekOfCode": "WHO_AM_I_EXPECTED = 0x6B    # ISM330DHCX (the chip ST's RBT01 datasheet actually\n                            # lists), NOT LSM6DSV16X's 0x70 used by the reference script\nCTRL1 = 0x10                 # ODR_XL / OP_MODE_XL (accelerometer)\nCTRL2 = 0x11                 # ODR_G / OP_MODE_G (gyroscope)\nCTRL3 = 0x12                 # BDU | IF_INC\nCTRL6 = 0x15                 # FS_G full-scale bits (gyroscope)\nCTRL8 = 0x17                 # FS_XL full-scale bits (accelerometer)\nOUTX_L_A = 0x28               # accelerometer X low byte; Y/Z follow at +2/+4\nOUTZ_L_G = 0x26               # gyroscope Z low byte, OUTZ_H_G follows at +1\nFS_500DPS_SENSITIVITY_MDPS = 17.50  # mdps/LSB @ +-500 dps (ST 16-bit gyro standard table)",
         "detail": "odometry_locomization.imu_lsm6dsv16x",
         "documentation": {}
     },
@@ -3149,11 +3239,20 @@
         "documentation": {}
     },
     {
-        "label": "imu_yaw_thread",
+        "label": "imu_gyro_yaw_thread",
         "kind": 2,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "def imu_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X\n    try:\n        imu = LSM6DSV16X()\n        if not imu.check_who_am_i():\n            print(\"[IMU] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")\n            return\n        imu.configure()\n    except Exception as e:",
+        "peekOfCode": "def imu_gyro_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X\n    try:\n        imu = LSM6DSV16X()\n        if not imu.check_who_am_i():\n            print(\"[IMU] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")\n            return\n        imu.configure()\n    except Exception as e:",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "imu_mag_yaw_thread",
+        "kind": 2,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "def imu_mag_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_iis2mdc import IIS2MDC\n    try:\n        mag = IIS2MDC()\n        if not mag.check_who_am_i():\n            print(\"[MAG] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")\n            return\n        mag.configure()\n    except Exception as e:",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -3405,7 +3504,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "GYRO_ODR_HZ = 120\nGYRO_BIAS_CALIB_SAMPLES = 60\nGYRO_BIAS_EMA_ALPHA = 0.02\n# Total accel magnitude stays ~1000 mg only when there's no linear\n# acceleration, i.e. the board is genuinely still (not just yaw-still).\nSTATIONARY_ACCEL_MG_LOW = 950\nSTATIONARY_ACCEL_MG_HIGH = 1050\ndef imu_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X",
+        "peekOfCode": "GYRO_ODR_HZ = 120\nGYRO_BIAS_CALIB_SAMPLES = 60\nGYRO_BIAS_EMA_ALPHA = 0.02\n# Total accel magnitude stays ~1000 mg only when there's no linear\n# acceleration, i.e. the board is genuinely still (not just yaw-still).\nSTATIONARY_ACCEL_MG_LOW = 950\nSTATIONARY_ACCEL_MG_HIGH = 1050\ndef imu_gyro_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -3414,7 +3513,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "GYRO_BIAS_CALIB_SAMPLES = 60\nGYRO_BIAS_EMA_ALPHA = 0.02\n# Total accel magnitude stays ~1000 mg only when there's no linear\n# acceleration, i.e. the board is genuinely still (not just yaw-still).\nSTATIONARY_ACCEL_MG_LOW = 950\nSTATIONARY_ACCEL_MG_HIGH = 1050\ndef imu_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X\n    try:",
+        "peekOfCode": "GYRO_BIAS_CALIB_SAMPLES = 60\nGYRO_BIAS_EMA_ALPHA = 0.02\n# Total accel magnitude stays ~1000 mg only when there's no linear\n# acceleration, i.e. the board is genuinely still (not just yaw-still).\nSTATIONARY_ACCEL_MG_LOW = 950\nSTATIONARY_ACCEL_MG_HIGH = 1050\ndef imu_gyro_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X\n    try:",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -3423,7 +3522,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "GYRO_BIAS_EMA_ALPHA = 0.02\n# Total accel magnitude stays ~1000 mg only when there's no linear\n# acceleration, i.e. the board is genuinely still (not just yaw-still).\nSTATIONARY_ACCEL_MG_LOW = 950\nSTATIONARY_ACCEL_MG_HIGH = 1050\ndef imu_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X\n    try:\n        imu = LSM6DSV16X()",
+        "peekOfCode": "GYRO_BIAS_EMA_ALPHA = 0.02\n# Total accel magnitude stays ~1000 mg only when there's no linear\n# acceleration, i.e. the board is genuinely still (not just yaw-still).\nSTATIONARY_ACCEL_MG_LOW = 950\nSTATIONARY_ACCEL_MG_HIGH = 1050\ndef imu_gyro_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X\n    try:\n        imu = LSM6DSV16X()",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -3432,7 +3531,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "STATIONARY_ACCEL_MG_LOW = 950\nSTATIONARY_ACCEL_MG_HIGH = 1050\ndef imu_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X\n    try:\n        imu = LSM6DSV16X()\n        if not imu.check_who_am_i():\n            print(\"[IMU] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")\n            return",
+        "peekOfCode": "STATIONARY_ACCEL_MG_LOW = 950\nSTATIONARY_ACCEL_MG_HIGH = 1050\ndef imu_gyro_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X\n    try:\n        imu = LSM6DSV16X()\n        if not imu.check_who_am_i():\n            print(\"[IMU] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")\n            return",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -3441,7 +3540,16 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "STATIONARY_ACCEL_MG_HIGH = 1050\ndef imu_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X\n    try:\n        imu = LSM6DSV16X()\n        if not imu.check_who_am_i():\n            print(\"[IMU] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")\n            return\n        imu.configure()",
+        "peekOfCode": "STATIONARY_ACCEL_MG_HIGH = 1050\ndef imu_gyro_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X\n    try:\n        imu = LSM6DSV16X()\n        if not imu.check_who_am_i():\n            print(\"[IMU] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")\n            return\n        imu.configure()",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "MAG_ODR_HZ",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "MAG_ODR_HZ = 100\ndef imu_mag_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_iis2mdc import IIS2MDC\n    try:\n        mag = IIS2MDC()\n        if not mag.check_who_am_i():\n            print(\"[MAG] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")\n            return\n        mag.configure()",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },

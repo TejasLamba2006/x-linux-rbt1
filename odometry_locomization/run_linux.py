@@ -109,13 +109,11 @@ def udp_listener():
             print(f"[UDP] Error: {e}")
 
 
-# ── Onboard IMU (LSM6DSV16X gyro) ────────────────────────────────────────────
-# Integrates gyro-Z angular rate directly into _raw_smoothed_yaw -- the same
-# shared variable udp_listener() would have written -- so /zero_yaw and
-# _raw_input_delta_callback need no changes regardless of which yaw source runs.
-# Startup gyro-bias calibration (averages the first ~0.5s assuming the board
-# is stationary at boot) plus continuous accelerometer-gated bias re-tracking
-# handle most of the drift; use "Zero Heading" for anything left over.
+# ── Onboard IMU gyro (LSM6DSV16X/ISM330DHCX) ─────────────────────────────────
+# NOT currently used -- during 257F-DK bring-up this chip did not ACK on
+# i2c-1 at 0x6A or 0x6B (see imu_lsm6dsv16x.py header for the full note).
+# Kept for reference / easy revert if the hardware issue gets resolved --
+# swap the thread started in __main__ back to imu_gyro_yaw_thread.
 GYRO_ODR_HZ = 120
 GYRO_BIAS_CALIB_SAMPLES = 60
 GYRO_BIAS_EMA_ALPHA = 0.02
@@ -126,7 +124,7 @@ STATIONARY_ACCEL_MG_LOW = 950
 STATIONARY_ACCEL_MG_HIGH = 1050
 
 
-def imu_yaw_thread():
+def imu_gyro_yaw_thread():
     global _raw_smoothed_yaw
     from imu_lsm6dsv16x import LSM6DSV16X
 
@@ -140,7 +138,7 @@ def imu_yaw_thread():
         print(f"[IMU] init failed: {e}")
         return
 
-    print("[IMU] LSM6DSV16X gyro-yaw integration started, calibrating bias...")
+    print("[IMU] gyro-yaw integration started, calibrating bias...")
     _raw_smoothed_yaw = 0.0
 
     calib_samples = []
@@ -179,6 +177,59 @@ def imu_yaw_thread():
             time.sleep(1.0 / GYRO_ODR_HZ)
         except Exception as e:
             print(f"[IMU] Error: {e}")
+            time.sleep(0.1)
+
+
+# ── Onboard magnetometer (IIS2MDC) ───────────────────────────────────────────
+# Active yaw source (as of this bring-up) -- confirmed alive on i2c-1 @ 0x1e
+# where the gyro didn't respond. Writes into the same shared _raw_smoothed_yaw
+# variable udp_listener()/imu_gyro_yaw_thread() would have, so /zero_yaw and
+# _raw_input_delta_callback need no changes regardless of which yaw source runs.
+#
+# Absolute heading straight from Earth's field -- no dead-reckoning drift like
+# gyro integration has -- but raw and noisy sample-to-sample, so it's smoothed
+# with the same EMA approach as the old phone-UDP source.
+# ponytail: no hard-iron/soft-iron calibration and no tilt compensation (the
+# STSPIN948 motor drivers + steel chassis nearby can bias the field reading;
+# a stray few degrees of constant offset is expected -- use "Zero Heading" to
+# correct for it). Add calibration if accuracy needs to improve further.
+MAG_ODR_HZ = 100
+
+
+def imu_mag_yaw_thread():
+    global _raw_smoothed_yaw
+    from imu_iis2mdc import IIS2MDC
+
+    try:
+        mag = IIS2MDC()
+        if not mag.check_who_am_i():
+            print("[MAG] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled")
+            return
+        mag.configure()
+    except Exception as e:
+        print(f"[MAG] init failed: {e}")
+        return
+
+    print("[MAG] IIS2MDC magnetometer-yaw integration started")
+
+    while True:
+        try:
+            mx, my, mz = mag.read_mag_mgauss()
+            raw_yaw = math.degrees(math.atan2(my, mx))
+
+            if _raw_smoothed_yaw is None:
+                _raw_smoothed_yaw = raw_yaw
+            else:
+                diff = angle_diff(raw_yaw, _raw_smoothed_yaw)
+                _raw_smoothed_yaw = _raw_smoothed_yaw + EMA_ALPHA * diff
+                _raw_smoothed_yaw = (_raw_smoothed_yaw + 180) % 360 - 180
+
+            with lock:
+                state["yaw"] = round(angle_diff(_raw_smoothed_yaw, _yaw_offset), 2)
+
+            time.sleep(1.0 / MAG_ODR_HZ)
+        except Exception as e:
+            print(f"[MAG] Error: {e}")
             time.sleep(0.1)
 
 
@@ -378,7 +429,7 @@ def zero_yaw():
 # ── Entry Point ───────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     t_yaw = threading.Thread(
-        target=imu_yaw_thread,
+        target=imu_mag_yaw_thread,
         daemon=True
     )
     t_yaw.start()
