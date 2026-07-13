@@ -1,9 +1,24 @@
-# imu_lsm6dsv16x.py — LSM6DSV16X onboard IMU (STM32MP257F-DK), gyro-Z yaw
-# source + accelerometer (used for stationary detection / gyro-bias tracking).
+# imu_lsm6dsv16x.py — onboard IMU (STM32MP257F-DK + X-STM32MP-RBT01), gyro-Z
+# yaw source + accelerometer (used for stationary detection / gyro-bias
+# tracking).
 #
-# Register map/config mirrors lsm6dsv16x.sh + board_utils.sh (accel config and
-# I2C_BUS_PRIMARY=1 / DEVICE_ADDR_LSM6DV16X=0x6B come straight from there);
-# this adds the gyroscope config+read since yaw needs angular rate, not tilt.
+# NOTE (name mismatch found during 257F-DK bring-up): the reference shell
+# script this was ported from (lsm6dsv16x.sh) targets the LSM6DSV16X part and
+# checks WHO_AM_I == 0x70. ST's own datasheet for the X-STM32MP-RBT01 board
+# (data brief + UM3482) lists the *actual* onboard IMU as the ISM330DHCX,
+# whose WHO_AM_I is 0x6B instead -- so the reference script was checking the
+# wrong chip's identity byte from the start. Register layout (CTRL1_XL/
+# CTRL2_G/CTRL3_C, OUTX_L_A, OUTZ_L_G, etc.) is compatible between the two
+# parts, so only WHO_AM_I_EXPECTED changes here.
+#
+# I2C_BUS/DEVICE_ADDR still come from board_utils.sh (I2C_BUS_PRIMARY=1,
+# DEVICE_ADDR_LSM6DV16X=0x6B) -- confirmed correct against the 257F-DK's own
+# i2c-1 (SoC node 46040000.i2c, header I2C8) where the magnetometer/ToF/baro
+# all answer. As of this bring-up, the IMU itself does not ACK at 0x6A or
+# 0x6B on that bus (see check_who_am_i() below) -- this looks like a
+# hardware-side issue on this unit, not a bus/address/register bug; see the
+# board bring-up notes for details before spending more time on the register
+# map.
 #
 # Uses raw ioctl on /dev/i2c-N (stdlib os/fcntl) instead of smbus2, to avoid a
 # new dependency for a handful of registers.
@@ -17,7 +32,8 @@ DEVICE_ADDR = 0x6B          # board_utils.sh: DEVICE_ADDR_LSM6DV16X (SA0 tied hi
 I2C_SLAVE = 0x0703          # linux/i2c-dev.h ioctl request
 
 WHO_AM_I_REG = 0x0F
-WHO_AM_I_EXPECTED = 0x70    # 112 decimal, per lsm6dsv16x.sh
+WHO_AM_I_EXPECTED = 0x6B    # ISM330DHCX (the chip ST's RBT01 datasheet actually
+                            # lists), NOT LSM6DSV16X's 0x70 used by the reference script
 
 CTRL1 = 0x10                 # ODR_XL / OP_MODE_XL (accelerometer)
 CTRL2 = 0x11                 # ODR_G / OP_MODE_G (gyroscope)
