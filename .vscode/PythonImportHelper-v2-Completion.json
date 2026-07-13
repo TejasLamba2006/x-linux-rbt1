@@ -1601,6 +1601,15 @@
         "documentation": {}
     },
     {
+        "label": "set_odometry_recording",
+        "kind": 2,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "def set_odometry_recording(active: bool) -> None:\n    \"\"\"Tell the odometry subprocess whether to accumulate distance/position.\n    The mouse sensor is mounted on the robot itself (nothing to click), so\n    recording tracks whether the motors are actually being driven instead.\"\"\"\n    import urllib.request\n    import urllib.error\n    if odometry_process is None or odometry_process.poll() is not None:\n        return\n    try:\n        body = json.dumps({\"active\": active}).encode()",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
         "label": "fetch_odometry_state",
         "kind": 2,
         "importPath": "applications.web-app.main",
@@ -1893,7 +1902,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "ODOMETRY_HTML_FILE = os.path.join(REPO_ROOT, \"odometry_locomization\", \"index.html\")\nODOMETRY_STATE_URL = \"http://127.0.0.1:5000/state\"\nODOMETRY_ZERO_YAW_URL = \"http://127.0.0.1:5000/zero_yaw\"\nODOMETRY_SET_CPC_URL = \"http://127.0.0.1:5000/set_counts_per_cm\"\n@app.get(\"/map\")\nasync def map_page():\n    \"\"\"Serve the odometry map as its own full page, proxied so it shares\n    this app's origin (avoids https-page/http-iframe mixed-content blocking\n    when embedded, see the map widget on the controller page).\"\"\"\n    if not os.path.isfile(ODOMETRY_HTML_FILE):",
+        "peekOfCode": "ODOMETRY_HTML_FILE = os.path.join(REPO_ROOT, \"odometry_locomization\", \"index.html\")\nODOMETRY_STATE_URL = \"http://127.0.0.1:5000/state\"\nODOMETRY_ZERO_YAW_URL = \"http://127.0.0.1:5000/zero_yaw\"\nODOMETRY_SET_CPC_URL = \"http://127.0.0.1:5000/set_counts_per_cm\"\nODOMETRY_SET_RECORDING_URL = \"http://127.0.0.1:5000/set_recording\"\n_motor_moving = False\ndef set_odometry_recording(active: bool) -> None:\n    \"\"\"Tell the odometry subprocess whether to accumulate distance/position.\n    The mouse sensor is mounted on the robot itself (nothing to click), so\n    recording tracks whether the motors are actually being driven instead.\"\"\"",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1902,7 +1911,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "ODOMETRY_STATE_URL = \"http://127.0.0.1:5000/state\"\nODOMETRY_ZERO_YAW_URL = \"http://127.0.0.1:5000/zero_yaw\"\nODOMETRY_SET_CPC_URL = \"http://127.0.0.1:5000/set_counts_per_cm\"\n@app.get(\"/map\")\nasync def map_page():\n    \"\"\"Serve the odometry map as its own full page, proxied so it shares\n    this app's origin (avoids https-page/http-iframe mixed-content blocking\n    when embedded, see the map widget on the controller page).\"\"\"\n    if not os.path.isfile(ODOMETRY_HTML_FILE):\n        return HTMLResponse(\"<h1>Map unavailable</h1>\", status_code=503)",
+        "peekOfCode": "ODOMETRY_STATE_URL = \"http://127.0.0.1:5000/state\"\nODOMETRY_ZERO_YAW_URL = \"http://127.0.0.1:5000/zero_yaw\"\nODOMETRY_SET_CPC_URL = \"http://127.0.0.1:5000/set_counts_per_cm\"\nODOMETRY_SET_RECORDING_URL = \"http://127.0.0.1:5000/set_recording\"\n_motor_moving = False\ndef set_odometry_recording(active: bool) -> None:\n    \"\"\"Tell the odometry subprocess whether to accumulate distance/position.\n    The mouse sensor is mounted on the robot itself (nothing to click), so\n    recording tracks whether the motors are actually being driven instead.\"\"\"\n    import urllib.request",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1911,7 +1920,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "ODOMETRY_ZERO_YAW_URL = \"http://127.0.0.1:5000/zero_yaw\"\nODOMETRY_SET_CPC_URL = \"http://127.0.0.1:5000/set_counts_per_cm\"\n@app.get(\"/map\")\nasync def map_page():\n    \"\"\"Serve the odometry map as its own full page, proxied so it shares\n    this app's origin (avoids https-page/http-iframe mixed-content blocking\n    when embedded, see the map widget on the controller page).\"\"\"\n    if not os.path.isfile(ODOMETRY_HTML_FILE):\n        return HTMLResponse(\"<h1>Map unavailable</h1>\", status_code=503)\n    return FileResponse(ODOMETRY_HTML_FILE)",
+        "peekOfCode": "ODOMETRY_ZERO_YAW_URL = \"http://127.0.0.1:5000/zero_yaw\"\nODOMETRY_SET_CPC_URL = \"http://127.0.0.1:5000/set_counts_per_cm\"\nODOMETRY_SET_RECORDING_URL = \"http://127.0.0.1:5000/set_recording\"\n_motor_moving = False\ndef set_odometry_recording(active: bool) -> None:\n    \"\"\"Tell the odometry subprocess whether to accumulate distance/position.\n    The mouse sensor is mounted on the robot itself (nothing to click), so\n    recording tracks whether the motors are actually being driven instead.\"\"\"\n    import urllib.request\n    import urllib.error",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1920,7 +1929,25 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "ODOMETRY_SET_CPC_URL = \"http://127.0.0.1:5000/set_counts_per_cm\"\n@app.get(\"/map\")\nasync def map_page():\n    \"\"\"Serve the odometry map as its own full page, proxied so it shares\n    this app's origin (avoids https-page/http-iframe mixed-content blocking\n    when embedded, see the map widget on the controller page).\"\"\"\n    if not os.path.isfile(ODOMETRY_HTML_FILE):\n        return HTMLResponse(\"<h1>Map unavailable</h1>\", status_code=503)\n    return FileResponse(ODOMETRY_HTML_FILE)\ndef fetch_odometry_state() -> Optional[dict]:",
+        "peekOfCode": "ODOMETRY_SET_CPC_URL = \"http://127.0.0.1:5000/set_counts_per_cm\"\nODOMETRY_SET_RECORDING_URL = \"http://127.0.0.1:5000/set_recording\"\n_motor_moving = False\ndef set_odometry_recording(active: bool) -> None:\n    \"\"\"Tell the odometry subprocess whether to accumulate distance/position.\n    The mouse sensor is mounted on the robot itself (nothing to click), so\n    recording tracks whether the motors are actually being driven instead.\"\"\"\n    import urllib.request\n    import urllib.error\n    if odometry_process is None or odometry_process.poll() is not None:",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "ODOMETRY_SET_RECORDING_URL",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "ODOMETRY_SET_RECORDING_URL = \"http://127.0.0.1:5000/set_recording\"\n_motor_moving = False\ndef set_odometry_recording(active: bool) -> None:\n    \"\"\"Tell the odometry subprocess whether to accumulate distance/position.\n    The mouse sensor is mounted on the robot itself (nothing to click), so\n    recording tracks whether the motors are actually being driven instead.\"\"\"\n    import urllib.request\n    import urllib.error\n    if odometry_process is None or odometry_process.poll() is not None:\n        return",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "_motor_moving",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "_motor_moving = False\ndef set_odometry_recording(active: bool) -> None:\n    \"\"\"Tell the odometry subprocess whether to accumulate distance/position.\n    The mouse sensor is mounted on the robot itself (nothing to click), so\n    recording tracks whether the motors are actually being driven instead.\"\"\"\n    import urllib.request\n    import urllib.error\n    if odometry_process is None or odometry_process.poll() is not None:\n        return\n    try:",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -3154,6 +3181,15 @@
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
         "peekOfCode": "def set_counts_per_cm():\n    \"\"\"Update the mouse-counts-to-cm calibration factor at runtime (see\n    calibrate_linux.py for how to derive an accurate value).\"\"\"\n    global COUNTS_PER_CM\n    try:\n        value = float(request.get_json(force=True)[\"value\"])\n        if value <= 0:\n            raise ValueError\n    except Exception:\n        return jsonify({\"ok\": False}), 400",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "set_recording",
+        "kind": 2,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "def set_recording():\n    \"\"\"Set whether odometry accumulates -- driven by main.py based on whether\n    the motors are actually commanded to move, since the mouse sensor is\n    mounted on the robot itself (nothing to click).\"\"\"\n    try:\n        active = bool(request.get_json(force=True)[\"active\"])\n    except Exception:\n        return jsonify({\"ok\": False}), 400\n    with lock:\n        state[\"recording\"] = active",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
