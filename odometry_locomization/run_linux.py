@@ -48,6 +48,13 @@ _ema_distance = 0.0
 _click_count = 0
 _last_click = 0.0
 
+# Phone's raw (un-zeroed) smoothed yaw, and the offset subtracted from it to
+# produce state["yaw"]. The phone's quaternion is referenced to its own
+# arbitrary/magnetic-north origin, not the robot's facing direction, so a
+# zero point must be captured at run start (see /zero_yaw).
+_raw_smoothed_yaw = None
+_yaw_offset = 0.0
+
 # ── Yaw helpers ───────────────────────────────────────────────────────────────
 
 
@@ -67,13 +74,13 @@ def angle_diff(a, b):
 
 
 def udp_listener():
+    global _raw_smoothed_yaw
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind(("0.0.0.0", UDP_PORT))
     sock.settimeout(1.0)
     print(f"[UDP] Listening on port {UDP_PORT}")
 
-    smoothed_yaw = None
     while True:
         try:
             data, _ = sock.recvfrom(256)
@@ -83,15 +90,15 @@ def udp_listener():
             x, y, z = float(parts[0]), float(parts[1]), float(parts[2])
             raw_yaw = quaternion_to_yaw(x, y, z)
 
-            if smoothed_yaw is None:
-                smoothed_yaw = raw_yaw
+            if _raw_smoothed_yaw is None:
+                _raw_smoothed_yaw = raw_yaw
             else:
-                diff = angle_diff(raw_yaw, smoothed_yaw)
-                smoothed_yaw = smoothed_yaw + EMA_ALPHA * diff
-                smoothed_yaw = (smoothed_yaw + 180) % 360 - 180
+                diff = angle_diff(raw_yaw, _raw_smoothed_yaw)
+                _raw_smoothed_yaw = _raw_smoothed_yaw + EMA_ALPHA * diff
+                _raw_smoothed_yaw = (_raw_smoothed_yaw + 180) % 360 - 180
 
             with lock:
-                state["yaw"] = round(smoothed_yaw, 2)
+                state["yaw"] = round(angle_diff(_raw_smoothed_yaw, _yaw_offset), 2)
 
         except socket.timeout:
             continue
@@ -245,6 +252,20 @@ def get_state():
             "recording": state["recording"],
             "path":      state["path"][-500:],
         })
+
+
+@app.route("/zero_yaw", methods=["POST"])
+def zero_yaw():
+    """Capture the phone's current raw heading as the new zero-reference,
+    so state["yaw"] (and the world_dx/dy rotation in
+    _raw_input_delta_callback) aligns with wherever the robot is actually
+    facing right now, instead of the phone's own arbitrary yaw origin."""
+    global _yaw_offset
+    with lock:
+        if _raw_smoothed_yaw is not None:
+            _yaw_offset = _raw_smoothed_yaw
+            state["yaw"] = 0.0
+        return jsonify({"ok": _raw_smoothed_yaw is not None, "yaw_offset": round(_yaw_offset, 2)})
 
 
 # ── Entry Point ───────────────────────────────────────────────────────────────

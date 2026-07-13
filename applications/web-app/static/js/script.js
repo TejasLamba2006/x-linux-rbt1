@@ -132,6 +132,25 @@ if (speedSlider) {
     });
 }
 
+// Odometry Map Widget
+const mapToggle = document.getElementById('map-toggle');
+const mapFrame = document.getElementById('map-frame');
+const mapWidget = document.getElementById('map-widget');
+
+function setMapEnabled(enabled) {
+    if (mapToggle) mapToggle.checked = enabled;
+    if (mapWidget) mapWidget.classList.toggle('expanded', enabled);
+    if (mapFrame) mapFrame.src = enabled ? '/map' : '';
+}
+
+if (mapToggle) {
+    setMapEnabled(localStorage.getItem('mapEnabled') === 'true');
+    mapToggle.addEventListener('change', function() {
+        localStorage.setItem('mapEnabled', mapToggle.checked);
+        setMapEnabled(mapToggle.checked);
+    });
+}
+
 // Left Joystick
 let leftJoystick = {
     element: document.getElementById('left-joystick'),

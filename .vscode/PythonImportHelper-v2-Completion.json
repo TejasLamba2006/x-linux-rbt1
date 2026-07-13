@@ -338,6 +338,22 @@
         "documentation": {}
     },
     {
+        "label": "JSONResponse",
+        "importPath": "fastapi.responses",
+        "description": "fastapi.responses",
+        "isExtraImport": true,
+        "detail": "fastapi.responses",
+        "documentation": {}
+    },
+    {
+        "label": "HTMLResponse",
+        "importPath": "fastapi.responses",
+        "description": "fastapi.responses",
+        "isExtraImport": true,
+        "detail": "fastapi.responses",
+        "documentation": {}
+    },
+    {
         "label": "RedirectResponse",
         "importPath": "fastapi.responses",
         "description": "fastapi.responses",
@@ -458,6 +474,71 @@
         "documentation": {}
     },
     {
+        "label": "struct",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "struct",
+        "description": "struct",
+        "detail": "struct",
+        "documentation": {}
+    },
+    {
+        "label": "INPUT_EVENT_FMT",
+        "importPath": "run_linux",
+        "description": "run_linux",
+        "isExtraImport": true,
+        "detail": "run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "INPUT_EVENT_SIZE",
+        "importPath": "run_linux",
+        "description": "run_linux",
+        "isExtraImport": true,
+        "detail": "run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "EV_REL",
+        "importPath": "run_linux",
+        "description": "run_linux",
+        "isExtraImport": true,
+        "detail": "run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "EV_KEY",
+        "importPath": "run_linux",
+        "description": "run_linux",
+        "isExtraImport": true,
+        "detail": "run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "REL_X",
+        "importPath": "run_linux",
+        "description": "run_linux",
+        "isExtraImport": true,
+        "detail": "run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "REL_Y",
+        "importPath": "run_linux",
+        "description": "run_linux",
+        "isExtraImport": true,
+        "detail": "run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "BTN_LEFT",
+        "importPath": "run_linux",
+        "description": "run_linux",
+        "isExtraImport": true,
+        "detail": "run_linux",
+        "documentation": {}
+    },
+    {
         "label": "hid",
         "importPath": "pywinusb",
         "description": "pywinusb",
@@ -506,15 +587,6 @@
         "importPath": "socket",
         "description": "socket",
         "detail": "socket",
-        "documentation": {}
-    },
-    {
-        "label": "struct",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "struct",
-        "description": "struct",
-        "detail": "struct",
         "documentation": {}
     },
     {
@@ -1279,6 +1351,15 @@
         "documentation": {}
     },
     {
+        "label": "apply_speed_limit",
+        "kind": 2,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "def apply_speed_limit(parsed_data: dict) -> None:\n    \"\"\"Scale throttle/dir_x/dir_y/dir_rot in-place by max_speed_percent,\n    ahead of the drive-type-agnostic parser call, so the limit applies\n    regardless of which drive module (mecanum/differential) is active.\"\"\"\n    if max_speed_percent >= 100:\n        return\n    scale = max_speed_percent / 100.0\n    for key in (\"throttle\", \"dir_x\", \"dir_y\", \"dir_rot\"):\n        if key in parsed_data and isinstance(parsed_data[key], (int, float)):\n            parsed_data[key] = parsed_data[key] * scale",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
         "label": "load_config",
         "kind": 2,
         "importPath": "applications.web-app.main",
@@ -1580,7 +1661,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "TLS_CERT_FILE = os.path.join(SCRIPT_DIR, \"tls_cert.pem\")\nTLS_KEY_FILE = os.path.join(SCRIPT_DIR, \"tls_key.pem\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\nINTENT_AVAILABLE = False",
+        "peekOfCode": "TLS_CERT_FILE = os.path.join(SCRIPT_DIR, \"tls_cert.pem\")\nTLS_KEY_FILE = os.path.join(SCRIPT_DIR, \"tls_key.pem\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\n# GUI-configurable overall speed limit (0..100), applied to joystick input",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1589,7 +1670,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "TLS_KEY_FILE = os.path.join(SCRIPT_DIR, \"tls_key.pem\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\nINTENT_AVAILABLE = False\ntry:",
+        "peekOfCode": "TLS_KEY_FILE = os.path.join(SCRIPT_DIR, \"tls_key.pem\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\n# GUI-configurable overall speed limit (0..100), applied to joystick input\n# before it reaches the drive module. Set via {\"max_speed\": N} over the WS.",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1598,7 +1679,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "VOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\nINTENT_AVAILABLE = False\ntry:\n    sys.path.insert(0, os.path.join(REPO_ROOT, \"intent_classifier\"))\n    from infer import classify_single_command\n    INTENT_AVAILABLE = True\nexcept Exception as e:",
+        "peekOfCode": "VOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\n# GUI-configurable overall speed limit (0..100), applied to joystick input\n# before it reaches the drive module. Set via {\"max_speed\": N} over the WS.\nmax_speed_percent = 100\ndef apply_speed_limit(parsed_data: dict) -> None:\n    \"\"\"Scale throttle/dir_x/dir_y/dir_rot in-place by max_speed_percent,\n    ahead of the drive-type-agnostic parser call, so the limit applies",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1607,7 +1688,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "VOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\nINTENT_AVAILABLE = False\ntry:\n    sys.path.insert(0, os.path.join(REPO_ROOT, \"intent_classifier\"))\n    from infer import classify_single_command\n    INTENT_AVAILABLE = True\nexcept Exception as e:\n    logging.getLogger(__name__).warning(f\"Intent classifier unavailable: {e}\")",
+        "peekOfCode": "VOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\n# GUI-configurable overall speed limit (0..100), applied to joystick input\n# before it reaches the drive module. Set via {\"max_speed\": N} over the WS.\nmax_speed_percent = 100\ndef apply_speed_limit(parsed_data: dict) -> None:\n    \"\"\"Scale throttle/dir_x/dir_y/dir_rot in-place by max_speed_percent,\n    ahead of the drive-type-agnostic parser call, so the limit applies\n    regardless of which drive module (mecanum/differential) is active.\"\"\"",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1616,7 +1697,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "VOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\nINTENT_AVAILABLE = False\ntry:\n    sys.path.insert(0, os.path.join(REPO_ROOT, \"intent_classifier\"))\n    from infer import classify_single_command\n    INTENT_AVAILABLE = True\nexcept Exception as e:\n    logging.getLogger(__name__).warning(f\"Intent classifier unavailable: {e}\")\n# =============================================================================",
+        "peekOfCode": "VOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\n# GUI-configurable overall speed limit (0..100), applied to joystick input\n# before it reaches the drive module. Set via {\"max_speed\": N} over the WS.\nmax_speed_percent = 100\ndef apply_speed_limit(parsed_data: dict) -> None:\n    \"\"\"Scale throttle/dir_x/dir_y/dir_rot in-place by max_speed_percent,\n    ahead of the drive-type-agnostic parser call, so the limit applies\n    regardless of which drive module (mecanum/differential) is active.\"\"\"\n    if max_speed_percent >= 100:",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1625,7 +1706,16 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "VOICE_MAX_DURATION = 5.0\nINTENT_AVAILABLE = False\ntry:\n    sys.path.insert(0, os.path.join(REPO_ROOT, \"intent_classifier\"))\n    from infer import classify_single_command\n    INTENT_AVAILABLE = True\nexcept Exception as e:\n    logging.getLogger(__name__).warning(f\"Intent classifier unavailable: {e}\")\n# =============================================================================\n# CONFIGURATION FILE MANAGEMENT",
+        "peekOfCode": "VOICE_MAX_DURATION = 5.0\n# GUI-configurable overall speed limit (0..100), applied to joystick input\n# before it reaches the drive module. Set via {\"max_speed\": N} over the WS.\nmax_speed_percent = 100\ndef apply_speed_limit(parsed_data: dict) -> None:\n    \"\"\"Scale throttle/dir_x/dir_y/dir_rot in-place by max_speed_percent,\n    ahead of the drive-type-agnostic parser call, so the limit applies\n    regardless of which drive module (mecanum/differential) is active.\"\"\"\n    if max_speed_percent >= 100:\n        return",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "max_speed_percent",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "max_speed_percent = 100\ndef apply_speed_limit(parsed_data: dict) -> None:\n    \"\"\"Scale throttle/dir_x/dir_y/dir_rot in-place by max_speed_percent,\n    ahead of the drive-type-agnostic parser call, so the limit applies\n    regardless of which drive module (mecanum/differential) is active.\"\"\"\n    if max_speed_percent >= 100:\n        return\n    scale = max_speed_percent / 100.0\n    for key in (\"throttle\", \"dir_x\", \"dir_y\", \"dir_rot\"):\n        if key in parsed_data and isinstance(parsed_data[key], (int, float)):",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1698,6 +1788,33 @@
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
         "peekOfCode": "app = FastAPI(\n    title=\"X-LINUX-RBT1 Controller\",\n    description=\"Robotics control web application\",\n    version=\"1.0.0\",\n    lifespan=lifespan\n)\n# Serve static files\napp.mount(\"/static\", StaticFiles(directory=os.path.join(SCRIPT_DIR, \"static\")), name=\"static\")\n@app.get(\"/\")\nasync def root():",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "ODOMETRY_HTML_FILE",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "ODOMETRY_HTML_FILE = os.path.join(REPO_ROOT, \"odometry_locomization\", \"index.html\")\nODOMETRY_STATE_URL = \"http://127.0.0.1:5000/state\"\nODOMETRY_ZERO_YAW_URL = \"http://127.0.0.1:5000/zero_yaw\"\n@app.get(\"/map\")\nasync def map_page():\n    \"\"\"Serve the odometry map as its own full page, proxied so it shares\n    this app's origin (avoids https-page/http-iframe mixed-content blocking\n    when embedded, see the map widget on the controller page).\"\"\"\n    if not os.path.isfile(ODOMETRY_HTML_FILE):\n        return HTMLResponse(\"<h1>Map unavailable</h1>\", status_code=503)",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "ODOMETRY_STATE_URL",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "ODOMETRY_STATE_URL = \"http://127.0.0.1:5000/state\"\nODOMETRY_ZERO_YAW_URL = \"http://127.0.0.1:5000/zero_yaw\"\n@app.get(\"/map\")\nasync def map_page():\n    \"\"\"Serve the odometry map as its own full page, proxied so it shares\n    this app's origin (avoids https-page/http-iframe mixed-content blocking\n    when embedded, see the map widget on the controller page).\"\"\"\n    if not os.path.isfile(ODOMETRY_HTML_FILE):\n        return HTMLResponse(\"<h1>Map unavailable</h1>\", status_code=503)\n    return FileResponse(ODOMETRY_HTML_FILE)",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "ODOMETRY_ZERO_YAW_URL",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "ODOMETRY_ZERO_YAW_URL = \"http://127.0.0.1:5000/zero_yaw\"\n@app.get(\"/map\")\nasync def map_page():\n    \"\"\"Serve the odometry map as its own full page, proxied so it shares\n    this app's origin (avoids https-page/http-iframe mixed-content blocking\n    when embedded, see the map widget on the controller page).\"\"\"\n    if not os.path.isfile(ODOMETRY_HTML_FILE):\n        return HTMLResponse(\"<h1>Map unavailable</h1>\", status_code=503)\n    return FileResponse(ODOMETRY_HTML_FILE)\n@app.get(\"/state\")",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -2620,6 +2737,15 @@
         "documentation": {}
     },
     {
+        "label": "calibrate",
+        "kind": 2,
+        "importPath": "odometry_locomization.calibrate_linux",
+        "description": "odometry_locomization.calibrate_linux",
+        "peekOfCode": "def calibrate(device_path: str, distance_cm: float):\n    fd = open(device_path, \"rb\")\n    print(f\"[calibrate] Opened {device_path}. Hold LEFT CLICK, move exactly {distance_cm} cm, release.\")\n    print(\"[calibrate] Ctrl+C to stop.\")\n    dx = dy = 0\n    recording = False\n    while True:\n        raw = fd.read(INPUT_EVENT_SIZE)\n        if len(raw) < INPUT_EVENT_SIZE:\n            continue",
+        "detail": "odometry_locomization.calibrate_linux",
+        "documentation": {}
+    },
+    {
         "label": "handler",
         "kind": 2,
         "importPath": "odometry_locomization.dpi",
@@ -2741,7 +2867,7 @@
         "kind": 2,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "def angle_diff(a, b):\n    return (a - b + 180) % 360 - 180\n# ── UDP Listener ──────────────────────────────────────────────────────────────\ndef udp_listener():\n    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\n    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n    sock.bind((\"0.0.0.0\", UDP_PORT))\n    sock.settimeout(1.0)\n    print(f\"[UDP] Listening on port {UDP_PORT}\")\n    smoothed_yaw = None",
+        "peekOfCode": "def angle_diff(a, b):\n    return (a - b + 180) % 360 - 180\n# ── UDP Listener ──────────────────────────────────────────────────────────────\ndef udp_listener():\n    global _raw_smoothed_yaw\n    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\n    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n    sock.bind((\"0.0.0.0\", UDP_PORT))\n    sock.settimeout(1.0)\n    print(f\"[UDP] Listening on port {UDP_PORT}\")",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -2750,7 +2876,7 @@
         "kind": 2,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "def udp_listener():\n    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\n    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n    sock.bind((\"0.0.0.0\", UDP_PORT))\n    sock.settimeout(1.0)\n    print(f\"[UDP] Listening on port {UDP_PORT}\")\n    smoothed_yaw = None\n    while True:\n        try:\n            data, _ = sock.recvfrom(256)",
+        "peekOfCode": "def udp_listener():\n    global _raw_smoothed_yaw\n    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\n    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n    sock.bind((\"0.0.0.0\", UDP_PORT))\n    sock.settimeout(1.0)\n    print(f\"[UDP] Listening on port {UDP_PORT}\")\n    while True:\n        try:\n            data, _ = sock.recvfrom(256)",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -2769,6 +2895,15 @@
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
         "peekOfCode": "def get_state():\n    with lock:\n        return jsonify({\n            \"x\":         round(state[\"x\"], 2),\n            \"y\":         round(state[\"y\"], 2),\n            \"yaw\":       state[\"yaw\"],\n            \"distance\":  round(state[\"distance\"], 2),\n            \"recording\": state[\"recording\"],\n            \"path\":      state[\"path\"][-500:],\n        })",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "zero_yaw",
+        "kind": 2,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "def zero_yaw():\n    \"\"\"Capture the phone's current raw heading as the new zero-reference,\n    so state[\"yaw\"] (and the world_dx/dy rotation in\n    _raw_input_delta_callback) aligns with wherever the robot is actually\n    facing right now, instead of the phone's own arbitrary yaw origin.\"\"\"\n    global _yaw_offset\n    with lock:\n        if _raw_smoothed_yaw is not None:\n            _yaw_offset = _raw_smoothed_yaw\n            state[\"yaw\"] = 0.0",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -2921,7 +3056,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_raw_dx_buf = deque(maxlen=SMOOTHING_WIN)\n_ema_distance = 0.0\n_click_count = 0\n_last_click = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef quaternion_to_yaw(x, y, z):\n    w = math.sqrt(max(0.0, 1.0 - x*x - y*y - z*z))\n    yaw = math.atan2(\n        2.0 * (w * z + x * y),\n        1.0 - 2.0 * (y * y + z * z)",
+        "peekOfCode": "_raw_dx_buf = deque(maxlen=SMOOTHING_WIN)\n_ema_distance = 0.0\n_click_count = 0\n_last_click = 0.0\n# Phone's raw (un-zeroed) smoothed yaw, and the offset subtracted from it to\n# produce state[\"yaw\"]. The phone's quaternion is referenced to its own\n# arbitrary/magnetic-north origin, not the robot's facing direction, so a\n# zero point must be captured at run start (see /zero_yaw).\n_raw_smoothed_yaw = None\n_yaw_offset = 0.0",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -2930,7 +3065,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_ema_distance = 0.0\n_click_count = 0\n_last_click = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef quaternion_to_yaw(x, y, z):\n    w = math.sqrt(max(0.0, 1.0 - x*x - y*y - z*z))\n    yaw = math.atan2(\n        2.0 * (w * z + x * y),\n        1.0 - 2.0 * (y * y + z * z)\n    )",
+        "peekOfCode": "_ema_distance = 0.0\n_click_count = 0\n_last_click = 0.0\n# Phone's raw (un-zeroed) smoothed yaw, and the offset subtracted from it to\n# produce state[\"yaw\"]. The phone's quaternion is referenced to its own\n# arbitrary/magnetic-north origin, not the robot's facing direction, so a\n# zero point must be captured at run start (see /zero_yaw).\n_raw_smoothed_yaw = None\n_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -2939,7 +3074,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_click_count = 0\n_last_click = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef quaternion_to_yaw(x, y, z):\n    w = math.sqrt(max(0.0, 1.0 - x*x - y*y - z*z))\n    yaw = math.atan2(\n        2.0 * (w * z + x * y),\n        1.0 - 2.0 * (y * y + z * z)\n    )\n    return math.degrees(yaw)",
+        "peekOfCode": "_click_count = 0\n_last_click = 0.0\n# Phone's raw (un-zeroed) smoothed yaw, and the offset subtracted from it to\n# produce state[\"yaw\"]. The phone's quaternion is referenced to its own\n# arbitrary/magnetic-north origin, not the robot's facing direction, so a\n# zero point must be captured at run start (see /zero_yaw).\n_raw_smoothed_yaw = None\n_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef quaternion_to_yaw(x, y, z):",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -2948,7 +3083,25 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_last_click = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef quaternion_to_yaw(x, y, z):\n    w = math.sqrt(max(0.0, 1.0 - x*x - y*y - z*z))\n    yaw = math.atan2(\n        2.0 * (w * z + x * y),\n        1.0 - 2.0 * (y * y + z * z)\n    )\n    return math.degrees(yaw)\ndef angle_diff(a, b):",
+        "peekOfCode": "_last_click = 0.0\n# Phone's raw (un-zeroed) smoothed yaw, and the offset subtracted from it to\n# produce state[\"yaw\"]. The phone's quaternion is referenced to its own\n# arbitrary/magnetic-north origin, not the robot's facing direction, so a\n# zero point must be captured at run start (see /zero_yaw).\n_raw_smoothed_yaw = None\n_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef quaternion_to_yaw(x, y, z):\n    w = math.sqrt(max(0.0, 1.0 - x*x - y*y - z*z))",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "_raw_smoothed_yaw",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "_raw_smoothed_yaw = None\n_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef quaternion_to_yaw(x, y, z):\n    w = math.sqrt(max(0.0, 1.0 - x*x - y*y - z*z))\n    yaw = math.atan2(\n        2.0 * (w * z + x * y),\n        1.0 - 2.0 * (y * y + z * z)\n    )\n    return math.degrees(yaw)",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "_yaw_offset",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef quaternion_to_yaw(x, y, z):\n    w = math.sqrt(max(0.0, 1.0 - x*x - y*y - z*z))\n    yaw = math.atan2(\n        2.0 * (w * z + x * y),\n        1.0 - 2.0 * (y * y + z * z)\n    )\n    return math.degrees(yaw)\ndef angle_diff(a, b):",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },

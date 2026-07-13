@@ -34,7 +34,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 import uvicorn
 import netifaces
 import qrcode
@@ -492,15 +492,16 @@ def handle_voice_command(text: str) -> dict:
         motor_api.stop()
         return {"intent": intent, "value": value}
 
+    voice_speed = VOICE_SPEED * max_speed_percent / 100.0
     drive = {
-        "FORWARD":      {"throttle": VOICE_SPEED},
-        "BACKWARD":     {"throttle": -VOICE_SPEED},
-        "LEFT":         {"dir_x": -VOICE_SPEED},
-        "RIGHT":        {"dir_x": VOICE_SPEED},
-        "TURN_LEFT":    {"dir_x": -VOICE_SPEED},
-        "TURN_RIGHT":   {"dir_x": VOICE_SPEED},
-        "ROTATE_LEFT":  {"dir_rot": -VOICE_SPEED},
-        "ROTATE_RIGHT": {"dir_rot": VOICE_SPEED},
+        "FORWARD":      {"throttle": voice_speed},
+        "BACKWARD":     {"throttle": -voice_speed},
+        "LEFT":         {"dir_x": -voice_speed},
+        "RIGHT":        {"dir_x": voice_speed},
+        "TURN_LEFT":    {"dir_x": -voice_speed},
+        "TURN_RIGHT":   {"dir_x": voice_speed},
+        "ROTATE_LEFT":  {"dir_rot": -voice_speed},
+        "ROTATE_RIGHT": {"dir_rot": voice_speed},
     }.get(intent)
 
     if drive is None:
@@ -937,6 +938,58 @@ async def root():
 async def get_drive_type():
     """API endpoint to get the current drive type."""
     return {"drive_type": current_drive_type}
+
+
+ODOMETRY_HTML_FILE = os.path.join(REPO_ROOT, "odometry_locomization", "index.html")
+ODOMETRY_STATE_URL = "http://127.0.0.1:5000/state"
+ODOMETRY_ZERO_YAW_URL = "http://127.0.0.1:5000/zero_yaw"
+
+
+@app.get("/map")
+async def map_page():
+    """Serve the odometry map as its own full page, proxied so it shares
+    this app's origin (avoids https-page/http-iframe mixed-content blocking
+    when embedded, see the map widget on the controller page)."""
+    if not os.path.isfile(ODOMETRY_HTML_FILE):
+        return HTMLResponse("<h1>Map unavailable</h1>", status_code=503)
+    return FileResponse(ODOMETRY_HTML_FILE)
+
+
+@app.get("/state")
+async def map_state():
+    """Proxy /state to the odometry companion subprocess (port 5000). The
+    subprocess is best-effort (see start_odometry_server), so this returns
+    a graceful "no data" response instead of erroring if it's not running."""
+    import urllib.request
+    import urllib.error
+
+    if odometry_process is None or odometry_process.poll() is not None:
+        return JSONResponse({"available": False}, status_code=200)
+
+    try:
+        with urllib.request.urlopen(ODOMETRY_STATE_URL, timeout=1) as resp:
+            return JSONResponse(json.loads(resp.read()))
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
+        logger.warning(f"Odometry map proxy failed: {e}")
+        return JSONResponse({"available": False}, status_code=200)
+
+
+@app.post("/zero_yaw")
+async def map_zero_yaw():
+    """Proxy the map's 'zero heading' button to the odometry subprocess."""
+    import urllib.request
+    import urllib.error
+
+    if odometry_process is None or odometry_process.poll() is not None:
+        return JSONResponse({"ok": False}, status_code=200)
+
+    try:
+        req = urllib.request.Request(ODOMETRY_ZERO_YAW_URL, method="POST")
+        with urllib.request.urlopen(req, timeout=1) as resp:
+            return JSONResponse(json.loads(resp.read()))
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
+        logger.warning(f"Odometry zero-yaw proxy failed: {e}")
+        return JSONResponse({"ok": False}, status_code=200)
 
 
 # =============================================================================
