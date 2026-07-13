@@ -39,7 +39,7 @@ state = {
     "y":         0.0,
     "yaw":       0.0,
     "distance":  0.0,
-    "recording": True,
+    "recording": False,
     "path":      [[0.0, 0.0]],
 }
 
@@ -113,10 +113,17 @@ def udp_listener():
 # Integrates gyro-Z angular rate directly into _raw_smoothed_yaw -- the same
 # shared variable udp_listener() would have written -- so /zero_yaw and
 # _raw_input_delta_callback need no changes regardless of which yaw source runs.
-# ponytail: pure gyro dead-reckoning drifts over time (no magnetometer fusion);
-# use the map's "Zero Heading" button to recalibrate, add a complementary
-# filter with the LSM6DSV16X's magnetometer/accelerometer if drift matters.
+# Startup gyro-bias calibration (averages the first ~0.5s assuming the board
+# is stationary at boot) plus continuous accelerometer-gated bias re-tracking
+# handle most of the drift; use "Zero Heading" for anything left over.
 GYRO_ODR_HZ = 120
+GYRO_BIAS_CALIB_SAMPLES = 60
+GYRO_BIAS_EMA_ALPHA = 0.02
+
+# Total accel magnitude stays ~1000 mg only when there's no linear
+# acceleration, i.e. the board is genuinely still (not just yaw-still).
+STATIONARY_ACCEL_MG_LOW = 950
+STATIONARY_ACCEL_MG_HIGH = 1050
 
 
 def imu_yaw_thread():
@@ -133,8 +140,16 @@ def imu_yaw_thread():
         print(f"[IMU] init failed: {e}")
         return
 
-    print("[IMU] LSM6DSV16X gyro-yaw integration started")
+    print("[IMU] LSM6DSV16X gyro-yaw integration started, calibrating bias...")
     _raw_smoothed_yaw = 0.0
+
+    calib_samples = []
+    for _ in range(GYRO_BIAS_CALIB_SAMPLES):
+        calib_samples.append(imu.read_gyro_z_dps())
+        time.sleep(1.0 / GYRO_ODR_HZ)
+    gyro_bias_dps = sum(calib_samples) / len(calib_samples)
+    print(f"[IMU] gyro bias = {gyro_bias_dps:.3f} dps")
+
     last_t = time.time()
 
     while True:
@@ -144,7 +159,19 @@ def imu_yaw_thread():
             last_t = now
 
             gyro_z_dps = imu.read_gyro_z_dps()
-            _raw_smoothed_yaw = (_raw_smoothed_yaw + gyro_z_dps * dt + 180) % 360 - 180
+
+            # ponytail: the accelerometer can't observe yaw directly (rotating
+            # about gravity doesn't change the gravity vector) -- it's used
+            # only to detect "no linear acceleration" moments so the gyro's
+            # zero-rate bias can be re-tracked continuously, which is what
+            # actually stops the slow fake rotation while sitting still.
+            ax, ay, az = imu.read_accel_mg()
+            accel_mag = math.sqrt(ax * ax + ay * ay + az * az)
+            if (STATIONARY_ACCEL_MG_LOW < accel_mag < STATIONARY_ACCEL_MG_HIGH
+                    and abs(gyro_z_dps - gyro_bias_dps) < 5):
+                gyro_bias_dps += GYRO_BIAS_EMA_ALPHA * (gyro_z_dps - gyro_bias_dps)
+
+            _raw_smoothed_yaw = (_raw_smoothed_yaw + (gyro_z_dps - gyro_bias_dps) * dt + 180) % 360 - 180
 
             with lock:
                 state["yaw"] = round(angle_diff(_raw_smoothed_yaw, _yaw_offset), 2)
@@ -251,6 +278,9 @@ def _evdev_thread(device_path: str):
 
                     if ev_value == 1:
 
+                        with lock:
+                            state["recording"] = True
+
                         if now - _last_click < 0.4:
                             _click_count += 1
                         else:
@@ -270,6 +300,10 @@ def _evdev_thread(device_path: str):
 
                             print("[Mouse] MAP RESET")
                             continue
+
+                    elif ev_value == 0:
+                        with lock:
+                            state["recording"] = False
             elif ev_type == EV_SYN:
                 # SYN_REPORT (code 0) marks end of one logical event frame
                 if (pending_dx != 0 or pending_dy != 0):
