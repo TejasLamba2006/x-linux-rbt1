@@ -6,7 +6,7 @@ import struct
 import threading
 import time
 from collections import deque
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 COUNTS_PER_CM = 151
@@ -70,7 +70,10 @@ def quaternion_to_yaw(x, y, z):
 def angle_diff(a, b):
     return (a - b + 180) % 360 - 180
 
-# ── UDP Listener ──────────────────────────────────────────────────────────────
+# ── UDP Listener (phone IMU) ─────────────────────────────────────────────────
+# Not started by default anymore -- see imu_yaw_thread() below, which reads the
+# board's own LSM6DSV16X gyro instead so the map doesn't depend on a phone.
+# Kept for reference / easy revert (swap the thread started in __main__).
 
 
 def udp_listener():
@@ -104,6 +107,52 @@ def udp_listener():
             continue
         except Exception as e:
             print(f"[UDP] Error: {e}")
+
+
+# ── Onboard IMU (LSM6DSV16X gyro) ────────────────────────────────────────────
+# Integrates gyro-Z angular rate directly into _raw_smoothed_yaw -- the same
+# shared variable udp_listener() would have written -- so /zero_yaw and
+# _raw_input_delta_callback need no changes regardless of which yaw source runs.
+# ponytail: pure gyro dead-reckoning drifts over time (no magnetometer fusion);
+# use the map's "Zero Heading" button to recalibrate, add a complementary
+# filter with the LSM6DSV16X's magnetometer/accelerometer if drift matters.
+GYRO_ODR_HZ = 120
+
+
+def imu_yaw_thread():
+    global _raw_smoothed_yaw
+    from imu_lsm6dsv16x import LSM6DSV16X
+
+    try:
+        imu = LSM6DSV16X()
+        if not imu.check_who_am_i():
+            print("[IMU] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled")
+            return
+        imu.configure()
+    except Exception as e:
+        print(f"[IMU] init failed: {e}")
+        return
+
+    print("[IMU] LSM6DSV16X gyro-yaw integration started")
+    _raw_smoothed_yaw = 0.0
+    last_t = time.time()
+
+    while True:
+        try:
+            now = time.time()
+            dt = now - last_t
+            last_t = now
+
+            gyro_z_dps = imu.read_gyro_z_dps()
+            _raw_smoothed_yaw = (_raw_smoothed_yaw + gyro_z_dps * dt + 180) % 360 - 180
+
+            with lock:
+                state["yaw"] = round(angle_diff(_raw_smoothed_yaw, _yaw_offset), 2)
+
+            time.sleep(1.0 / GYRO_ODR_HZ)
+        except Exception as e:
+            print(f"[IMU] Error: {e}")
+            time.sleep(0.1)
 
 
 def _raw_input_delta_callback(raw_dx: int, raw_dy: int):
@@ -245,13 +294,30 @@ def index():
 def get_state():
     with lock:
         return jsonify({
-            "x":         round(state["x"], 2),
-            "y":         round(state["y"], 2),
-            "yaw":       state["yaw"],
-            "distance":  round(state["distance"], 2),
-            "recording": state["recording"],
-            "path":      state["path"][-500:],
+            "x":              round(state["x"], 2),
+            "y":              round(state["y"], 2),
+            "yaw":            state["yaw"],
+            "distance":       round(state["distance"], 2),
+            "recording":      state["recording"],
+            "path":           state["path"][-500:],
+            "counts_per_cm":  COUNTS_PER_CM,
         })
+
+
+@app.route("/set_counts_per_cm", methods=["POST"])
+def set_counts_per_cm():
+    """Update the mouse-counts-to-cm calibration factor at runtime (see
+    calibrate_linux.py for how to derive an accurate value)."""
+    global COUNTS_PER_CM
+    try:
+        value = float(request.get_json(force=True)["value"])
+        if value <= 0:
+            raise ValueError
+    except Exception:
+        return jsonify({"ok": False}), 400
+    with lock:
+        COUNTS_PER_CM = value
+    return jsonify({"ok": True, "counts_per_cm": COUNTS_PER_CM})
 
 
 @app.route("/zero_yaw", methods=["POST"])
@@ -270,11 +336,11 @@ def zero_yaw():
 
 # ── Entry Point ───────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    t_udp = threading.Thread(
-        target=udp_listener,
+    t_yaw = threading.Thread(
+        target=imu_yaw_thread,
         daemon=True
     )
-    t_udp.start()
+    t_yaw.start()
 
     device_path = "/dev/input/event1"
     print("Using:", device_path)

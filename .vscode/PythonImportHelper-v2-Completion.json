@@ -219,6 +219,15 @@
         "documentation": {}
     },
     {
+        "label": "asyncio",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "asyncio",
+        "description": "asyncio",
+        "detail": "asyncio",
+        "documentation": {}
+    },
+    {
         "label": "json",
         "kind": 6,
         "isExtraImport": true,
@@ -291,6 +300,14 @@
     },
     {
         "label": "FastAPI",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Request",
         "importPath": "fastapi",
         "description": "fastapi",
         "isExtraImport": true,
@@ -547,6 +564,15 @@
         "documentation": {}
     },
     {
+        "label": "fcntl",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "fcntl",
+        "description": "fcntl",
+        "detail": "fcntl",
+        "documentation": {}
+    },
+    {
         "label": "torch",
         "kind": 6,
         "isExtraImport": true,
@@ -615,6 +641,14 @@
     },
     {
         "label": "jsonify",
+        "importPath": "flask",
+        "description": "flask",
+        "isExtraImport": true,
+        "detail": "flask",
+        "documentation": {}
+    },
+    {
+        "label": "request",
         "importPath": "flask",
         "description": "flask",
         "isExtraImport": true,
@@ -1567,6 +1601,15 @@
         "documentation": {}
     },
     {
+        "label": "fetch_odometry_state",
+        "kind": 2,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "def fetch_odometry_state() -> Optional[dict]:\n    \"\"\"Fetch /state from the odometry companion subprocess. Shared by the\n    /state proxy route and the move_cm closed-loop driver. Returns None if\n    the subprocess isn't running or didn't respond in time.\"\"\"\n    import urllib.request\n    import urllib.error\n    if odometry_process is None or odometry_process.poll() is not None:\n        return None\n    try:\n        with urllib.request.urlopen(ODOMETRY_STATE_URL, timeout=1) as resp:",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
         "label": "signal_handler",
         "kind": 2,
         "importPath": "applications.web-app.main",
@@ -1661,7 +1704,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "TLS_CERT_FILE = os.path.join(SCRIPT_DIR, \"tls_cert.pem\")\nTLS_KEY_FILE = os.path.join(SCRIPT_DIR, \"tls_key.pem\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\n# GUI-configurable overall speed limit (0..100), applied to joystick input",
+        "peekOfCode": "TLS_CERT_FILE = os.path.join(SCRIPT_DIR, \"tls_cert.pem\")\nTLS_KEY_FILE = os.path.join(SCRIPT_DIR, \"tls_key.pem\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\n# =============================================================================",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1670,7 +1713,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "TLS_KEY_FILE = os.path.join(SCRIPT_DIR, \"tls_key.pem\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\n# GUI-configurable overall speed limit (0..100), applied to joystick input\n# before it reaches the drive module. Set via {\"max_speed\": N} over the WS.",
+        "peekOfCode": "TLS_KEY_FILE = os.path.join(SCRIPT_DIR, \"tls_key.pem\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\n# =============================================================================\n# CLOSED-LOOP MOVE-BY-DISTANCE (see move_distance_cm) -- uses the odometry",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1679,7 +1722,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "VOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\n# GUI-configurable overall speed limit (0..100), applied to joystick input\n# before it reaches the drive module. Set via {\"max_speed\": N} over the WS.\nmax_speed_percent = 100\ndef apply_speed_limit(parsed_data: dict) -> None:\n    \"\"\"Scale throttle/dir_x/dir_y/dir_rot in-place by max_speed_percent,\n    ahead of the drive-type-agnostic parser call, so the limit applies",
+        "peekOfCode": "VOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100\nVOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\n# =============================================================================\n# CLOSED-LOOP MOVE-BY-DISTANCE (see move_distance_cm) -- uses the odometry\n# subprocess's cumulative mouse-based distance reading as feedback.\n# =============================================================================\nMOVE_SPEED = 50               # duty for move_cm driving, 0..100\nMOVE_MAX_CM = 500             # sanity cap on a single move_cm request",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1688,7 +1731,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "VOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\n# GUI-configurable overall speed limit (0..100), applied to joystick input\n# before it reaches the drive module. Set via {\"max_speed\": N} over the WS.\nmax_speed_percent = 100\ndef apply_speed_limit(parsed_data: dict) -> None:\n    \"\"\"Scale throttle/dir_x/dir_y/dir_rot in-place by max_speed_percent,\n    ahead of the drive-type-agnostic parser call, so the limit applies\n    regardless of which drive module (mecanum/differential) is active.\"\"\"",
+        "peekOfCode": "VOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value\nVOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\n# =============================================================================\n# CLOSED-LOOP MOVE-BY-DISTANCE (see move_distance_cm) -- uses the odometry\n# subprocess's cumulative mouse-based distance reading as feedback.\n# =============================================================================\nMOVE_SPEED = 50               # duty for move_cm driving, 0..100\nMOVE_MAX_CM = 500             # sanity cap on a single move_cm request\nMOVE_POLL_INTERVAL = 0.1      # seconds between odometry distance polls",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1697,7 +1740,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "VOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\n# GUI-configurable overall speed limit (0..100), applied to joystick input\n# before it reaches the drive module. Set via {\"max_speed\": N} over the WS.\nmax_speed_percent = 100\ndef apply_speed_limit(parsed_data: dict) -> None:\n    \"\"\"Scale throttle/dir_x/dir_y/dir_rot in-place by max_speed_percent,\n    ahead of the drive-type-agnostic parser call, so the limit applies\n    regardless of which drive module (mecanum/differential) is active.\"\"\"\n    if max_speed_percent >= 100:",
+        "peekOfCode": "VOICE_PER_UNIT_DURATION = 0.15\nVOICE_MAX_DURATION = 5.0\n# =============================================================================\n# CLOSED-LOOP MOVE-BY-DISTANCE (see move_distance_cm) -- uses the odometry\n# subprocess's cumulative mouse-based distance reading as feedback.\n# =============================================================================\nMOVE_SPEED = 50               # duty for move_cm driving, 0..100\nMOVE_MAX_CM = 500             # sanity cap on a single move_cm request\nMOVE_POLL_INTERVAL = 0.1      # seconds between odometry distance polls\nMOVE_TIMEOUT_PER_CM = 0.5     # worst-case seconds/cm before aborting as stuck",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1706,7 +1749,61 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "VOICE_MAX_DURATION = 5.0\n# GUI-configurable overall speed limit (0..100), applied to joystick input\n# before it reaches the drive module. Set via {\"max_speed\": N} over the WS.\nmax_speed_percent = 100\ndef apply_speed_limit(parsed_data: dict) -> None:\n    \"\"\"Scale throttle/dir_x/dir_y/dir_rot in-place by max_speed_percent,\n    ahead of the drive-type-agnostic parser call, so the limit applies\n    regardless of which drive module (mecanum/differential) is active.\"\"\"\n    if max_speed_percent >= 100:\n        return",
+        "peekOfCode": "VOICE_MAX_DURATION = 5.0\n# =============================================================================\n# CLOSED-LOOP MOVE-BY-DISTANCE (see move_distance_cm) -- uses the odometry\n# subprocess's cumulative mouse-based distance reading as feedback.\n# =============================================================================\nMOVE_SPEED = 50               # duty for move_cm driving, 0..100\nMOVE_MAX_CM = 500             # sanity cap on a single move_cm request\nMOVE_POLL_INTERVAL = 0.1      # seconds between odometry distance polls\nMOVE_TIMEOUT_PER_CM = 0.5     # worst-case seconds/cm before aborting as stuck\nMOVE_TIMEOUT_MIN = 3.0",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "MOVE_SPEED",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "MOVE_SPEED = 50               # duty for move_cm driving, 0..100\nMOVE_MAX_CM = 500             # sanity cap on a single move_cm request\nMOVE_POLL_INTERVAL = 0.1      # seconds between odometry distance polls\nMOVE_TIMEOUT_PER_CM = 0.5     # worst-case seconds/cm before aborting as stuck\nMOVE_TIMEOUT_MIN = 3.0\nmove_in_progress = False\n# GUI-configurable overall speed limit (0..100), applied to joystick input\n# before it reaches the drive module. Set via {\"max_speed\": N} over the WS.\nmax_speed_percent = 100\ndef apply_speed_limit(parsed_data: dict) -> None:",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "MOVE_MAX_CM",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "MOVE_MAX_CM = 500             # sanity cap on a single move_cm request\nMOVE_POLL_INTERVAL = 0.1      # seconds between odometry distance polls\nMOVE_TIMEOUT_PER_CM = 0.5     # worst-case seconds/cm before aborting as stuck\nMOVE_TIMEOUT_MIN = 3.0\nmove_in_progress = False\n# GUI-configurable overall speed limit (0..100), applied to joystick input\n# before it reaches the drive module. Set via {\"max_speed\": N} over the WS.\nmax_speed_percent = 100\ndef apply_speed_limit(parsed_data: dict) -> None:\n    \"\"\"Scale throttle/dir_x/dir_y/dir_rot in-place by max_speed_percent,",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "MOVE_POLL_INTERVAL",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "MOVE_POLL_INTERVAL = 0.1      # seconds between odometry distance polls\nMOVE_TIMEOUT_PER_CM = 0.5     # worst-case seconds/cm before aborting as stuck\nMOVE_TIMEOUT_MIN = 3.0\nmove_in_progress = False\n# GUI-configurable overall speed limit (0..100), applied to joystick input\n# before it reaches the drive module. Set via {\"max_speed\": N} over the WS.\nmax_speed_percent = 100\ndef apply_speed_limit(parsed_data: dict) -> None:\n    \"\"\"Scale throttle/dir_x/dir_y/dir_rot in-place by max_speed_percent,\n    ahead of the drive-type-agnostic parser call, so the limit applies",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "MOVE_TIMEOUT_PER_CM",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "MOVE_TIMEOUT_PER_CM = 0.5     # worst-case seconds/cm before aborting as stuck\nMOVE_TIMEOUT_MIN = 3.0\nmove_in_progress = False\n# GUI-configurable overall speed limit (0..100), applied to joystick input\n# before it reaches the drive module. Set via {\"max_speed\": N} over the WS.\nmax_speed_percent = 100\ndef apply_speed_limit(parsed_data: dict) -> None:\n    \"\"\"Scale throttle/dir_x/dir_y/dir_rot in-place by max_speed_percent,\n    ahead of the drive-type-agnostic parser call, so the limit applies\n    regardless of which drive module (mecanum/differential) is active.\"\"\"",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "MOVE_TIMEOUT_MIN",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "MOVE_TIMEOUT_MIN = 3.0\nmove_in_progress = False\n# GUI-configurable overall speed limit (0..100), applied to joystick input\n# before it reaches the drive module. Set via {\"max_speed\": N} over the WS.\nmax_speed_percent = 100\ndef apply_speed_limit(parsed_data: dict) -> None:\n    \"\"\"Scale throttle/dir_x/dir_y/dir_rot in-place by max_speed_percent,\n    ahead of the drive-type-agnostic parser call, so the limit applies\n    regardless of which drive module (mecanum/differential) is active.\"\"\"\n    if max_speed_percent >= 100:",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "move_in_progress",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "move_in_progress = False\n# GUI-configurable overall speed limit (0..100), applied to joystick input\n# before it reaches the drive module. Set via {\"max_speed\": N} over the WS.\nmax_speed_percent = 100\ndef apply_speed_limit(parsed_data: dict) -> None:\n    \"\"\"Scale throttle/dir_x/dir_y/dir_rot in-place by max_speed_percent,\n    ahead of the drive-type-agnostic parser call, so the limit applies\n    regardless of which drive module (mecanum/differential) is active.\"\"\"\n    if max_speed_percent >= 100:\n        return",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1796,7 +1893,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "ODOMETRY_HTML_FILE = os.path.join(REPO_ROOT, \"odometry_locomization\", \"index.html\")\nODOMETRY_STATE_URL = \"http://127.0.0.1:5000/state\"\nODOMETRY_ZERO_YAW_URL = \"http://127.0.0.1:5000/zero_yaw\"\n@app.get(\"/map\")\nasync def map_page():\n    \"\"\"Serve the odometry map as its own full page, proxied so it shares\n    this app's origin (avoids https-page/http-iframe mixed-content blocking\n    when embedded, see the map widget on the controller page).\"\"\"\n    if not os.path.isfile(ODOMETRY_HTML_FILE):\n        return HTMLResponse(\"<h1>Map unavailable</h1>\", status_code=503)",
+        "peekOfCode": "ODOMETRY_HTML_FILE = os.path.join(REPO_ROOT, \"odometry_locomization\", \"index.html\")\nODOMETRY_STATE_URL = \"http://127.0.0.1:5000/state\"\nODOMETRY_ZERO_YAW_URL = \"http://127.0.0.1:5000/zero_yaw\"\nODOMETRY_SET_CPC_URL = \"http://127.0.0.1:5000/set_counts_per_cm\"\n@app.get(\"/map\")\nasync def map_page():\n    \"\"\"Serve the odometry map as its own full page, proxied so it shares\n    this app's origin (avoids https-page/http-iframe mixed-content blocking\n    when embedded, see the map widget on the controller page).\"\"\"\n    if not os.path.isfile(ODOMETRY_HTML_FILE):",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1805,7 +1902,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "ODOMETRY_STATE_URL = \"http://127.0.0.1:5000/state\"\nODOMETRY_ZERO_YAW_URL = \"http://127.0.0.1:5000/zero_yaw\"\n@app.get(\"/map\")\nasync def map_page():\n    \"\"\"Serve the odometry map as its own full page, proxied so it shares\n    this app's origin (avoids https-page/http-iframe mixed-content blocking\n    when embedded, see the map widget on the controller page).\"\"\"\n    if not os.path.isfile(ODOMETRY_HTML_FILE):\n        return HTMLResponse(\"<h1>Map unavailable</h1>\", status_code=503)\n    return FileResponse(ODOMETRY_HTML_FILE)",
+        "peekOfCode": "ODOMETRY_STATE_URL = \"http://127.0.0.1:5000/state\"\nODOMETRY_ZERO_YAW_URL = \"http://127.0.0.1:5000/zero_yaw\"\nODOMETRY_SET_CPC_URL = \"http://127.0.0.1:5000/set_counts_per_cm\"\n@app.get(\"/map\")\nasync def map_page():\n    \"\"\"Serve the odometry map as its own full page, proxied so it shares\n    this app's origin (avoids https-page/http-iframe mixed-content blocking\n    when embedded, see the map widget on the controller page).\"\"\"\n    if not os.path.isfile(ODOMETRY_HTML_FILE):\n        return HTMLResponse(\"<h1>Map unavailable</h1>\", status_code=503)",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -1814,7 +1911,16 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "ODOMETRY_ZERO_YAW_URL = \"http://127.0.0.1:5000/zero_yaw\"\n@app.get(\"/map\")\nasync def map_page():\n    \"\"\"Serve the odometry map as its own full page, proxied so it shares\n    this app's origin (avoids https-page/http-iframe mixed-content blocking\n    when embedded, see the map widget on the controller page).\"\"\"\n    if not os.path.isfile(ODOMETRY_HTML_FILE):\n        return HTMLResponse(\"<h1>Map unavailable</h1>\", status_code=503)\n    return FileResponse(ODOMETRY_HTML_FILE)\n@app.get(\"/state\")",
+        "peekOfCode": "ODOMETRY_ZERO_YAW_URL = \"http://127.0.0.1:5000/zero_yaw\"\nODOMETRY_SET_CPC_URL = \"http://127.0.0.1:5000/set_counts_per_cm\"\n@app.get(\"/map\")\nasync def map_page():\n    \"\"\"Serve the odometry map as its own full page, proxied so it shares\n    this app's origin (avoids https-page/http-iframe mixed-content blocking\n    when embedded, see the map widget on the controller page).\"\"\"\n    if not os.path.isfile(ODOMETRY_HTML_FILE):\n        return HTMLResponse(\"<h1>Map unavailable</h1>\", status_code=503)\n    return FileResponse(ODOMETRY_HTML_FILE)",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "ODOMETRY_SET_CPC_URL",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "ODOMETRY_SET_CPC_URL = \"http://127.0.0.1:5000/set_counts_per_cm\"\n@app.get(\"/map\")\nasync def map_page():\n    \"\"\"Serve the odometry map as its own full page, proxied so it shares\n    this app's origin (avoids https-page/http-iframe mixed-content blocking\n    when embedded, see the map widget on the controller page).\"\"\"\n    if not os.path.isfile(ODOMETRY_HTML_FILE):\n        return HTMLResponse(\"<h1>Map unavailable</h1>\", status_code=503)\n    return FileResponse(ODOMETRY_HTML_FILE)\ndef fetch_odometry_state() -> Optional[dict]:",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -2755,6 +2861,105 @@
         "documentation": {}
     },
     {
+        "label": "LSM6DSV16X",
+        "kind": 6,
+        "importPath": "odometry_locomization.imu_lsm6dsv16x",
+        "description": "odometry_locomization.imu_lsm6dsv16x",
+        "peekOfCode": "class LSM6DSV16X:\n    def __init__(self, bus_num=I2C_BUS, addr=DEVICE_ADDR):\n        self.addr = addr\n        self.fd = os.open(f\"/dev/i2c-{bus_num}\", os.O_RDWR)\n        fcntl.ioctl(self.fd, I2C_SLAVE, self.addr)\n    def _read_byte(self, reg):\n        os.write(self.fd, bytes([reg]))\n        return os.read(self.fd, 1)[0]\n    def _write_byte(self, reg, value):\n        os.write(self.fd, bytes([reg, value]))",
+        "detail": "odometry_locomization.imu_lsm6dsv16x",
+        "documentation": {}
+    },
+    {
+        "label": "I2C_BUS",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_lsm6dsv16x",
+        "description": "odometry_locomization.imu_lsm6dsv16x",
+        "peekOfCode": "I2C_BUS = 1\nDEVICE_ADDR = 0x6A          # SDO/SA0 tied low; use 0x6B if tied high\nI2C_SLAVE = 0x0703          # linux/i2c-dev.h ioctl request\nWHO_AM_I_REG = 0x0F\nWHO_AM_I_EXPECTED = 0x70    # 112 decimal, per lsm6dsv16x.sh\nCTRL2 = 0x11                # ODR_G / OP_MODE_G (gyroscope)\nCTRL3 = 0x12                # BDU | IF_INC\nCTRL6 = 0x15                # FS_G full-scale bits (gyroscope)\nOUTZ_L_G = 0x26              # gyroscope Z low byte, OUTZ_H_G follows at +1\nFS_500DPS_SENSITIVITY_MDPS = 17.50  # mdps/LSB @ +-500 dps (ST 16-bit gyro standard table)",
+        "detail": "odometry_locomization.imu_lsm6dsv16x",
+        "documentation": {}
+    },
+    {
+        "label": "DEVICE_ADDR",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_lsm6dsv16x",
+        "description": "odometry_locomization.imu_lsm6dsv16x",
+        "peekOfCode": "DEVICE_ADDR = 0x6A          # SDO/SA0 tied low; use 0x6B if tied high\nI2C_SLAVE = 0x0703          # linux/i2c-dev.h ioctl request\nWHO_AM_I_REG = 0x0F\nWHO_AM_I_EXPECTED = 0x70    # 112 decimal, per lsm6dsv16x.sh\nCTRL2 = 0x11                # ODR_G / OP_MODE_G (gyroscope)\nCTRL3 = 0x12                # BDU | IF_INC\nCTRL6 = 0x15                # FS_G full-scale bits (gyroscope)\nOUTZ_L_G = 0x26              # gyroscope Z low byte, OUTZ_H_G follows at +1\nFS_500DPS_SENSITIVITY_MDPS = 17.50  # mdps/LSB @ +-500 dps (ST 16-bit gyro standard table)\nclass LSM6DSV16X:",
+        "detail": "odometry_locomization.imu_lsm6dsv16x",
+        "documentation": {}
+    },
+    {
+        "label": "I2C_SLAVE",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_lsm6dsv16x",
+        "description": "odometry_locomization.imu_lsm6dsv16x",
+        "peekOfCode": "I2C_SLAVE = 0x0703          # linux/i2c-dev.h ioctl request\nWHO_AM_I_REG = 0x0F\nWHO_AM_I_EXPECTED = 0x70    # 112 decimal, per lsm6dsv16x.sh\nCTRL2 = 0x11                # ODR_G / OP_MODE_G (gyroscope)\nCTRL3 = 0x12                # BDU | IF_INC\nCTRL6 = 0x15                # FS_G full-scale bits (gyroscope)\nOUTZ_L_G = 0x26              # gyroscope Z low byte, OUTZ_H_G follows at +1\nFS_500DPS_SENSITIVITY_MDPS = 17.50  # mdps/LSB @ +-500 dps (ST 16-bit gyro standard table)\nclass LSM6DSV16X:\n    def __init__(self, bus_num=I2C_BUS, addr=DEVICE_ADDR):",
+        "detail": "odometry_locomization.imu_lsm6dsv16x",
+        "documentation": {}
+    },
+    {
+        "label": "WHO_AM_I_REG",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_lsm6dsv16x",
+        "description": "odometry_locomization.imu_lsm6dsv16x",
+        "peekOfCode": "WHO_AM_I_REG = 0x0F\nWHO_AM_I_EXPECTED = 0x70    # 112 decimal, per lsm6dsv16x.sh\nCTRL2 = 0x11                # ODR_G / OP_MODE_G (gyroscope)\nCTRL3 = 0x12                # BDU | IF_INC\nCTRL6 = 0x15                # FS_G full-scale bits (gyroscope)\nOUTZ_L_G = 0x26              # gyroscope Z low byte, OUTZ_H_G follows at +1\nFS_500DPS_SENSITIVITY_MDPS = 17.50  # mdps/LSB @ +-500 dps (ST 16-bit gyro standard table)\nclass LSM6DSV16X:\n    def __init__(self, bus_num=I2C_BUS, addr=DEVICE_ADDR):\n        self.addr = addr",
+        "detail": "odometry_locomization.imu_lsm6dsv16x",
+        "documentation": {}
+    },
+    {
+        "label": "WHO_AM_I_EXPECTED",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_lsm6dsv16x",
+        "description": "odometry_locomization.imu_lsm6dsv16x",
+        "peekOfCode": "WHO_AM_I_EXPECTED = 0x70    # 112 decimal, per lsm6dsv16x.sh\nCTRL2 = 0x11                # ODR_G / OP_MODE_G (gyroscope)\nCTRL3 = 0x12                # BDU | IF_INC\nCTRL6 = 0x15                # FS_G full-scale bits (gyroscope)\nOUTZ_L_G = 0x26              # gyroscope Z low byte, OUTZ_H_G follows at +1\nFS_500DPS_SENSITIVITY_MDPS = 17.50  # mdps/LSB @ +-500 dps (ST 16-bit gyro standard table)\nclass LSM6DSV16X:\n    def __init__(self, bus_num=I2C_BUS, addr=DEVICE_ADDR):\n        self.addr = addr\n        self.fd = os.open(f\"/dev/i2c-{bus_num}\", os.O_RDWR)",
+        "detail": "odometry_locomization.imu_lsm6dsv16x",
+        "documentation": {}
+    },
+    {
+        "label": "CTRL2",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_lsm6dsv16x",
+        "description": "odometry_locomization.imu_lsm6dsv16x",
+        "peekOfCode": "CTRL2 = 0x11                # ODR_G / OP_MODE_G (gyroscope)\nCTRL3 = 0x12                # BDU | IF_INC\nCTRL6 = 0x15                # FS_G full-scale bits (gyroscope)\nOUTZ_L_G = 0x26              # gyroscope Z low byte, OUTZ_H_G follows at +1\nFS_500DPS_SENSITIVITY_MDPS = 17.50  # mdps/LSB @ +-500 dps (ST 16-bit gyro standard table)\nclass LSM6DSV16X:\n    def __init__(self, bus_num=I2C_BUS, addr=DEVICE_ADDR):\n        self.addr = addr\n        self.fd = os.open(f\"/dev/i2c-{bus_num}\", os.O_RDWR)\n        fcntl.ioctl(self.fd, I2C_SLAVE, self.addr)",
+        "detail": "odometry_locomization.imu_lsm6dsv16x",
+        "documentation": {}
+    },
+    {
+        "label": "CTRL3",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_lsm6dsv16x",
+        "description": "odometry_locomization.imu_lsm6dsv16x",
+        "peekOfCode": "CTRL3 = 0x12                # BDU | IF_INC\nCTRL6 = 0x15                # FS_G full-scale bits (gyroscope)\nOUTZ_L_G = 0x26              # gyroscope Z low byte, OUTZ_H_G follows at +1\nFS_500DPS_SENSITIVITY_MDPS = 17.50  # mdps/LSB @ +-500 dps (ST 16-bit gyro standard table)\nclass LSM6DSV16X:\n    def __init__(self, bus_num=I2C_BUS, addr=DEVICE_ADDR):\n        self.addr = addr\n        self.fd = os.open(f\"/dev/i2c-{bus_num}\", os.O_RDWR)\n        fcntl.ioctl(self.fd, I2C_SLAVE, self.addr)\n    def _read_byte(self, reg):",
+        "detail": "odometry_locomization.imu_lsm6dsv16x",
+        "documentation": {}
+    },
+    {
+        "label": "CTRL6",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_lsm6dsv16x",
+        "description": "odometry_locomization.imu_lsm6dsv16x",
+        "peekOfCode": "CTRL6 = 0x15                # FS_G full-scale bits (gyroscope)\nOUTZ_L_G = 0x26              # gyroscope Z low byte, OUTZ_H_G follows at +1\nFS_500DPS_SENSITIVITY_MDPS = 17.50  # mdps/LSB @ +-500 dps (ST 16-bit gyro standard table)\nclass LSM6DSV16X:\n    def __init__(self, bus_num=I2C_BUS, addr=DEVICE_ADDR):\n        self.addr = addr\n        self.fd = os.open(f\"/dev/i2c-{bus_num}\", os.O_RDWR)\n        fcntl.ioctl(self.fd, I2C_SLAVE, self.addr)\n    def _read_byte(self, reg):\n        os.write(self.fd, bytes([reg]))",
+        "detail": "odometry_locomization.imu_lsm6dsv16x",
+        "documentation": {}
+    },
+    {
+        "label": "OUTZ_L_G",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_lsm6dsv16x",
+        "description": "odometry_locomization.imu_lsm6dsv16x",
+        "peekOfCode": "OUTZ_L_G = 0x26              # gyroscope Z low byte, OUTZ_H_G follows at +1\nFS_500DPS_SENSITIVITY_MDPS = 17.50  # mdps/LSB @ +-500 dps (ST 16-bit gyro standard table)\nclass LSM6DSV16X:\n    def __init__(self, bus_num=I2C_BUS, addr=DEVICE_ADDR):\n        self.addr = addr\n        self.fd = os.open(f\"/dev/i2c-{bus_num}\", os.O_RDWR)\n        fcntl.ioctl(self.fd, I2C_SLAVE, self.addr)\n    def _read_byte(self, reg):\n        os.write(self.fd, bytes([reg]))\n        return os.read(self.fd, 1)[0]",
+        "detail": "odometry_locomization.imu_lsm6dsv16x",
+        "documentation": {}
+    },
+    {
+        "label": "FS_500DPS_SENSITIVITY_MDPS",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_lsm6dsv16x",
+        "description": "odometry_locomization.imu_lsm6dsv16x",
+        "peekOfCode": "FS_500DPS_SENSITIVITY_MDPS = 17.50  # mdps/LSB @ +-500 dps (ST 16-bit gyro standard table)\nclass LSM6DSV16X:\n    def __init__(self, bus_num=I2C_BUS, addr=DEVICE_ADDR):\n        self.addr = addr\n        self.fd = os.open(f\"/dev/i2c-{bus_num}\", os.O_RDWR)\n        fcntl.ioctl(self.fd, I2C_SLAVE, self.addr)\n    def _read_byte(self, reg):\n        os.write(self.fd, bytes([reg]))\n        return os.read(self.fd, 1)[0]\n    def _write_byte(self, reg, value):",
+        "detail": "odometry_locomization.imu_lsm6dsv16x",
+        "documentation": {}
+    },
+    {
         "label": "checkpoint",
         "kind": 5,
         "importPath": "odometry_locomization.main",
@@ -2858,7 +3063,7 @@
         "kind": 2,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "def quaternion_to_yaw(x, y, z):\n    w = math.sqrt(max(0.0, 1.0 - x*x - y*y - z*z))\n    yaw = math.atan2(\n        2.0 * (w * z + x * y),\n        1.0 - 2.0 * (y * y + z * z)\n    )\n    return math.degrees(yaw)\ndef angle_diff(a, b):\n    return (a - b + 180) % 360 - 180\n# ── UDP Listener ──────────────────────────────────────────────────────────────",
+        "peekOfCode": "def quaternion_to_yaw(x, y, z):\n    w = math.sqrt(max(0.0, 1.0 - x*x - y*y - z*z))\n    yaw = math.atan2(\n        2.0 * (w * z + x * y),\n        1.0 - 2.0 * (y * y + z * z)\n    )\n    return math.degrees(yaw)\ndef angle_diff(a, b):\n    return (a - b + 180) % 360 - 180\n# ── UDP Listener (phone IMU) ─────────────────────────────────────────────────",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -2867,7 +3072,7 @@
         "kind": 2,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "def angle_diff(a, b):\n    return (a - b + 180) % 360 - 180\n# ── UDP Listener ──────────────────────────────────────────────────────────────\ndef udp_listener():\n    global _raw_smoothed_yaw\n    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\n    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n    sock.bind((\"0.0.0.0\", UDP_PORT))\n    sock.settimeout(1.0)\n    print(f\"[UDP] Listening on port {UDP_PORT}\")",
+        "peekOfCode": "def angle_diff(a, b):\n    return (a - b + 180) % 360 - 180\n# ── UDP Listener (phone IMU) ─────────────────────────────────────────────────\n# Not started by default anymore -- see imu_yaw_thread() below, which reads the\n# board's own LSM6DSV16X gyro instead so the map doesn't depend on a phone.\n# Kept for reference / easy revert (swap the thread started in __main__).\ndef udp_listener():\n    global _raw_smoothed_yaw\n    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\n    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -2881,11 +3086,20 @@
         "documentation": {}
     },
     {
+        "label": "imu_yaw_thread",
+        "kind": 2,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "def imu_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X\n    try:\n        imu = LSM6DSV16X()\n        if not imu.check_who_am_i():\n            print(\"[IMU] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")\n            return\n        imu.configure()\n    except Exception as e:",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
         "label": "index",
         "kind": 2,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "def index():\n    return send_from_directory(\".\", \"index.html\")\n@app.route(\"/state\")\ndef get_state():\n    with lock:\n        return jsonify({\n            \"x\":         round(state[\"x\"], 2),\n            \"y\":         round(state[\"y\"], 2),\n            \"yaw\":       state[\"yaw\"],\n            \"distance\":  round(state[\"distance\"], 2),",
+        "peekOfCode": "def index():\n    return send_from_directory(\".\", \"index.html\")\n@app.route(\"/state\")\ndef get_state():\n    with lock:\n        return jsonify({\n            \"x\":              round(state[\"x\"], 2),\n            \"y\":              round(state[\"y\"], 2),\n            \"yaw\":            state[\"yaw\"],\n            \"distance\":       round(state[\"distance\"], 2),",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -2894,7 +3108,16 @@
         "kind": 2,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "def get_state():\n    with lock:\n        return jsonify({\n            \"x\":         round(state[\"x\"], 2),\n            \"y\":         round(state[\"y\"], 2),\n            \"yaw\":       state[\"yaw\"],\n            \"distance\":  round(state[\"distance\"], 2),\n            \"recording\": state[\"recording\"],\n            \"path\":      state[\"path\"][-500:],\n        })",
+        "peekOfCode": "def get_state():\n    with lock:\n        return jsonify({\n            \"x\":              round(state[\"x\"], 2),\n            \"y\":              round(state[\"y\"], 2),\n            \"yaw\":            state[\"yaw\"],\n            \"distance\":       round(state[\"distance\"], 2),\n            \"recording\":      state[\"recording\"],\n            \"path\":           state[\"path\"][-500:],\n            \"counts_per_cm\":  COUNTS_PER_CM,",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "set_counts_per_cm",
+        "kind": 2,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "def set_counts_per_cm():\n    \"\"\"Update the mouse-counts-to-cm calibration factor at runtime (see\n    calibrate_linux.py for how to derive an accurate value).\"\"\"\n    global COUNTS_PER_CM\n    try:\n        value = float(request.get_json(force=True)[\"value\"])\n        if value <= 0:\n            raise ValueError\n    except Exception:\n        return jsonify({\"ok\": False}), 400",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -3102,6 +3325,15 @@
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
         "peekOfCode": "_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef quaternion_to_yaw(x, y, z):\n    w = math.sqrt(max(0.0, 1.0 - x*x - y*y - z*z))\n    yaw = math.atan2(\n        2.0 * (w * z + x * y),\n        1.0 - 2.0 * (y * y + z * z)\n    )\n    return math.degrees(yaw)\ndef angle_diff(a, b):",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "GYRO_ODR_HZ",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "GYRO_ODR_HZ = 120\ndef imu_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X\n    try:\n        imu = LSM6DSV16X()\n        if not imu.check_who_am_i():\n            print(\"[IMU] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")\n            return\n        imu.configure()",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
