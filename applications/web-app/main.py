@@ -502,6 +502,7 @@ def handle_voice_command(text: str) -> dict:
 
     if intent == "STOP":
         motor_api.stop()
+        set_odometry_recording(False)
         return {"intent": intent, "value": value}
 
     voice_speed = VOICE_SPEED * max_speed_percent / 100.0
@@ -519,6 +520,7 @@ def handle_voice_command(text: str) -> dict:
     if drive is None:
         return {"intent": intent, "value": value, "note": "unrecognized intent"}
 
+    set_odometry_recording(True)
     if "throttle" in drive:
         motor_api.throttle_value(drive["throttle"])
     if "dir_x" in drive:
@@ -531,6 +533,7 @@ def handle_voice_command(text: str) -> dict:
     def _stop_after(d):
         time.sleep(d)
         motor_api.stop()
+        set_odometry_recording(False)
 
     threading.Thread(target=_stop_after, args=(duration,), daemon=True).start()
 
@@ -572,6 +575,7 @@ async def move_distance_cm(websocket: WebSocket, target_cm: float) -> None:
     moved = 0.0
 
     try:
+        await asyncio.to_thread(set_odometry_recording, True)
         motor_api.throttle_value(speed)
         while moved < target_cm:
             if time.time() - started_at > timeout:
@@ -586,6 +590,7 @@ async def move_distance_cm(websocket: WebSocket, target_cm: float) -> None:
         await websocket.send_json({"move_result": {"moved_cm": round(moved, 1)}})
     finally:
         motor_api.stop()
+        await asyncio.to_thread(set_odometry_recording, False)
         move_in_progress = False
 
 
@@ -1007,6 +1012,28 @@ ODOMETRY_HTML_FILE = os.path.join(REPO_ROOT, "odometry_locomization", "index.htm
 ODOMETRY_STATE_URL = "http://127.0.0.1:5000/state"
 ODOMETRY_ZERO_YAW_URL = "http://127.0.0.1:5000/zero_yaw"
 ODOMETRY_SET_CPC_URL = "http://127.0.0.1:5000/set_counts_per_cm"
+ODOMETRY_SET_RECORDING_URL = "http://127.0.0.1:5000/set_recording"
+
+_motor_moving = False
+
+
+def set_odometry_recording(active: bool) -> None:
+    """Tell the odometry subprocess whether to accumulate distance/position.
+    The mouse sensor is mounted on the robot itself (nothing to click), so
+    recording tracks whether the motors are actually being driven instead."""
+    import urllib.request
+    import urllib.error
+
+    if odometry_process is None or odometry_process.poll() is not None:
+        return
+    try:
+        body = json.dumps({"active": active}).encode()
+        req = urllib.request.Request(ODOMETRY_SET_RECORDING_URL, data=body, method="POST",
+                                      headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=1) as resp:
+            resp.read()
+    except (urllib.error.URLError, TimeoutError):
+        pass
 
 
 @app.get("/map")
@@ -1363,6 +1390,16 @@ class ConnectionManager:
                         if motor_api:
                             apply_speed_limit(parsed_data)
                             motor_api.parser(parsed_data)
+
+                            global _motor_moving
+                            moving = (
+                                getattr(motor_api.state, "active_mode", "locked") in ("controller", "hybrid")
+                                and any(abs(parsed_data.get(k, 0)) > 0.01
+                                        for k in ("throttle", "dir_x", "dir_y", "dir_rot"))
+                            )
+                            if moving != _motor_moving:
+                                _motor_moving = moving
+                                asyncio.create_task(asyncio.to_thread(set_odometry_recording, moving))
                         else:
                             logger.warning("Motor API not initialized")
                             

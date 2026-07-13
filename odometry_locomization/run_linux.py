@@ -278,9 +278,6 @@ def _evdev_thread(device_path: str):
 
                     if ev_value == 1:
 
-                        with lock:
-                            state["recording"] = True
-
                         if now - _last_click < 0.4:
                             _click_count += 1
                         else:
@@ -300,10 +297,6 @@ def _evdev_thread(device_path: str):
 
                             print("[Mouse] MAP RESET")
                             continue
-
-                    elif ev_value == 0:
-                        with lock:
-                            state["recording"] = False
             elif ev_type == EV_SYN:
                 # SYN_REPORT (code 0) marks end of one logical event frame
                 if (pending_dx != 0 or pending_dy != 0):
@@ -352,6 +345,20 @@ def set_counts_per_cm():
     with lock:
         COUNTS_PER_CM = value
     return jsonify({"ok": True, "counts_per_cm": COUNTS_PER_CM})
+
+
+@app.route("/set_recording", methods=["POST"])
+def set_recording():
+    """Set whether odometry accumulates -- driven by main.py based on whether
+    the motors are actually commanded to move, since the mouse sensor is
+    mounted on the robot itself (nothing to click)."""
+    try:
+        active = bool(request.get_json(force=True)["active"])
+    except Exception:
+        return jsonify({"ok": False}), 400
+    with lock:
+        state["recording"] = active
+    return jsonify({"ok": True, "recording": active})
 
 
 @app.route("/zero_yaw", methods=["POST"])
