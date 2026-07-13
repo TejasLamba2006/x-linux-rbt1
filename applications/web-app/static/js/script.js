@@ -82,6 +82,10 @@ function connectWebSocket() {
             if (data.voice_result) {
                 handleVoiceResult(data.voice_result);
             }
+            // Handle move-cm result from server
+            if (data.move_result) {
+                handleMoveResult(data.move_result);
+            }
         } catch (e) {
             debugLog('Failed to parse message: ' + e);
         }
@@ -683,6 +687,57 @@ if (SpeechRecognitionAPI && voiceButton) {
 } else if (voiceButton) {
     voiceButton.disabled = true;
     setVoiceStatus('Voice not supported in this browser');
+}
+
+// =============================================================================
+// MANUAL VOICE-TEXT INPUT (types a command instead of speaking it)
+// =============================================================================
+const voiceTextInput = document.getElementById('voice-text-input');
+const voiceTextSend = document.getElementById('voice-text-send');
+
+function sendVoiceText() {
+    const text = voiceTextInput.value.trim();
+    if (!text) return;
+    setVoiceStatus(`"${text}"`);
+    sendCommand({ voice_text: text });
+    voiceTextInput.value = '';
+}
+
+if (voiceTextSend) {
+    voiceTextSend.addEventListener('click', sendVoiceText);
+    voiceTextInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') sendVoiceText();
+    });
+}
+
+// =============================================================================
+// MOVE N CM (closed-loop, driven by mouse odometry on the board)
+// =============================================================================
+const moveCmInput = document.getElementById('move-cm-input');
+const moveCmSend = document.getElementById('move-cm-send');
+const moveCmStatus = document.getElementById('move-cm-status');
+
+function sendMoveCm() {
+    const cm = parseFloat(moveCmInput.value);
+    if (!cm || cm <= 0) return;
+    moveCmStatus.textContent = 'Moving...';
+    sendCommand({ move_cm: cm });
+}
+
+if (moveCmSend) {
+    moveCmSend.addEventListener('click', sendMoveCm);
+    moveCmInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') sendMoveCm();
+    });
+}
+
+function handleMoveResult(result) {
+    if (!moveCmStatus) return;
+    if (result.error) {
+        moveCmStatus.textContent = result.error;
+    } else {
+        moveCmStatus.textContent = `Moved ${result.moved_cm} cm`;
+    }
 }
 
 // =============================================================================

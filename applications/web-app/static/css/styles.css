@@ -282,6 +282,73 @@ body {
     white-space: nowrap;
 }
 
+/* Manual Voice Text Input */
+#voice-text-control {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+#voice-text-input {
+    width: 140px;
+    background: #1a1a1a;
+    border: 1px solid #666;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 12px;
+    padding: 4px 6px;
+}
+
+#voice-text-send {
+    background-color: #444;
+    border: 1px solid #777;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 11px;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+/* Move N cm Control */
+#move-cm-control {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+#move-cm-input {
+    width: 60px;
+    background: #1a1a1a;
+    border: 1px solid #666;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 12px;
+    padding: 4px 6px;
+}
+
+#move-cm-send {
+    background-color: #444;
+    border: 1px solid #777;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 11px;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+#move-cm-status {
+    font-size: 11px;
+    color: #ccc;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* Speed Control */
 #speed-control {
     margin-bottom: 10px;

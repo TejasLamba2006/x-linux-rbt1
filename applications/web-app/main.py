@@ -20,6 +20,7 @@ Features:
 - QR code for easy mobile connection
 """
 
+import asyncio
 import json
 import os
 import sys
@@ -32,7 +33,7 @@ import shutil
 from typing import Optional, List
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 import uvicorn
@@ -59,6 +60,17 @@ VOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100
 VOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value
 VOICE_PER_UNIT_DURATION = 0.15
 VOICE_MAX_DURATION = 5.0
+
+# =============================================================================
+# CLOSED-LOOP MOVE-BY-DISTANCE (see move_distance_cm) -- uses the odometry
+# subprocess's cumulative mouse-based distance reading as feedback.
+# =============================================================================
+MOVE_SPEED = 50               # duty for move_cm driving, 0..100
+MOVE_MAX_CM = 500             # sanity cap on a single move_cm request
+MOVE_POLL_INTERVAL = 0.1      # seconds between odometry distance polls
+MOVE_TIMEOUT_PER_CM = 0.5     # worst-case seconds/cm before aborting as stuck
+MOVE_TIMEOUT_MIN = 3.0
+move_in_progress = False
 
 # GUI-configurable overall speed limit (0..100), applied to joystick input
 # before it reaches the drive module. Set via {"max_speed": N} over the WS.
@@ -525,6 +537,57 @@ def handle_voice_command(text: str) -> dict:
     return {"intent": intent, "value": value, "duration": round(duration, 2)}
 
 
+async def move_distance_cm(websocket: WebSocket, target_cm: float) -> None:
+    """Closed-loop "move forward N cm", using the mouse-odometry subprocess's
+    cumulative distance reading as feedback instead of an open-loop timed
+    pulse (like voice commands use). Runs as a background asyncio task so it
+    doesn't block the WS receive loop -- other commands (e.g. mode change)
+    still get processed while this is driving.
+
+    ponytail: no PID/deceleration ramp, just full-speed-then-stop; add a
+    slow-down-near-target ramp if overshoot becomes a problem.
+    """
+    global move_in_progress
+    if move_in_progress:
+        await websocket.send_json({"move_result": {"error": "a move is already in progress"}})
+        return
+    if motor_api is None:
+        await websocket.send_json({"move_result": {"error": "motor API not initialized"}})
+        return
+    if getattr(motor_api.state, "active_mode", "locked") == "locked":
+        await websocket.send_json({"move_result": {"error": "locked"}})
+        return
+
+    target_cm = max(0.0, min(MOVE_MAX_CM, target_cm))
+    start_state = await asyncio.to_thread(fetch_odometry_state)
+    if start_state is None:
+        await websocket.send_json({"move_result": {"error": "odometry data unavailable"}})
+        return
+
+    move_in_progress = True
+    start_distance = start_state["distance"]
+    timeout = max(MOVE_TIMEOUT_MIN, target_cm * MOVE_TIMEOUT_PER_CM)
+    speed = MOVE_SPEED * max_speed_percent / 100.0
+    started_at = time.time()
+    moved = 0.0
+
+    try:
+        motor_api.throttle_value(speed)
+        while moved < target_cm:
+            if time.time() - started_at > timeout:
+                await websocket.send_json({"move_result": {"error": "timed out", "moved_cm": round(moved, 1)}})
+                return
+            await asyncio.sleep(MOVE_POLL_INTERVAL)
+            state = await asyncio.to_thread(fetch_odometry_state)
+            if state is None:
+                await websocket.send_json({"move_result": {"error": "odometry data unavailable", "moved_cm": round(moved, 1)}})
+                return
+            moved = state["distance"] - start_distance
+        await websocket.send_json({"move_result": {"moved_cm": round(moved, 1)}})
+    finally:
+        motor_api.stop()
+        move_in_progress = False
+
 
 # =============================================================================
 # DRIVE TYPE SELECTION
@@ -943,6 +1006,7 @@ async def get_drive_type():
 ODOMETRY_HTML_FILE = os.path.join(REPO_ROOT, "odometry_locomization", "index.html")
 ODOMETRY_STATE_URL = "http://127.0.0.1:5000/state"
 ODOMETRY_ZERO_YAW_URL = "http://127.0.0.1:5000/zero_yaw"
+ODOMETRY_SET_CPC_URL = "http://127.0.0.1:5000/set_counts_per_cm"
 
 
 @app.get("/map")
@@ -955,23 +1019,32 @@ async def map_page():
     return FileResponse(ODOMETRY_HTML_FILE)
 
 
+def fetch_odometry_state() -> Optional[dict]:
+    """Fetch /state from the odometry companion subprocess. Shared by the
+    /state proxy route and the move_cm closed-loop driver. Returns None if
+    the subprocess isn't running or didn't respond in time."""
+    import urllib.request
+    import urllib.error
+
+    if odometry_process is None or odometry_process.poll() is not None:
+        return None
+    try:
+        with urllib.request.urlopen(ODOMETRY_STATE_URL, timeout=1) as resp:
+            return json.loads(resp.read())
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
+        logger.warning(f"Odometry map proxy failed: {e}")
+        return None
+
+
 @app.get("/state")
 async def map_state():
     """Proxy /state to the odometry companion subprocess (port 5000). The
     subprocess is best-effort (see start_odometry_server), so this returns
     a graceful "no data" response instead of erroring if it's not running."""
-    import urllib.request
-    import urllib.error
-
-    if odometry_process is None or odometry_process.poll() is not None:
+    data = fetch_odometry_state()
+    if data is None:
         return JSONResponse({"available": False}, status_code=200)
-
-    try:
-        with urllib.request.urlopen(ODOMETRY_STATE_URL, timeout=1) as resp:
-            return JSONResponse(json.loads(resp.read()))
-    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
-        logger.warning(f"Odometry map proxy failed: {e}")
-        return JSONResponse({"available": False}, status_code=200)
+    return JSONResponse(data)
 
 
 @app.post("/zero_yaw")
@@ -989,6 +1062,26 @@ async def map_zero_yaw():
             return JSONResponse(json.loads(resp.read()))
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
         logger.warning(f"Odometry zero-yaw proxy failed: {e}")
+        return JSONResponse({"ok": False}, status_code=200)
+
+
+@app.post("/set_counts_per_cm")
+async def map_set_counts_per_cm(request: Request):
+    """Proxy the map's counts-per-cm calibration input to the odometry subprocess."""
+    import urllib.request
+    import urllib.error
+
+    if odometry_process is None or odometry_process.poll() is not None:
+        return JSONResponse({"ok": False}, status_code=200)
+
+    try:
+        body = await request.body()
+        req = urllib.request.Request(ODOMETRY_SET_CPC_URL, data=body, method="POST",
+                                      headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=1) as resp:
+            return JSONResponse(json.loads(resp.read()))
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
+        logger.warning(f"Odometry set-counts-per-cm proxy failed: {e}")
         return JSONResponse({"ok": False}, status_code=200)
 
 
@@ -1253,6 +1346,11 @@ class ConnectionManager:
                         if 'voice_text' in parsed_data:
                             result = handle_voice_command(parsed_data['voice_text'])
                             await websocket.send_json({"voice_result": result})
+                            continue
+
+                        # Handle closed-loop move-by-distance requests
+                        if 'move_cm' in parsed_data:
+                            asyncio.create_task(move_distance_cm(websocket, float(parsed_data['move_cm'])))
                             continue
 
                         # Handle speed-limit slider updates from the GUI

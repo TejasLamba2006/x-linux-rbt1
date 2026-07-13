@@ -55,10 +55,21 @@
                 <button id="voice-button" title="Voice control">&#x1F3A4;</button>
                 <span id="voice-status"></span>
             </div>
+            <!-- Manual voice-command text input (bypasses mic, same intent classifier) -->
+            <div id="voice-text-control">
+                <input type="text" id="voice-text-input" placeholder="Type a command (e.g. move forward)">
+                <button id="voice-text-send" title="Send as voice command">Send</button>
+            </div>
             <!-- Speed Limit -->
             <div id="speed-control">
                 <label for="speed-slider">Speed: <span id="speed-value">100</span>%</label>
                 <input type="range" id="speed-slider" min="10" max="100" step="5" value="100">
+            </div>
+            <!-- Closed-loop move-by-distance, using mouse odometry -->
+            <div id="move-cm-control">
+                <input type="number" id="move-cm-input" min="1" max="500" step="1" placeholder="cm">
+                <button id="move-cm-send" title="Drive forward this many cm">Move</button>
+                <span id="move-cm-status"></span>
             </div>
             <!-- Odometry Map Widget -->
             <div id="map-widget">
