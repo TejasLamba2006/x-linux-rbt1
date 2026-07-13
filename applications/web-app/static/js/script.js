@@ -121,6 +121,17 @@ function sendCommand(cmd) {
     }
 }
 
+// Speed Limit Slider
+const speedSlider = document.getElementById('speed-slider');
+const speedValueLabel = document.getElementById('speed-value');
+
+if (speedSlider) {
+    speedSlider.addEventListener('input', function() {
+        speedValueLabel.textContent = speedSlider.value;
+        sendCommand({ max_speed: parseInt(speedSlider.value, 10) });
+    });
+}
+
 // Left Joystick
 let leftJoystick = {
     element: document.getElementById('left-joystick'),

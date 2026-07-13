@@ -24,7 +24,9 @@ Useful `main.py` flags: `--auto`, `--install-service` / `--uninstall-service` / 
 
 Known board-side gotchas (see AGENTS.md "Known Issues" for the full list): PWM channels can get
 stuck after a crash and must be unexported via sysfs before restart; `netifaces` must come from
-`apt-get`, not pip, on Yocto; pin `pydantic<2.12` (zoneinfo issue on Yocto's Python).
+`apt-get`, not pip, on Yocto; pin `pydantic<2.12` (zoneinfo issue on Yocto's Python); voice control
+needs `onnxruntime` and a working `openssl` (for the self-signed TLS cert) or it silently disables
+itself; the odometry map server needs `flask`.
 
 ## Architecture
 
@@ -62,6 +64,24 @@ runtime, not at build time:
 5. A background thread (`tof_obstacle_detection`) polls the VL53L5CX ToF sensor
    (`vl53l5cx/vl53l5cx.py`) and force-zeroes throttle if an obstacle is closer than 20mm.
 
+### Voice control (optional, lazily loaded)
+
+`main.py` adds `intent_classifier/` to `sys.path` and tries to import it at startup; if the ONNX
+model or `onnxruntime` is unavailable, `INTENT_AVAILABLE` is `False` and voice control is silently
+disabled — everything else still runs. The browser transcribes speech client-side (Web Speech API)
+and sends `{"voice_text": ...}` over the WebSocket; `handle_voice_command()` classifies it with
+`intent_classifier/robot_intent_5.onnx` and pulse-drives the active drive module's throttle/dir/rotate
+functions directly (bypassing the controller/hybrid mode gate — works in any mode except `locked`).
+Serving over HTTPS is required for the Web Speech API to work in most browsers, so `main.py`
+self-generates a TLS cert/key pair via `openssl` (`ensure_tls_cert()`) if one isn't already present.
+
+### Odometry map server (companion process)
+
+`start_odometry_server()` launches `odometry_locomization/run_linux.py` as a separate subprocess
+(Flask app on port 5000) alongside the main controller, for live mouse-sensor-based position
+tracking/mapping. Best-effort like ToF: if the script or its sensor is missing, the main controller
+still runs fine without it. Terminated via `stop_odometry_server()` on shutdown.
+
 ### Networking / onboarding UX
 
 `main.py` also handles Wi-Fi vs. hotspot mode setup (`enable-wifi-hotspot.sh`), QR-code generation
@@ -73,6 +93,11 @@ same `CAPTIVE_PORTAL_HTML` — so that connecting to the robot's hotspot trigger
 ### Directory map
 
 - `applications/web-app/` — the actual running application (see above).
+- `intent_classifier/` — ONNX voice-intent model (`robot_intent_5.onnx`) + `infer.py`, imported
+  lazily by `main.py` for voice control (see above).
+- `odometry_locomization/` — standalone Flask mouse-odometry map server, launched as a companion
+  subprocess by `main.py` (`run_linux.py` on the board; `run_windows.py`/`calibrate.py` for
+  dev-machine testing/calibration).
 - `kernel/` — prebuilt device tree sources/blobs per kernel version, for reference/patching, not built here.
 - `tests/` — manual hardware bring-up test scripts (`rbt01_test.sh`, `motor_test.py`, `led_test.py`) run directly on the board; see `tests/README.md` for the full manual test procedure using a Discovery Kit.
 - `scripts/deploy_starter_package.sh` — deploys the `applications/` folder to a board over the network.

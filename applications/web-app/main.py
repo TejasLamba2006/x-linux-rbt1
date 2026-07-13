@@ -60,6 +60,22 @@ VOICE_BASE_DURATION = 0.8    # seconds for a bare command with no numeric value
 VOICE_PER_UNIT_DURATION = 0.15
 VOICE_MAX_DURATION = 5.0
 
+# GUI-configurable overall speed limit (0..100), applied to joystick input
+# before it reaches the drive module. Set via {"max_speed": N} over the WS.
+max_speed_percent = 100
+
+
+def apply_speed_limit(parsed_data: dict) -> None:
+    """Scale throttle/dir_x/dir_y/dir_rot in-place by max_speed_percent,
+    ahead of the drive-type-agnostic parser call, so the limit applies
+    regardless of which drive module (mecanum/differential) is active."""
+    if max_speed_percent >= 100:
+        return
+    scale = max_speed_percent / 100.0
+    for key in ("throttle", "dir_x", "dir_y", "dir_rot"):
+        if key in parsed_data and isinstance(parsed_data[key], (int, float)):
+            parsed_data[key] = parsed_data[key] * scale
+
 INTENT_AVAILABLE = False
 try:
     sys.path.insert(0, os.path.join(REPO_ROOT, "intent_classifier"))
@@ -1186,8 +1202,15 @@ class ConnectionManager:
                             await websocket.send_json({"voice_result": result})
                             continue
 
+                        # Handle speed-limit slider updates from the GUI
+                        if 'max_speed' in parsed_data:
+                            global max_speed_percent
+                            max_speed_percent = max(0, min(100, int(parsed_data['max_speed'])))
+                            continue
+
                         # Process motor commands
                         if motor_api:
+                            apply_speed_limit(parsed_data)
                             motor_api.parser(parsed_data)
                         else:
                             logger.warning("Motor API not initialized")
