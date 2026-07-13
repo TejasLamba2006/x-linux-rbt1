@@ -60,6 +60,14 @@
                 <label for="speed-slider">Speed: <span id="speed-value">100</span>%</label>
                 <input type="range" id="speed-slider" min="10" max="100" step="5" value="100">
             </div>
+            <!-- Odometry Map Widget -->
+            <div id="map-widget">
+                <div id="map-widget-header">
+                    <label><input type="checkbox" id="map-toggle"> Show Map</label>
+                    <a id="map-fullpage-link" href="/map" target="_blank" title="Open full map">&#x2197;</a>
+                </div>
+                <iframe id="map-frame" title="Robot map"></iframe>
+            </div>
             <div class="mode-buttons">
                 <button class="mode-button" data-mode="locked" id="mode-locked">
                     <div class="button-icon"></div>

@@ -61,6 +61,24 @@
         color: #555;
         font-size: 11px;
       }
+
+      #zero-yaw-btn {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        background: rgba(0, 0, 0, 0.65);
+        border: 1px solid #00ff88;
+        border-radius: 8px;
+        color: #00ff88;
+        font-family: inherit;
+        font-size: 12px;
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+      #zero-yaw-btn:active {
+        background: #00ff88;
+        color: #000;
+      }
     </style>
   </head>
   <body>
@@ -80,6 +98,10 @@
     <div id="legend">
       Hold LEFT CLICK to record &nbsp;|&nbsp; Double-click to reset
     </div>
+
+    <button id="zero-yaw-btn" title="Set the phone's current heading as forward (0°)">
+      Zero Heading
+    </button>
 
     <script>
       const canvas = document.getElementById("map");
@@ -119,6 +141,10 @@
         }
       }
       setInterval(fetchState, 80); // ~12 Hz polling
+
+      document.getElementById("zero-yaw-btn").addEventListener("click", () => {
+        fetch("/zero_yaw", { method: "POST" }).catch(() => {});
+      });
 
       // ── Draw ───────────────────────────────────────────────────────────────────
       function drawGrid(offsetX, offsetY) {
