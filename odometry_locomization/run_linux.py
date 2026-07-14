@@ -322,24 +322,29 @@ def imu_fusion_yaw_thread():
         while _latest_mag_heading is None:
             await asyncio.sleep(0.1)
         _raw_smoothed_yaw = _latest_mag_heading
+
+        # ── Gyro bias calibration: sample gz while stationary for 2 s ──
+        print("[FUSION] calibrating gyro bias (keep robot still)...")
+        bias_samples = []
+        cal_deadline = time.time() + 2.0
+        while time.time() < cal_deadline:
+            b = box.read_gyro_dps()
+            for _, _, gz in b:
+                bias_samples.append(gz)
+            await asyncio.sleep(0.05)
+        gyro_bias = sum(bias_samples) / len(bias_samples) if bias_samples else 0.0
+        print(f"[FUSION] gyro bias = {gyro_bias:.3f} dps ({len(bias_samples)} samples)")
         print("[FUSION] fusion started")
 
         last_batch_t = time.time()
         while True:
-            # ponytail: dt is measured from real elapsed wall-clock time
-            # across the whole batch, divided evenly across however many
-            # samples arrived -- NOT a hardcoded assumed sample rate (an
-            # earlier assumption derived from get_status's "usb_dps" was
-            # ~20x too slow; measuring live showed ~7880 samples/sec
-            # actually arrive). Measuring the real batch interval is
-            # self-correcting regardless of what these ODR fields mean.
             batch = box.read_gyro_dps()
             now = time.time()
             dt = (now - last_batch_t) / len(batch) if batch else 0.0
             last_batch_t = now
 
             for gx, gy, gz in batch:
-                _raw_smoothed_yaw = (_raw_smoothed_yaw + gz * dt + 180) % 360 - 180
+                _raw_smoothed_yaw = (_raw_smoothed_yaw + (gz - gyro_bias) * dt + 180) % 360 - 180
 
             if _latest_mag_heading is not None:
                 correction = angle_diff(_latest_mag_heading, _raw_smoothed_yaw)

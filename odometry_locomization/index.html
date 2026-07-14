@@ -170,9 +170,11 @@
       let recording = false;
 
       const cpcInput = document.getElementById("cpc-input");
+      let cpcSetTime = 0;
       document.getElementById("cpc-set-btn").addEventListener("click", () => {
         const value = parseFloat(cpcInput.value);
         if (!value || value <= 0) return;
+        cpcSetTime = Date.now();
         fetch("/set_counts_per_cm", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -193,7 +195,7 @@
           dist = d.distance;
           recording = d.recording;
           path = d.path;
-          if (document.activeElement !== cpcInput && d.counts_per_cm) {
+          if (document.activeElement !== cpcInput && Date.now() - cpcSetTime > 1000 && d.counts_per_cm) {
             cpcInput.value = d.counts_per_cm;
           }
         } catch (e) {
@@ -278,7 +280,7 @@
 
         ctx.save();
         ctx.translate(cx, cy);
-        ctx.rotate(((90 - robotYaw) * Math.PI) / 180);
+        ctx.rotate(((-robotYaw) * Math.PI) / 180);
 
         // Car body
         ctx.fillStyle = "#2255ff";
