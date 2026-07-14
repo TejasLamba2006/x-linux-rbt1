@@ -501,26 +501,36 @@ def handle_voice_command(text: str) -> dict:
 
     result = classify_single_command(text)
     intent, value = result["intent"], result["value"]
+    confidence = result["confidence"]
+
+    VOICE_CONFIDENCE_THRESHOLD = 0.6
+
+    if intent == "NOP" or confidence < VOICE_CONFIDENCE_THRESHOLD:
+        return {"intent": intent, "value": value, "confidence": confidence,
+                "note": "nop" if intent == "NOP" else "low confidence"}
 
     if intent == "STOP":
         motor_api.stop()
         set_odometry_recording(False)
-        return {"intent": intent, "value": value}
+        return {"intent": intent, "value": value, "confidence": confidence}
 
     voice_speed = VOICE_SPEED * max_speed_percent / 100.0
-    drive = {
-        "FORWARD":      {"throttle": voice_speed},
-        "BACKWARD":     {"throttle": -voice_speed},
-        "LEFT":         {"dir_x": -voice_speed},
-        "RIGHT":        {"dir_x": voice_speed},
-        "TURN_LEFT":    {"dir_x": -voice_speed},
-        "TURN_RIGHT":   {"dir_x": voice_speed},
-        "ROTATE_LEFT":  {"dir_rot": -voice_speed},
-        "ROTATE_RIGHT": {"dir_rot": voice_speed},
-    }.get(intent)
+
+    if intent == "PULSE":
+        drive = {"throttle": voice_speed * 0.6}
+    else:
+        drive = {
+            "FORWARD":      {"throttle": voice_speed},
+            "BACKWARD":     {"throttle": -voice_speed},
+            "STRAFE_LEFT":  {"dir_x": -voice_speed},
+            "STRAFE_RIGHT": {"dir_x": voice_speed},
+            "ROTATE_LEFT":  {"dir_rot": -voice_speed},
+            "ROTATE_RIGHT": {"dir_rot": voice_speed},
+        }.get(intent)
 
     if drive is None:
-        return {"intent": intent, "value": value, "note": "unrecognized intent"}
+        return {"intent": intent, "value": value, "confidence": confidence,
+                "note": "unrecognized intent"}
 
     set_odometry_recording(True)
     if "throttle" in drive:
@@ -530,7 +540,10 @@ def handle_voice_command(text: str) -> dict:
     if "dir_rot" in drive:
         motor_api.rotate_angle(drive["dir_rot"])
 
-    duration = min(VOICE_MAX_DURATION, VOICE_BASE_DURATION + value * VOICE_PER_UNIT_DURATION)
+    if intent == "PULSE":
+        duration = VOICE_BASE_DURATION
+    else:
+        duration = min(VOICE_MAX_DURATION, VOICE_BASE_DURATION + value * VOICE_PER_UNIT_DURATION)
 
     def _stop_after(d):
         time.sleep(d)
@@ -539,7 +552,8 @@ def handle_voice_command(text: str) -> dict:
 
     threading.Thread(target=_stop_after, args=(duration,), daemon=True).start()
 
-    return {"intent": intent, "value": value, "duration": round(duration, 2)}
+    return {"intent": intent, "value": value, "confidence": confidence,
+            "duration": round(duration, 2)}
 
 
 async def move_distance_cm(websocket: WebSocket, target_cm: float) -> None:
