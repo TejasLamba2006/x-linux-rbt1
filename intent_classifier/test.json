@@ -1,0 +1,3786 @@
+[
+  {
+    "text": "back karo 15",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "do nothing 30",
+    "intent": "NOP"
+  },
+  {
+    "text": "lift",
+    "intent": "NOP"
+  },
+  {
+    "text": "face right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "stop karo",
+    "intent": "STOP"
+  },
+  {
+    "text": "brief pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "reverse lo",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "mat chal 10",
+    "intent": "STOP"
+  },
+  {
+    "text": "peechay",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "right ghumo",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "brief pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "seedhe",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "backward",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "right mein jao",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "freeze 10",
+    "intent": "STOP"
+  },
+  {
+    "text": "move ahead 30",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "ruk jao",
+    "intent": "STOP"
+  },
+  {
+    "text": "go right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "bayin 20",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "do nothing 10",
+    "intent": "NOP"
+  },
+  {
+    "text": "spin left 50",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "slide left 8",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "turn to the right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "rotate left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "dayin",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "back up",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "back up",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "skip karo",
+    "intent": "NOP"
+  },
+  {
+    "text": "peechay",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "never mind",
+    "intent": "NOP"
+  },
+  {
+    "text": "do not move",
+    "intent": "STOP"
+  },
+  {
+    "text": "aagay",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "lyft",
+    "intent": "NOP"
+  },
+  {
+    "text": "turn to the left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "brief pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "leave it 1",
+    "intent": "NOP"
+  },
+  {
+    "text": "ruku 5",
+    "intent": "STOP"
+  },
+  {
+    "text": "brake",
+    "intent": "STOP"
+  },
+  {
+    "text": "move backward",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "reekh mat karo",
+    "intent": "NOP"
+  },
+  {
+    "text": "back ward",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "go straight ahead",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "spin left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "face right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "left mein jao",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "baayein",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "spin left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "piche 10",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "right side jao",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "spin right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "dayin",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "rotate left 20",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "go backwards",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "right side",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "seedha chalo 1",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "left side jao 5",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "peeche jao",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "quick pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "rotate right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "left 3",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "lif",
+    "intent": "NOP"
+  },
+  {
+    "text": "bayan",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "shift rite 5",
+    "intent": "NOP"
+  },
+  {
+    "text": "ulta",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "quick pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "reverse",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "seedha 10",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "kuch mat kar",
+    "intent": "NOP"
+  },
+  {
+    "text": "move backward 5",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "ghumaao right 2",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "mud ja left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "ignore 5",
+    "intent": "NOP"
+  },
+  {
+    "text": "write side jao",
+    "intent": "NOP"
+  },
+  {
+    "text": "move backward",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "ek jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "ghumaao left 4",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "back up",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "brake 30",
+    "intent": "STOP"
+  },
+  {
+    "text": "reverse 3",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "turn right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "go left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "quick move",
+    "intent": "PULSE"
+  },
+  {
+    "text": "brief pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "whait",
+    "intent": "NOP"
+  },
+  {
+    "text": "pulse karo",
+    "intent": "PULSE"
+  },
+  {
+    "text": "go to the right 50",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "move forward",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "mud ja right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "drive for ward 4",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "jhatka do",
+    "intent": "PULSE"
+  },
+  {
+    "text": "go ahead",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "move left 2",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "spinn right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "straight",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "ek jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "slide right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "nothing 5",
+    "intent": "NOP"
+  },
+  {
+    "text": "scratch that",
+    "intent": "NOP"
+  },
+  {
+    "text": "nudge",
+    "intent": "PULSE"
+  },
+  {
+    "text": "pulse karo",
+    "intent": "PULSE"
+  },
+  {
+    "text": "ghumaao right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "brief pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "go left 50",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "quick pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "skip",
+    "intent": "NOP"
+  },
+  {
+    "text": "spin left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "go backwards 2",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "right side",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "move forward",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "never mind",
+    "intent": "NOP"
+  },
+  {
+    "text": "forward",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "brief pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "stop karo",
+    "intent": "STOP"
+  },
+  {
+    "text": "rukna hai",
+    "intent": "STOP"
+  },
+  {
+    "text": "nuffin",
+    "intent": "NOP"
+  },
+  {
+    "text": "rotate right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "peechay 1",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "skip",
+    "intent": "NOP"
+  },
+  {
+    "text": "stop 50",
+    "intent": "STOP"
+  },
+  {
+    "text": "mud ja left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "shift left 4",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "left side jao",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "go left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "ruk jao",
+    "intent": "STOP"
+  },
+  {
+    "text": "aage chalo",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "spin right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "ghum left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "backward",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "move ahead",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "reverce",
+    "intent": "NOP"
+  },
+  {
+    "text": "ghum left 4",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "quick pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "left mein mud",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "move backward 2",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "scratch that",
+    "intent": "NOP"
+  },
+  {
+    "text": "quick pals",
+    "intent": "NOP"
+  },
+  {
+    "text": "ghum right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "nothing 20",
+    "intent": "NOP"
+  },
+  {
+    "text": "turn to the left 10",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "peeche",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "shift left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "face left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "lift mein mud",
+    "intent": "NOP"
+  },
+  {
+    "text": "ghum right 20",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "sidhe 8",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "scratch that 10",
+    "intent": "NOP"
+  },
+  {
+    "text": "ghum left 1",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "ghum right 1",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "mud ja right 2",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "ruku 10",
+    "intent": "STOP"
+  },
+  {
+    "text": "back word",
+    "intent": "NOP"
+  },
+  {
+    "text": "jhatka do",
+    "intent": "PULSE"
+  },
+  {
+    "text": "quick pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "turn to the right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "dayan",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "pulse karo",
+    "intent": "PULSE"
+  },
+  {
+    "text": "disregard",
+    "intent": "NOP"
+  },
+  {
+    "text": "pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "rukna",
+    "intent": "STOP"
+  },
+  {
+    "text": "never mind",
+    "intent": "NOP"
+  },
+  {
+    "text": "bayen mud",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "ghumaao right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "go to the left 5",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "rukna 1",
+    "intent": "STOP"
+  },
+  {
+    "text": "backward",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "aage chalo",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "bayen 3",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "aage jao",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "reekh mat karo",
+    "intent": "NOP"
+  },
+  {
+    "text": "go to the left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "face right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "go to the left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "face left 15",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "backward 50",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "strafe left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "stop",
+    "intent": "STOP"
+  },
+  {
+    "text": "move forward",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "shift right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "move ahead",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "never mind",
+    "intent": "NOP"
+  },
+  {
+    "text": "ghumaao left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "face right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "face left 5",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "ignore",
+    "intent": "NOP"
+  },
+  {
+    "text": "skip 100",
+    "intent": "NOP"
+  },
+  {
+    "text": "wait",
+    "intent": "STOP"
+  },
+  {
+    "text": "right mein jao",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "rotate left 4",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "turn to the left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "drive ahead 8",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "wright",
+    "intent": "NOP"
+  },
+  {
+    "text": "spin left 10",
+    "intent": "NOP"
+  },
+  {
+    "text": "go right 8",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "move left 15",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "write",
+    "intent": "NOP"
+  },
+  {
+    "text": "ignore",
+    "intent": "NOP"
+  },
+  {
+    "text": "turn right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "lift",
+    "intent": "NOP"
+  },
+  {
+    "text": "nevermind",
+    "intent": "NOP"
+  },
+  {
+    "text": "dayen mud",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "ghuma left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "seedha chalo",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "turn to the right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "piche",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "face left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "turn right 2",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "disregard",
+    "intent": "NOP"
+  },
+  {
+    "text": "seedha chalo 1",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "stap",
+    "intent": "STOP"
+  },
+  {
+    "text": "move right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "forward 10",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "move forward 1",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "nothing 1",
+    "intent": "NOP"
+  },
+  {
+    "text": "thahar",
+    "intent": "STOP"
+  },
+  {
+    "text": "dayen 8",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "peechay",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "pause",
+    "intent": "STOP"
+  },
+  {
+    "text": "jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "nudge",
+    "intent": "PULSE"
+  },
+  {
+    "text": "move karo aage",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "halt",
+    "intent": "STOP"
+  },
+  {
+    "text": "ghum left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "kuch mat kar",
+    "intent": "NOP"
+  },
+  {
+    "text": "peechay",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "stop karo",
+    "intent": "STOP"
+  },
+  {
+    "text": "dahine",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "rotate right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "move backward 15",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "move right 2",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "turn left 15",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "move left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "pause 20",
+    "intent": "STOP"
+  },
+  {
+    "text": "nahi chal 15",
+    "intent": "STOP"
+  },
+  {
+    "text": "skip",
+    "intent": "NOP"
+  },
+  {
+    "text": "ghuma left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "dayin",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "strafe right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "turn to the left 8",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "shift right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "dayan 2",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "mat chal 5",
+    "intent": "STOP"
+  },
+  {
+    "text": "go backwards",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "shift left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "go straight ahead",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "stop karo",
+    "intent": "STOP"
+  },
+  {
+    "text": "right mein mud",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "reverse lo",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "don't move 3",
+    "intent": "STOP"
+  },
+  {
+    "text": "bayin 50",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "skip",
+    "intent": "NOP"
+  },
+  {
+    "text": "skip karo",
+    "intent": "NOP"
+  },
+  {
+    "text": "straight",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "forward",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "rotate right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "reverse",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "straight",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "nutting",
+    "intent": "NOP"
+  },
+  {
+    "text": "jhatka do",
+    "intent": "PULSE"
+  },
+  {
+    "text": "brake",
+    "intent": "STOP"
+  },
+  {
+    "text": "face left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "ek jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "move right 10",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "ghum right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "nothing 50",
+    "intent": "NOP"
+  },
+  {
+    "text": "turn right 30",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "right side jao 15",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "reverse lo",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "peeche jao 3",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "seedha",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "dayan",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "left ghumo",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "back up",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "left ghumo",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "skip",
+    "intent": "NOP"
+  },
+  {
+    "text": "jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "skip karo",
+    "intent": "NOP"
+  },
+  {
+    "text": "go to the left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "nevermind 50",
+    "intent": "NOP"
+  },
+  {
+    "text": "nudge",
+    "intent": "PULSE"
+  },
+  {
+    "text": "ghum left 1",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "ek jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "mud ja right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "rukna",
+    "intent": "STOP"
+  },
+  {
+    "text": "ghum right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "dahine",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "sidhe",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "kuch nahi",
+    "intent": "NOP"
+  },
+  {
+    "text": "nudge",
+    "intent": "PULSE"
+  },
+  {
+    "text": "move backward 2",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "paws",
+    "intent": "NOP"
+  },
+  {
+    "text": "left side jao",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "rotate left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "move left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "thahar",
+    "intent": "STOP"
+  },
+  {
+    "text": "reverse",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "shift left 30",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "strafe left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "dayen mud",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "pulse karo",
+    "intent": "PULSE"
+  },
+  {
+    "text": "brake 8",
+    "intent": "STOP"
+  },
+  {
+    "text": "turn to the right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "brake",
+    "intent": "STOP"
+  },
+  {
+    "text": "go backwards",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "thahar",
+    "intent": "STOP"
+  },
+  {
+    "text": "mud ja right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "move backward",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "baayein",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "ghumaao left 15",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "pulse karo",
+    "intent": "PULSE"
+  },
+  {
+    "text": "backward",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "aagye",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "don't move",
+    "intent": "STOP"
+  },
+  {
+    "text": "bayen mud",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "move right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "go straight",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "go to the left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "piche",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "rotate left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "dayan",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "shift right 5",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "slide right 100",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "left mein mud",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "peeche 5",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "ignore",
+    "intent": "NOP"
+  },
+  {
+    "text": "back karo",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "brake",
+    "intent": "STOP"
+  },
+  {
+    "text": "turn right 20",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "turn left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "strafe right 10",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "stop",
+    "intent": "STOP"
+  },
+  {
+    "text": "go backwards",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "dahine",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "jhatka do",
+    "intent": "PULSE"
+  },
+  {
+    "text": "right side",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "go write",
+    "intent": "NOP"
+  },
+  {
+    "text": "move right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "left side",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "ghuma left 5",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "left side",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "drive ahead 8",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "pals",
+    "intent": "NOP"
+  },
+  {
+    "text": "left mein mud",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "go to the right 10",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "turn to the left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "nothing 10",
+    "intent": "NOP"
+  },
+  {
+    "text": "wait",
+    "intent": "STOP"
+  },
+  {
+    "text": "cancel 15",
+    "intent": "NOP"
+  },
+  {
+    "text": "back karo",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "forward 1",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "mud ja left 100",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "ek jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "freeze",
+    "intent": "STOP"
+  },
+  {
+    "text": "chhod do",
+    "intent": "NOP"
+  },
+  {
+    "text": "jhatka do",
+    "intent": "PULSE"
+  },
+  {
+    "text": "pulse karo",
+    "intent": "PULSE"
+  },
+  {
+    "text": "strafe left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "four ward",
+    "intent": "NOP"
+  },
+  {
+    "text": "peeche jao 8",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "turn to the right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "left mein jao",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "quick move",
+    "intent": "PULSE"
+  },
+  {
+    "text": "nothing",
+    "intent": "NOP"
+  },
+  {
+    "text": "spin right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "straight",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "backward",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "pulse karo",
+    "intent": "PULSE"
+  },
+  {
+    "text": "strafe left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "right side",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "turn left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "back up 1",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "turn to the left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "never mind",
+    "intent": "NOP"
+  },
+  {
+    "text": "dayen mud",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "go left 20",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "don't move",
+    "intent": "STOP"
+  },
+  {
+    "text": "right side jao 5",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "brake",
+    "intent": "STOP"
+  },
+  {
+    "text": "ruku",
+    "intent": "STOP"
+  },
+  {
+    "text": "stop moving",
+    "intent": "STOP"
+  },
+  {
+    "text": "left mein jao 5",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "bayan",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "wait",
+    "intent": "STOP"
+  },
+  {
+    "text": "rotate right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "ek jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "go ahead",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "rotate left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "move backward",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "kuch nahi 3",
+    "intent": "NOP"
+  },
+  {
+    "text": "wait",
+    "intent": "STOP"
+  },
+  {
+    "text": "face right 20",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "backward",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "rotate left 4",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "straight",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "leave it 15",
+    "intent": "NOP"
+  },
+  {
+    "text": "face left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "right side jao 50",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "right ghumo",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "do nothing 50",
+    "intent": "NOP"
+  },
+  {
+    "text": "move ahead",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "ghumaao right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "rotate left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "mud ja left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "wait",
+    "intent": "STOP"
+  },
+  {
+    "text": "brake 8",
+    "intent": "STOP"
+  },
+  {
+    "text": "spin left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "strafe left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "spin right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "nudge",
+    "intent": "PULSE"
+  },
+  {
+    "text": "turn right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "shift left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "left side jao 4",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "do not move",
+    "intent": "STOP"
+  },
+  {
+    "text": "spin left 10",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "move right 5",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "go straight ahead",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "move karo aage",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "skip 20",
+    "intent": "NOP"
+  },
+  {
+    "text": "do nothing",
+    "intent": "NOP"
+  },
+  {
+    "text": "ek jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "stay",
+    "intent": "STOP"
+  },
+  {
+    "text": "nuffin",
+    "intent": "NOP"
+  },
+  {
+    "text": "rotate right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "nahi chal",
+    "intent": "STOP"
+  },
+  {
+    "text": "slide left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "ek jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "slide left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "reekh mat karo 3",
+    "intent": "NOP"
+  },
+  {
+    "text": "wait",
+    "intent": "STOP"
+  },
+  {
+    "text": "turn right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "baayein",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "chhod do",
+    "intent": "NOP"
+  },
+  {
+    "text": "go back",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "scratch that",
+    "intent": "NOP"
+  },
+  {
+    "text": "turn left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "move right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "move left 5",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "shift left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "stop karo 20",
+    "intent": "STOP"
+  },
+  {
+    "text": "don't move",
+    "intent": "STOP"
+  },
+  {
+    "text": "backward",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "go to the right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "ghum left 3",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "forward",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "slide left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "move karo aage",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "ruko 1",
+    "intent": "STOP"
+  },
+  {
+    "text": "face left 5",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "bayen",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "reekh mat karo 100",
+    "intent": "NOP"
+  },
+  {
+    "text": "straight",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "stop moving 4",
+    "intent": "STOP"
+  },
+  {
+    "text": "quick move",
+    "intent": "PULSE"
+  },
+  {
+    "text": "quick move",
+    "intent": "PULSE"
+  },
+  {
+    "text": "aage chalo",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "seedha 30",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "peeche jao",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "ghum left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "back up",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "brake 5",
+    "intent": "STOP"
+  },
+  {
+    "text": "kuch nahi",
+    "intent": "NOP"
+  },
+  {
+    "text": "move back ward",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "ghuma right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "go straight",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "rukoo 10",
+    "intent": "STOP"
+  },
+  {
+    "text": "pulse karo",
+    "intent": "PULSE"
+  },
+  {
+    "text": "rotate left 45",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "ruku",
+    "intent": "STOP"
+  },
+  {
+    "text": "slide left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "forward",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "dayen 2",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "bayin",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "strafe right 8",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "drive forward",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "kuch mat kar",
+    "intent": "NOP"
+  },
+  {
+    "text": "skip karo",
+    "intent": "NOP"
+  },
+  {
+    "text": "brief pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "turn left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "move left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "spyn wright",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "seedha chalo",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "move ahead 50",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "peeche jao",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "ek jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "bayan",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "go backwards",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "turn lyft 15",
+    "intent": "NOP"
+  },
+  {
+    "text": "dayin",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "ghuma left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "spin right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "for ward",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "stop",
+    "intent": "STOP"
+  },
+  {
+    "text": "right mein jao",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "sidhe",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "ruk jao",
+    "intent": "STOP"
+  },
+  {
+    "text": "rotate right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "shift right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "seedha chalo",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "move ahead 3",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "spin left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "reverse lo 5",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "piche 4",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "bayen",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "agey 4",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "forward 2",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "strait",
+    "intent": "NOP"
+  },
+  {
+    "text": "puls",
+    "intent": "NOP"
+  },
+  {
+    "text": "never mind 100",
+    "intent": "NOP"
+  },
+  {
+    "text": "rotate left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "ghuma right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "leave karo",
+    "intent": "NOP"
+  },
+  {
+    "text": "shift left 100",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "baayein",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "rotate right 90",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "nothing",
+    "intent": "NOP"
+  },
+  {
+    "text": "freeze",
+    "intent": "STOP"
+  },
+  {
+    "text": "rotate right 1",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "ignore",
+    "intent": "NOP"
+  },
+  {
+    "text": "nudge",
+    "intent": "PULSE"
+  },
+  {
+    "text": "spin right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "bayen",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "reverse lo",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "go straight 50",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "move forward 50",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "aage jao",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "rotate lyft",
+    "intent": "NOP"
+  },
+  {
+    "text": "right mein jao 50",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "go to the right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "nutting",
+    "intent": "NOP"
+  },
+  {
+    "text": "move left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "nothing 1",
+    "intent": "NOP"
+  },
+  {
+    "text": "jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "turn left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "brief pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "bayin",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "go ahead",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "kuch nahi",
+    "intent": "NOP"
+  },
+  {
+    "text": "slide right 3",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "turn left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "dayan 4",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "move backward 10",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "go right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "rukna hai 30",
+    "intent": "STOP"
+  },
+  {
+    "text": "move ahead",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "move backward",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "forward",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "move left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "aage chalo",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "slide left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "bayin",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "never mind",
+    "intent": "NOP"
+  },
+  {
+    "text": "strafe left 8",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "scratch that",
+    "intent": "NOP"
+  },
+  {
+    "text": "go ahead",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "kuch mat kar",
+    "intent": "NOP"
+  },
+  {
+    "text": "left side jao",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "back karo 15",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "nudge",
+    "intent": "PULSE"
+  },
+  {
+    "text": "reverse",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "roate",
+    "intent": "NOP"
+  },
+  {
+    "text": "move right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "peeche jao",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "samne",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "rukna",
+    "intent": "STOP"
+  },
+  {
+    "text": "peeche",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "face right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "right ghumo 100",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "stop karo",
+    "intent": "STOP"
+  },
+  {
+    "text": "left side",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "rotate left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "brief pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "right side",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "bayen mud",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "back up",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "drive ahead 2",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "shift left 1",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "go straight",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "peeche jao",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "strafe right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "turn to the right 50",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "backward 10",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "turn to the right 3",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "right side jao",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "right mein jao 2",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "move forward",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "peeche jao",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "straight",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "drive forward",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "streight",
+    "intent": "NOP"
+  },
+  {
+    "text": "spin left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "ek jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "cancel",
+    "intent": "NOP"
+  },
+  {
+    "text": "ghuma right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "mud ja right 30",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "spin left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "drive forward",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "go back",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "dayen",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "back karo 20",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "peechay",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "dayen 8",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "rukna 50",
+    "intent": "STOP"
+  },
+  {
+    "text": "mud ja right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "go straight ahead",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "shop",
+    "intent": "STOP"
+  },
+  {
+    "text": "strafe right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "right ghumo",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "go right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "piche 5",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "skip karo",
+    "intent": "NOP"
+  },
+  {
+    "text": "drive ahead",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "ghum right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "back up",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "dayen 100",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "bayin",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "right mein jao",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "quick pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "forward",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "rukna hai",
+    "intent": "STOP"
+  },
+  {
+    "text": "move right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "right mein mud",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "brief pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "dayen mud 10",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "slide right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "rotate right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "strafe right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "left side jao",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "stay",
+    "intent": "STOP"
+  },
+  {
+    "text": "disregard",
+    "intent": "NOP"
+  },
+  {
+    "text": "dayan 20",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "stop karo",
+    "intent": "STOP"
+  },
+  {
+    "text": "pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "ruk jao 1",
+    "intent": "STOP"
+  },
+  {
+    "text": "ruko 100",
+    "intent": "STOP"
+  },
+  {
+    "text": "never mind",
+    "intent": "NOP"
+  },
+  {
+    "text": "dayen",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "do nothing",
+    "intent": "NOP"
+  },
+  {
+    "text": "pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "leave it",
+    "intent": "NOP"
+  },
+  {
+    "text": "peechay 2",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "ghuma right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "ek jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "cancel",
+    "intent": "NOP"
+  },
+  {
+    "text": "move karo aage",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "skip karo",
+    "intent": "NOP"
+  },
+  {
+    "text": "left mein mud 100",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "strafe right 4",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "shift left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "left side jao",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "face left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "quick pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "disregard 3",
+    "intent": "NOP"
+  },
+  {
+    "text": "dayen",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "peechay",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "kuch mat kar 50",
+    "intent": "NOP"
+  },
+  {
+    "text": "aage",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "revurse",
+    "intent": "NOP"
+  },
+  {
+    "text": "ghumaao right 30",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "go to the right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "sidha",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "brake",
+    "intent": "STOP"
+  },
+  {
+    "text": "ghum right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "ghuma left 4",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "slide right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "baayein",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "left mein jao",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "disregard",
+    "intent": "NOP"
+  },
+  {
+    "text": "spin right 50",
+    "intent": "NOP"
+  },
+  {
+    "text": "go to the right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "go forward",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "ghuma right 50",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "spin right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "turn left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "ulta",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "pulse karo",
+    "intent": "PULSE"
+  },
+  {
+    "text": "ghumaao right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "brake",
+    "intent": "STOP"
+  },
+  {
+    "text": "left mein jao 20",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "bayen",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "move ahead 15",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "go backwards 50",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "move ahead",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "aage jao",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "strafe left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "right side 8",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "stop",
+    "intent": "STOP"
+  },
+  {
+    "text": "seedha jao",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "scratch that 8",
+    "intent": "NOP"
+  },
+  {
+    "text": "go straight",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "turn left 30",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "turn to the right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "seedhe",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "baayein",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "nudge",
+    "intent": "PULSE"
+  },
+  {
+    "text": "do nothing",
+    "intent": "NOP"
+  },
+  {
+    "text": "reekh mat karo 100",
+    "intent": "NOP"
+  },
+  {
+    "text": "ek jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "freeze",
+    "intent": "STOP"
+  },
+  {
+    "text": "do not move",
+    "intent": "STOP"
+  },
+  {
+    "text": "right side jao",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "strafe left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "brake",
+    "intent": "STOP"
+  },
+  {
+    "text": "quick move",
+    "intent": "PULSE"
+  },
+  {
+    "text": "slide left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "reverse",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "turn to the left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "wait",
+    "intent": "STOP"
+  },
+  {
+    "text": "pulse karo",
+    "intent": "PULSE"
+  },
+  {
+    "text": "reekh mat karo",
+    "intent": "NOP"
+  },
+  {
+    "text": "leave karo",
+    "intent": "NOP"
+  },
+  {
+    "text": "nudge",
+    "intent": "PULSE"
+  },
+  {
+    "text": "turn left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "turn right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "right side",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "never mind",
+    "intent": "NOP"
+  },
+  {
+    "text": "rukoo",
+    "intent": "STOP"
+  },
+  {
+    "text": "face right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "strafe left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "go backwards",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "pulse karo",
+    "intent": "PULSE"
+  },
+  {
+    "text": "move forward",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "ruk jao",
+    "intent": "STOP"
+  },
+  {
+    "text": "peechay 20",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "quick move",
+    "intent": "PULSE"
+  },
+  {
+    "text": "backward",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "kuch nahi",
+    "intent": "NOP"
+  },
+  {
+    "text": "kuch mat kar",
+    "intent": "NOP"
+  },
+  {
+    "text": "disregard",
+    "intent": "NOP"
+  },
+  {
+    "text": "rotate left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "move left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "do not move",
+    "intent": "STOP"
+  },
+  {
+    "text": "right mein mud 8",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "left side jao",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "strafe right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "agey",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "rukna",
+    "intent": "STOP"
+  },
+  {
+    "text": "go right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "dayan",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "dayin",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "turn to the right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "baayein",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "forward 5",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "nahi chal",
+    "intent": "STOP"
+  },
+  {
+    "text": "turn to the left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "go to the left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "do not move",
+    "intent": "STOP"
+  },
+  {
+    "text": "spin left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "ruk jao 3",
+    "intent": "STOP"
+  },
+  {
+    "text": "right side jao 20",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "move karo aage",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "ghum right 30",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "face right 30",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "spin left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "face left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "quick move",
+    "intent": "PULSE"
+  },
+  {
+    "text": "reverse",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "ignore",
+    "intent": "NOP"
+  },
+  {
+    "text": "move ahead 1",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "brake 8",
+    "intent": "STOP"
+  },
+  {
+    "text": "ghuma left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "turn to the left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "ruk jao",
+    "intent": "STOP"
+  },
+  {
+    "text": "bayin 30",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "puls",
+    "intent": "PULSE"
+  },
+  {
+    "text": "pulse karo",
+    "intent": "PULSE"
+  },
+  {
+    "text": "brief pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "rukoo",
+    "intent": "STOP"
+  },
+  {
+    "text": "turn right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "left mein mud",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "ghum left 1",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "right side jao",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "leave it 20",
+    "intent": "NOP"
+  },
+  {
+    "text": "right side jao",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "backward 1",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "brief pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "hot",
+    "intent": "NOP"
+  },
+  {
+    "text": "disregard",
+    "intent": "NOP"
+  },
+  {
+    "text": "back up",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "dayin 1",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "aagye",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "left ghumo",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "shift right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "turn to the right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "peeche jao",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "skip",
+    "intent": "NOP"
+  },
+  {
+    "text": "mat chal",
+    "intent": "STOP"
+  },
+  {
+    "text": "nevermind",
+    "intent": "NOP"
+  },
+  {
+    "text": "aage badho",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "weight",
+    "intent": "NOP"
+  },
+  {
+    "text": "top",
+    "intent": "NOP"
+  },
+  {
+    "text": "kuch mat kar",
+    "intent": "NOP"
+  },
+  {
+    "text": "reverse",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "seedha chalo 30",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "left mein jao 1",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "ghumaao left 100",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "rootate",
+    "intent": "NOP"
+  },
+  {
+    "text": "nudge",
+    "intent": "PULSE"
+  },
+  {
+    "text": "shift right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "face right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "right side",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "go left 2",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "dayan",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "go to the left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "go ahead 30",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "go straight ahead",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "quick move",
+    "intent": "PULSE"
+  },
+  {
+    "text": "quick pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "freeze",
+    "intent": "STOP"
+  },
+  {
+    "text": "right mein mud",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "left ghumo 3",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "backward",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "rukna hai",
+    "intent": "STOP"
+  },
+  {
+    "text": "ulta",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "reverse 8",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "left ghumo",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "strafe right",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "write",
+    "intent": "NOP"
+  },
+  {
+    "text": "left mein mud 50",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "right side 100",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "freaze",
+    "intent": "NOP"
+  },
+  {
+    "text": "halt 10",
+    "intent": "STOP"
+  },
+  {
+    "text": "nudge",
+    "intent": "PULSE"
+  },
+  {
+    "text": "face rite 15",
+    "intent": "NOP"
+  },
+  {
+    "text": "reekh mat karo",
+    "intent": "NOP"
+  },
+  {
+    "text": "right mein jao",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "stop moving 1",
+    "intent": "STOP"
+  },
+  {
+    "text": "mat chal 30",
+    "intent": "STOP"
+  },
+  {
+    "text": "left mein jao 50",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "strafe left 4",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "strafe left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "rite",
+    "intent": "NOP"
+  },
+  {
+    "text": "freeze 3",
+    "intent": "STOP"
+  },
+  {
+    "text": "go back",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "turn left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "sidhe",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "ek jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "shop",
+    "intent": "STOP"
+  },
+  {
+    "text": "ghuma left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "baayein",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "left side",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "spin right 2",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "hot",
+    "intent": "NOP"
+  },
+  {
+    "text": "rotate right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "ghum right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "drive ahead",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "back up",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "baayein",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "ek jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "sidha",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "dahine 10",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "ghuma left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "turn right 30",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "peeche",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "turn left 2",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "reverse lo",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "shift right 50",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "leave it",
+    "intent": "NOP"
+  },
+  {
+    "text": "ruk jao",
+    "intent": "STOP"
+  },
+  {
+    "text": "ek jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "right mein mud",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "spin left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "backward",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "right side",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "dayen mud",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "spin right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "bayen mud",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "skip",
+    "intent": "NOP"
+  },
+  {
+    "text": "backward",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "move left 5",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "ghum left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "spyn",
+    "intent": "NOP"
+  },
+  {
+    "text": "pore",
+    "intent": "NOP"
+  },
+  {
+    "text": "bayen mud 1",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "bayen",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "seedha chalo 2",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "reverse",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "shift left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "right 5",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "ignore",
+    "intent": "NOP"
+  },
+  {
+    "text": "quick pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "reverce 4",
+    "intent": "NOP"
+  },
+  {
+    "text": "aage chalo",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "rotate left",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "cancel",
+    "intent": "NOP"
+  },
+  {
+    "text": "spin right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "freez",
+    "intent": "NOP"
+  },
+  {
+    "text": "stop karo 5",
+    "intent": "STOP"
+  },
+  {
+    "text": "face rite",
+    "intent": "NOP"
+  },
+  {
+    "text": "move backward 50",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "nothing",
+    "intent": "NOP"
+  },
+  {
+    "text": "left side jao 20",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "rukna 4",
+    "intent": "STOP"
+  },
+  {
+    "text": "agey 15",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "bayen",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "aagye",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "move backward",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "dayen",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "go straight ahead",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "ruko",
+    "intent": "STOP"
+  },
+  {
+    "text": "ghumaao left 5",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "left side",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "face right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "cancel",
+    "intent": "NOP"
+  },
+  {
+    "text": "jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "reverse",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "paws",
+    "intent": "NOP"
+  },
+  {
+    "text": "rotate right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "face right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "backward",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "right mein jao",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "nudge",
+    "intent": "PULSE"
+  },
+  {
+    "text": "right mein mud",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "rukna 20",
+    "intent": "STOP"
+  },
+  {
+    "text": "ek jhatka",
+    "intent": "PULSE"
+  },
+  {
+    "text": "stop karo",
+    "intent": "STOP"
+  },
+  {
+    "text": "dahine",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "slide left",
+    "intent": "STRAFE_LEFT"
+  },
+  {
+    "text": "stop 50",
+    "intent": "STOP"
+  },
+  {
+    "text": "cancel 100",
+    "intent": "NOP"
+  },
+  {
+    "text": "dayan",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "weight",
+    "intent": "NOP"
+  },
+  {
+    "text": "go straight ahead 5",
+    "intent": "FORWARD"
+  },
+  {
+    "text": "wait",
+    "intent": "STOP"
+  },
+  {
+    "text": "left mein mud",
+    "intent": "ROTATE_LEFT"
+  },
+  {
+    "text": "dayin",
+    "intent": "STRAFE_RIGHT"
+  },
+  {
+    "text": "ghum right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "quick pulse",
+    "intent": "PULSE"
+  },
+  {
+    "text": "face right",
+    "intent": "ROTATE_RIGHT"
+  },
+  {
+    "text": "brake",
+    "intent": "STOP"
+  },
+  {
+    "text": "hault",
+    "intent": "NOP"
+  },
+  {
+    "text": "go back",
+    "intent": "BACKWARD"
+  },
+  {
+    "text": "drive forward",
+    "intent": "FORWARD"
+  }
+]
