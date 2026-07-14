@@ -3389,11 +3389,11 @@
         "documentation": {}
     },
     {
-        "label": "imu_ble_yaw_thread",
+        "label": "imu_usb_yaw_thread",
         "kind": 2,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "def imu_ble_yaw_thread():\n    global _raw_smoothed_yaw\n    import imu_ble_mkbox\n    calib_samples = []\n    gyro_bias_dps = 0.0\n    last_t = [None]\n    _raw_smoothed_yaw = 0.0\n    def on_sample(gx, gy, gz):\n        nonlocal gyro_bias_dps\n        global _raw_smoothed_yaw",
+        "peekOfCode": "def imu_usb_yaw_thread():\n    global _raw_smoothed_yaw\n    import imu_usb_mkbox\n    async def run():\n        global _raw_smoothed_yaw\n        box = imu_usb_mkbox.MkBoxUsbGyro()\n        print(\"[USB-GYRO] connecting over BLE to start USB streaming...\")\n        await box.start()\n        print(\"[USB-GYRO] streaming started, calibrating bias...\")\n        calib_samples = []",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -3695,11 +3695,20 @@
         "documentation": {}
     },
     {
-        "label": "BLE_GYRO_BIAS_CALIB_SAMPLES",
+        "label": "USB_GYRO_BIAS_CALIB_SAMPLES",
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "BLE_GYRO_BIAS_CALIB_SAMPLES = 60\ndef imu_ble_yaw_thread():\n    global _raw_smoothed_yaw\n    import imu_ble_mkbox\n    calib_samples = []\n    gyro_bias_dps = 0.0\n    last_t = [None]\n    _raw_smoothed_yaw = 0.0\n    def on_sample(gx, gy, gz):\n        nonlocal gyro_bias_dps",
+        "peekOfCode": "USB_GYRO_BIAS_CALIB_SAMPLES = 60\nUSB_GYRO_POLL_HZ = 200\ndef imu_usb_yaw_thread():\n    global _raw_smoothed_yaw\n    import imu_usb_mkbox\n    async def run():\n        global _raw_smoothed_yaw\n        box = imu_usb_mkbox.MkBoxUsbGyro()\n        print(\"[USB-GYRO] connecting over BLE to start USB streaming...\")\n        await box.start()",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "USB_GYRO_POLL_HZ",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "USB_GYRO_POLL_HZ = 200\ndef imu_usb_yaw_thread():\n    global _raw_smoothed_yaw\n    import imu_usb_mkbox\n    async def run():\n        global _raw_smoothed_yaw\n        box = imu_usb_mkbox.MkBoxUsbGyro()\n        print(\"[USB-GYRO] connecting over BLE to start USB streaming...\")\n        await box.start()\n        print(\"[USB-GYRO] streaming started, calibrating bias...\")",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
