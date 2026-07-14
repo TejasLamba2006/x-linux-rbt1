@@ -346,8 +346,15 @@ def imu_fusion_yaw_thread():
             dt = (now - last_batch_t) / len(batch) if batch else 0.0
             last_batch_t = now
 
+            batch_mean_gz = 0.0
             for gx, gy, gz in batch:
                 _raw_smoothed_yaw = (_raw_smoothed_yaw - (gz - gyro_bias) * dt + 180) % 360 - 180
+                batch_mean_gz += gz
+            if batch:
+                batch_mean_gz /= len(batch)
+                # When stationary, slowly track drift in gyro bias (EMA, alpha=0.01)
+                if (now - _last_mouse_move_time) > 1.0:
+                    gyro_bias += 0.01 * (batch_mean_gz - gyro_bias)
 
             if _latest_mag_heading is not None:
                 correction = angle_diff(_latest_mag_heading, _raw_smoothed_yaw)
@@ -451,7 +458,7 @@ def _evdev_thread(device_path: str):
                 INPUT_EVENT_FMT, raw)
 
             if ev_type == EV_REL:
-                _last_mouse_move_time = time.monotonic()
+                _last_mouse_move_time = time.time()
                 if ev_code == REL_X:
                     pending_dx += ev_value
                 elif ev_code == REL_Y:
