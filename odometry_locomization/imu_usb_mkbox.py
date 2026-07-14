@@ -3,26 +3,36 @@
 # ACK on i2c-1 (see imu_lsm6dsv16x.py).
 #
 # Split-transport protocol, reverse-engineered live against the box (DATALOG2
-# firmware, advertises as HSD2v3x over BLE):
+# firmware, advertises as HSD2v3x over BLE) and cross-checked against the
+# actual firmware source (STMicroelectronics/fp-sns-datalog2,
+# DatalogAppTask.c):
 #   - Commands (incl. "start streaming") ALWAYS go over BLE's PnPL command
 #     characteristic, even when the actual sensor data is routed over USB.
 #     Direct USB bulk writes to the command-shaped OUT endpoint (0x06) were
 #     tried and always came back STALL (EPIPE) -- USB is data-out only here.
-#   - Once "log_controller*start_log" is sent over BLE with
-#     {"interface": 1}, the box's USB interface (vendor id 0x0483:0x5744,
-#     "Sensortile.box_PRO_Multi_Sensor_Streaming") starts pushing continuous
-#     data on bulk IN endpoints 0x81-0x85, one endpoint per active sensor
-#     stream (matches each sensor's "ep_id" from get_status).
-#   - Endpoint 0x81 (gyro's ep_id=0) was confirmed live by rotating the box
-#     and watching its raw values spike from near-zero (~-33) to ~2000+ and
-#     decay back after stopping -- the other endpoints (accel, likely
-#     pressure/mic) stayed comparatively flat during the same rotation.
-#   - Payload on 0x81 is a raw back-to-back stream of signed int16 LE
-#     (gx, gy, gz) triples, no per-sample header/timestamp -- unlike some of
-#     the other endpoints (0x83 had a 5-byte counter prefix per read).
+#     Once "log_controller*start_log" is accepted with {"interface": 1}, the
+#     box keeps streaming over USB on its own, so the BLE connection is
+#     dropped immediately after -- no need to hold it open.
+#   - USB interface is vendor id 0x0483:0x5744 ("Sensortile.box_PRO_Multi_
+#     Sensor_Streaming"), one bulk IN endpoint per active sensor stream:
+#     endpoint address = 0x81 + ep_id, where ep_id comes from that sensor's
+#     {"get_status":"<name>"} response. lsm6dsv16x_gyro reports ep_id=0, so
+#     gyro data is on 0x81 -- confirmed live (see mkbox_live_debug.py) by
+#     rotating the box and watching ONLY that endpoint's decoded values
+#     track the motion and settle back near zero afterward.
+#   - Wire format per DatalogAppTask.c is NOT a flat stream of samples:
+#     [samples_per_ts raw samples][8-byte double timestamp][more samples]...
+#     samples_per_ts for the gyro is 1000 (from get_status), and at its
+#     streamed rate that timestamp block interrupts the stream every ~2-3s --
+#     long enough to corrupt any capture that doesn't skip it. Also, USB
+#     bulk reads return up to 64 bytes at a time but samples are 6 bytes (3x
+#     int16), and 64 isn't a multiple of 6, so treating each independent
+#     read as sample-aligned silently drifts the byte offset every read.
+#     Both are handled here with a persistent per-stream byte buffer and a
+#     sample counter that skips exactly 8 bytes every samples_per_ts samples.
 #   - Scale factor (0.14 dps/LSB) is NOT guessed -- it's the exact
-#     "multiply_factor" the box itself reported for lsm6dsv16x_gyro via
-#     {"get_status":"lsm6dsv16x_gyro"} over BLE.
+#     "multiply_factor"/"sensitivity" the box itself reported for
+#     lsm6dsv16x_gyro via {"get_status":"lsm6dsv16x_gyro"} over BLE.
 #
 # ponytail: axis order/sign (which of gx/gy/gz is "up" on this box, and
 # whether any axis is inverted vs. the robot's mounting) is unverified --
@@ -41,8 +51,11 @@ CMD_CHAR_UUID = "0000001b-0002-11e1-ac36-0002a5d5c51b"  # COPY_PNPLIKE_CHAR_UUID
 
 USB_VENDOR_ID = 0x0483
 USB_PRODUCT_ID = 0x5744
-GYRO_EP = 0x85
+GYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id
+GYRO_EP = 0x81 + GYRO_EP_ID
 
+GYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte
+                            # timestamp is interleaved into the sample stream
 GYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor
 
 # BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command
@@ -66,26 +79,32 @@ def _encode_tp(payload: bytes, mtu_payload=17):
 class MkBoxUsbGyro:
     def __init__(self, ble_device_name=BLE_DEVICE_NAME):
         self.ble_device_name = ble_device_name
-        self._ble_client = None
         self._usb_dev = None
+        self._buf = bytearray()
+        self._sample_count = 0
 
     async def start(self, scan_timeout=10.0):
-        """Connect over BLE just long enough to start USB streaming, then open the USB device."""
+        """Connect over BLE just long enough to start USB streaming, then
+        disconnect BLE entirely and open the USB device -- once
+        log_controller*start_log has been accepted, the box keeps streaming
+        over USB on its own; it doesn't need a live BLE connection held for
+        that."""
         from bleak import BleakScanner
 
         device = await BleakScanner.find_device_by_name(self.ble_device_name, scan_timeout)
         if device is None:
             raise RuntimeError(
                 f"MKBOXPRO '{self.ble_device_name}' not found in BLE scan")
-        self._ble_client = BleakClient(device)
-        await self._ble_client.connect()
-        await self._ble_client.start_notify(CMD_CHAR_UUID, lambda *_: None)
+        ble_client = BleakClient(device)
+        await ble_client.connect()
+        await ble_client.start_notify(CMD_CHAR_UUID, lambda *_: None)
 
         cmd = '{"log_controller*start_log":{"interface":1}}'
         for chunk in _encode_tp(cmd.encode()):
-            await self._ble_client.write_gatt_char(CMD_CHAR_UUID, chunk, response=False)
+            await ble_client.write_gatt_char(CMD_CHAR_UUID, chunk, response=False)
             await asyncio.sleep(0.05)
         await asyncio.sleep(0.5)
+        await ble_client.disconnect()
 
         self._usb_dev = usb.core.find(
             idVendor=USB_VENDOR_ID, idProduct=USB_PRODUCT_ID)
@@ -113,5 +132,16 @@ class MkBoxUsbGyro:
         return samples
 
     async def stop(self):
-        if self._ble_client is not None and self._ble_client.is_connected:
-            await self._ble_client.disconnect()
+        """Reconnect briefly over BLE to send stop_log -- USB streaming has
+        no live BLE connection to tear down (see start())."""
+        from bleak import BleakScanner
+
+        device = await BleakScanner.find_device_by_name(self.ble_device_name, 10.0)
+        if device is None:
+            return
+        async with BleakClient(device) as ble_client:
+            await ble_client.start_notify(CMD_CHAR_UUID, lambda *_: None)
+            cmd = '{"log_controller*stop_log":{"interface":1}}'
+            for chunk in _encode_tp(cmd.encode()):
+                await ble_client.write_gatt_char(CMD_CHAR_UUID, chunk, response=False)
+                await asyncio.sleep(0.05)
