@@ -170,11 +170,11 @@ async def main():
         print(f"'{BLE_DEVICE_NAME}' not found.")
         return
 
+    ep_map = {}
     async with BleakClient(device, timeout=20.0) as client:
         print("BLE connected. Reading sensor configs...")
         configs = await fetch_sensor_configs(client)
 
-        ep_map = {}
         for name, cfg in configs.items():
             if cfg.get("ep_id", -1) < 0:
                 continue
@@ -197,24 +197,31 @@ async def main():
             await client.write_gatt_char(CMD_UUID, chunk, response=False)
             await asyncio.sleep(0.05)
         await asyncio.sleep(0.3)
+    # BLE disconnected here (end of `async with`) -- USB keeps streaming on
+    # its own once start_log is accepted, no need to hold the BLE link open.
+    print("BLE disconnected, USB streaming continues on its own.")
 
-        stop_event = threading.Event()
-        t_usb = threading.Thread(target=usb_poll_thread, args=(stop_event, ep_map), daemon=True)
-        t_print = threading.Thread(target=print_loop, args=(stop_event,), daemon=True)
-        t_usb.start()
-        t_print.start()
+    stop_event = threading.Event()
+    t_usb = threading.Thread(target=usb_poll_thread, args=(stop_event, ep_map), daemon=True)
+    t_print = threading.Thread(target=print_loop, args=(stop_event,), daemon=True)
+    t_usb.start()
+    t_print.start()
 
-        try:
-            while True:
-                await asyncio.sleep(1.0)
-        except KeyboardInterrupt:
-            pass
-        finally:
-            stop_event.set()
-            print("\nStopping log...")
-            for chunk in encode_tp(b'{"log_controller*stop_log":{"interface":1}}'):
-                await client.write_gatt_char(CMD_UUID, chunk, response=False)
-                await asyncio.sleep(0.05)
+    try:
+        while True:
+            await asyncio.sleep(1.0)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        stop_event.set()
+        print("\nReconnecting over BLE to stop logging...")
+        device = await BleakScanner.find_device_by_name(BLE_DEVICE_NAME, 10.0)
+        if device is not None:
+            async with BleakClient(device, timeout=20.0) as client:
+                await client.start_notify(CMD_UUID, lambda *_: None)
+                for chunk in encode_tp(b'{"log_controller*stop_log":{"interface":1}}'):
+                    await client.write_gatt_char(CMD_UUID, chunk, response=False)
+                    await asyncio.sleep(0.05)
 
 
 if __name__ == "__main__":
