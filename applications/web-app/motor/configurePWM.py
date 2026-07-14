@@ -49,6 +49,12 @@ class PWMController:
     def set_motor_speed(self, speed_percent, value = True):
         period_ns = 500000  # 1 ms period for example
         duty_cycle_ns = int(period_ns * (speed_percent / 100))
+        # A channel left exported by a crashed run keeps its old duty_cycle;
+        # if that's bigger than the new period the kernel rejects the period
+        # write with EINVAL (duty_cycle can never exceed period). Zero it
+        # first so the period write always succeeds regardless of leftover
+        # hardware state.
+        self.set_pwm_duty_cycle(0)
         self.set_pwm_period(period_ns)
         self.set_pwm_duty_cycle(duty_cycle_ns)
         self.enable_pwm(value)
