@@ -58,16 +58,20 @@ GYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte
                             # timestamp is interleaved into the sample stream
 GYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor
 
-# Fixed per-sample time interval, derived from get_status:lsm6dsv16x_gyro's
-# own "usb_dps" (bytes/sec actually streamed over USB): 2304 / 6 bytes-per-
-# sample = 384 samples/sec. Used instead of wall-clock time.time() per
-# sample for yaw integration -- read_gyro_dps() often returns a whole batch
-# of samples decoded from one USB read (data arrives faster than we poll),
-# and timing each sample in that batch by wall-clock time makes every
-# sample after the first look like it took ~0s (just loop overhead),
-# wildly under-integrating bursts. The real time between consecutive
-# samples is this fixed interval, not however long the Python loop took.
-GYRO_SAMPLE_INTERVAL_S = 6.0 / 2304.0
+# Per-sample time interval: live measurement showed samples arrive at ~7880 Hz
+# (not the ~384 Hz that get_status's "usb_dps" field implied). Used only as
+# a fallback if the caller doesn't measure dt from wall-clock time (the fusion
+# thread in run_linux.py does measure dt live, so this constant isn't critical).
+GYRO_SAMPLE_INTERVAL_S = 1.0 / 7880.0
+
+# Each USB bulk read from the device starts with a 5-byte header:
+#   byte 0: stream ID (always 0x00)
+#   bytes 1-4: LE uint32 packet counter (increments by data-payload-size)
+# This header must be stripped before sample decoding. Reading only 64 bytes
+# at a time mixes header bytes into the sample stream, causing byte
+# misalignment and ~35 dps corruption at rest. Reading full packets (≥4096)
+# and stripping the header fixes this.
+_USB_HEADER_SIZE = 5
 
 # BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command
 # characteristic -- see imu_ble_mkbox.py's header note / prior probing).
@@ -131,17 +135,31 @@ class MkBoxUsbGyro:
         with the periodic 8-byte timestamp block skipped (see module header
         for why both of those matter -- may be empty)."""
         try:
-            raw = bytes(self._usb_dev.read(GYRO_EP, 64, timeout=timeout_ms))
+            raw = bytes(self._usb_dev.read(GYRO_EP, 4096, timeout=timeout_ms))
         except usb.core.USBError:
             return []
 
-        self._buf.extend(raw)
+        # Strip the per-packet USB header (5 bytes: 1 stream-id + 4 counter)
+        if len(raw) <= _USB_HEADER_SIZE:
+            return []
+        self._buf.extend(raw[_USB_HEADER_SIZE:])
+
         samples = []
         while True:
             if self._sample_count >= GYRO_SAMPLES_PER_TS:
                 if len(self._buf) < 8:
                     break
-                del self._buf[:8]  # skip the 8-byte double timestamp
+                # Validate the 8-byte timestamp: must decode to a plausible
+                # boot-time double (0 < t < 1e6 seconds). If it doesn't, our
+                # sample counter drifted out of sync (e.g. first read started
+                # mid-cycle). Scan forward up to 12 bytes to re-sync.
+                (ts,) = struct.unpack_from("<d", self._buf, 0)
+                if not (0 < ts < 1e6):
+                    # resync: skip 6 bytes (one sample) and retry
+                    del self._buf[:6]
+                    self._sample_count = max(0, self._sample_count - 1)
+                    continue
+                del self._buf[:8]  # valid timestamp -- skip it
                 self._sample_count = 0
                 continue
             if len(self._buf) < 6:
