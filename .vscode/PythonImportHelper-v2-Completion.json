@@ -18,22 +18,6 @@
         "documentation": {}
     },
     {
-        "label": "sleep",
-        "importPath": "time",
-        "description": "time",
-        "isExtraImport": true,
-        "detail": "time",
-        "documentation": {}
-    },
-    {
-        "label": "time",
-        "importPath": "time",
-        "description": "time",
-        "isExtraImport": true,
-        "detail": "time",
-        "documentation": {}
-    },
-    {
         "label": "STSpinDriver",
         "importPath": "motor.stspin_driver",
         "description": "motor.stspin_driver",
@@ -580,6 +564,22 @@
         "documentation": {}
     },
     {
+        "label": "BleakClient",
+        "importPath": "bleak",
+        "description": "bleak",
+        "isExtraImport": true,
+        "detail": "bleak",
+        "documentation": {}
+    },
+    {
+        "label": "BleakScanner",
+        "importPath": "bleak",
+        "description": "bleak",
+        "isExtraImport": true,
+        "detail": "bleak",
+        "documentation": {}
+    },
+    {
         "label": "fcntl",
         "kind": 6,
         "isExtraImport": true,
@@ -722,299 +722,6 @@
         "documentation": {}
     },
     {
-        "label": "random",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "random",
-        "description": "random",
-        "detail": "random",
-        "documentation": {}
-    },
-    {
-        "label": "sensor_config",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "sensor_config",
-        "description": "sensor_config",
-        "detail": "sensor_config",
-        "documentation": {}
-    },
-    {
-        "label": "cairo",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "cairo",
-        "description": "cairo",
-        "detail": "cairo",
-        "documentation": {}
-    },
-    {
-        "label": "stts22h",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "stts22h",
-        "description": "stts22h",
-        "detail": "stts22h",
-        "documentation": {}
-    },
-    {
-        "label": "stts22h",
-        "importPath": "stts22h",
-        "description": "stts22h",
-        "isExtraImport": true,
-        "detail": "stts22h",
-        "documentation": {}
-    },
-    {
-        "label": "GdkPixbuf",
-        "importPath": "gi.repository",
-        "description": "gi.repository",
-        "isExtraImport": true,
-        "detail": "gi.repository",
-        "documentation": {}
-    },
-    {
-        "label": "GLib",
-        "importPath": "gi.repository",
-        "description": "gi.repository",
-        "isExtraImport": true,
-        "detail": "gi.repository",
-        "documentation": {}
-    },
-    {
-        "label": "Gdk",
-        "importPath": "gi.repository",
-        "description": "gi.repository",
-        "isExtraImport": true,
-        "detail": "gi.repository",
-        "documentation": {}
-    },
-    {
-        "label": "GObject",
-        "importPath": "gi.repository",
-        "description": "gi.repository",
-        "isExtraImport": true,
-        "detail": "gi.repository",
-        "documentation": {}
-    },
-    {
-        "label": "Gtk",
-        "importPath": "gi.repository",
-        "description": "gi.repository",
-        "isExtraImport": true,
-        "detail": "gi.repository",
-        "documentation": {}
-    },
-    {
-        "label": "Gtk",
-        "importPath": "gi.repository",
-        "description": "gi.repository",
-        "isExtraImport": true,
-        "detail": "gi.repository",
-        "documentation": {}
-    },
-    {
-        "label": "Gdk",
-        "importPath": "gi.repository",
-        "description": "gi.repository",
-        "isExtraImport": true,
-        "detail": "gi.repository",
-        "documentation": {}
-    },
-    {
-        "label": "GdkPixbuf",
-        "importPath": "gi.repository",
-        "description": "gi.repository",
-        "isExtraImport": true,
-        "detail": "gi.repository",
-        "documentation": {}
-    },
-    {
-        "label": "gi",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "gi",
-        "description": "gi",
-        "detail": "gi",
-        "documentation": {}
-    },
-    {
-        "label": "subprocess",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "subprocess",
-        "description": "subprocess",
-        "detail": "subprocess",
-        "documentation": {}
-    },
-    {
-        "label": "Popen",
-        "importPath": "subprocess",
-        "description": "subprocess",
-        "isExtraImport": true,
-        "detail": "subprocess",
-        "documentation": {}
-    },
-    {
-        "label": "PIPE",
-        "importPath": "subprocess",
-        "description": "subprocess",
-        "isExtraImport": true,
-        "detail": "subprocess",
-        "documentation": {}
-    },
-    {
-        "label": "CalledProcessError",
-        "importPath": "subprocess",
-        "description": "subprocess",
-        "isExtraImport": true,
-        "detail": "subprocess",
-        "documentation": {}
-    },
-    {
-        "label": "Popen",
-        "importPath": "subprocess",
-        "description": "subprocess",
-        "isExtraImport": true,
-        "detail": "subprocess",
-        "documentation": {}
-    },
-    {
-        "label": "PIPE",
-        "importPath": "subprocess",
-        "description": "subprocess",
-        "isExtraImport": true,
-        "detail": "subprocess",
-        "documentation": {}
-    },
-    {
-        "label": "CalledProcessError",
-        "importPath": "subprocess",
-        "description": "subprocess",
-        "isExtraImport": true,
-        "detail": "subprocess",
-        "documentation": {}
-    },
-    {
-        "label": "SensorEnumerator",
-        "importPath": "sensors",
-        "description": "sensors",
-        "isExtraImport": true,
-        "detail": "sensors",
-        "documentation": {}
-    },
-    {
-        "label": "SensorEnumerator",
-        "importPath": "sensors",
-        "description": "sensors",
-        "isExtraImport": true,
-        "detail": "sensors",
-        "documentation": {}
-    },
-    {
-        "label": "SensorEnumerator",
-        "importPath": "sensors",
-        "description": "sensors",
-        "isExtraImport": true,
-        "detail": "sensors",
-        "documentation": {}
-    },
-    {
-        "label": "SensorEnumerator",
-        "importPath": "sensors",
-        "description": "sensors",
-        "isExtraImport": true,
-        "detail": "sensors",
-        "documentation": {}
-    },
-    {
-        "label": "SensorEnumerator",
-        "importPath": "sensors",
-        "description": "sensors",
-        "isExtraImport": true,
-        "detail": "sensors",
-        "documentation": {}
-    },
-    {
-        "label": "SensorEnumerator",
-        "importPath": "sensors",
-        "description": "sensors",
-        "isExtraImport": true,
-        "detail": "sensors",
-        "documentation": {}
-    },
-    {
-        "label": "enum",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "enum",
-        "description": "enum",
-        "detail": "enum",
-        "documentation": {}
-    },
-    {
-        "label": "iis2dlpc",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "iis2dlpc",
-        "description": "iis2dlpc",
-        "detail": "iis2dlpc",
-        "documentation": {}
-    },
-    {
-        "label": "ism330dhcx",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "ism330dhcx",
-        "description": "ism330dhcx",
-        "detail": "ism330dhcx",
-        "documentation": {}
-    },
-    {
-        "label": "lps22hh",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "lps22hh",
-        "description": "lps22hh",
-        "detail": "lps22hh",
-        "documentation": {}
-    },
-    {
-        "label": "web",
-        "importPath": "aiohttp",
-        "description": "aiohttp",
-        "isExtraImport": true,
-        "detail": "aiohttp",
-        "documentation": {}
-    },
-    {
-        "label": "websockets",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "websockets",
-        "description": "websockets",
-        "detail": "websockets",
-        "documentation": {}
-    },
-    {
-        "label": "mimetypes",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "mimetypes",
-        "description": "mimetypes",
-        "detail": "mimetypes",
-        "documentation": {}
-    },
-    {
-        "label": "utils",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "utils",
-        "description": "utils",
-        "detail": "utils",
-        "documentation": {}
-    },
-    {
         "label": "STSpinDriver",
         "importPath": "Motor.stspin_driver",
         "description": "Motor.stspin_driver",
@@ -1036,6 +743,39 @@
         "description": "Motor.pwm_controller",
         "isExtraImport": true,
         "detail": "Motor.pwm_controller",
+        "documentation": {}
+    },
+    {
+        "label": "gi",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "gi",
+        "description": "gi",
+        "detail": "gi",
+        "documentation": {}
+    },
+    {
+        "label": "Gtk",
+        "importPath": "gi.repository",
+        "description": "gi.repository",
+        "isExtraImport": true,
+        "detail": "gi.repository",
+        "documentation": {}
+    },
+    {
+        "label": "Gdk",
+        "importPath": "gi.repository",
+        "description": "gi.repository",
+        "isExtraImport": true,
+        "detail": "gi.repository",
+        "documentation": {}
+    },
+    {
+        "label": "GdkPixbuf",
+        "importPath": "gi.repository",
+        "description": "gi.repository",
+        "isExtraImport": true,
+        "detail": "gi.repository",
         "documentation": {}
     },
     {
@@ -3164,6 +2904,42 @@
         "documentation": {}
     },
     {
+        "label": "MkBoxGyro",
+        "kind": 6,
+        "importPath": "odometry_locomization.imu_ble_mkbox",
+        "description": "odometry_locomization.imu_ble_mkbox",
+        "peekOfCode": "class MkBoxGyro:\n    \"\"\"Connects to a STEVAL-MKBOXPRO over BLE and streams gyro-Z (dps) via a callback.\"\"\"\n    def __init__(self, device_name=DEVICE_NAME):\n        self.device_name = device_name\n        self._client = None\n    async def connect(self, scan_timeout=10.0):\n        device = await BleakScanner.find_device_by_name(self.device_name, scan_timeout)\n        if device is None:\n            raise RuntimeError(f\"MKBOXPRO '{self.device_name}' not found in BLE scan\")\n        self._client = BleakClient(device)",
+        "detail": "odometry_locomization.imu_ble_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "DEVICE_NAME",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_ble_mkbox",
+        "description": "odometry_locomization.imu_ble_mkbox",
+        "peekOfCode": "DEVICE_NAME = \"BLSenBP\"  # BLE Sensor Demo firmware's advertised name\nGYRO_CHAR_UUID = \"00400000-0001-11e1-ac36-0002a5d5c51b\"\n# ponytail: BlueST classic feature convention -- raw int16 is mdps, so\n# dps = raw / 1000. Verify against a known rotation once the box is live;\n# adjust here if the demo firmware reports a different fixed-point scale.\nMDPS_PER_LSB = 1.0\nclass MkBoxGyro:\n    \"\"\"Connects to a STEVAL-MKBOXPRO over BLE and streams gyro-Z (dps) via a callback.\"\"\"\n    def __init__(self, device_name=DEVICE_NAME):\n        self.device_name = device_name",
+        "detail": "odometry_locomization.imu_ble_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "GYRO_CHAR_UUID",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_ble_mkbox",
+        "description": "odometry_locomization.imu_ble_mkbox",
+        "peekOfCode": "GYRO_CHAR_UUID = \"00400000-0001-11e1-ac36-0002a5d5c51b\"\n# ponytail: BlueST classic feature convention -- raw int16 is mdps, so\n# dps = raw / 1000. Verify against a known rotation once the box is live;\n# adjust here if the demo firmware reports a different fixed-point scale.\nMDPS_PER_LSB = 1.0\nclass MkBoxGyro:\n    \"\"\"Connects to a STEVAL-MKBOXPRO over BLE and streams gyro-Z (dps) via a callback.\"\"\"\n    def __init__(self, device_name=DEVICE_NAME):\n        self.device_name = device_name\n        self._client = None",
+        "detail": "odometry_locomization.imu_ble_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "MDPS_PER_LSB",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_ble_mkbox",
+        "description": "odometry_locomization.imu_ble_mkbox",
+        "peekOfCode": "MDPS_PER_LSB = 1.0\nclass MkBoxGyro:\n    \"\"\"Connects to a STEVAL-MKBOXPRO over BLE and streams gyro-Z (dps) via a callback.\"\"\"\n    def __init__(self, device_name=DEVICE_NAME):\n        self.device_name = device_name\n        self._client = None\n    async def connect(self, scan_timeout=10.0):\n        device = await BleakScanner.find_device_by_name(self.device_name, scan_timeout)\n        if device is None:\n            raise RuntimeError(f\"MKBOXPRO '{self.device_name}' not found in BLE scan\")",
+        "detail": "odometry_locomization.imu_ble_mkbox",
+        "documentation": {}
+    },
+    {
         "label": "IIS2MDC",
         "kind": 6,
         "importPath": "odometry_locomization.imu_iis2mdc",
@@ -3533,6 +3309,15 @@
         "documentation": {}
     },
     {
+        "label": "imu_ble_yaw_thread",
+        "kind": 2,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "def imu_ble_yaw_thread():\n    global _raw_smoothed_yaw\n    import imu_ble_mkbox\n    calib_samples = []\n    gyro_bias_dps = 0.0\n    last_t = [None]\n    _raw_smoothed_yaw = 0.0\n    def on_sample(gx, gy, gz):\n        nonlocal gyro_bias_dps\n        global _raw_smoothed_yaw",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
         "label": "index",
         "kind": 2,
         "importPath": "odometry_locomization.run_linux",
@@ -3826,6 +3611,15 @@
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
         "peekOfCode": "MAG_ODR_HZ = 100\ndef imu_mag_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_iis2mdc import IIS2MDC\n    try:\n        mag = IIS2MDC()\n        if not mag.check_who_am_i():\n            print(\"[MAG] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")\n            return\n        mag.configure()",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "BLE_GYRO_BIAS_CALIB_SAMPLES",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "BLE_GYRO_BIAS_CALIB_SAMPLES = 60\ndef imu_ble_yaw_thread():\n    global _raw_smoothed_yaw\n    import imu_ble_mkbox\n    calib_samples = []\n    gyro_bias_dps = 0.0\n    last_t = [None]\n    _raw_smoothed_yaw = 0.0\n    def on_sample(gx, gy, gz):\n        nonlocal gyro_bias_dps",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -4223,411 +4017,6 @@
         "description": "tests.motor_test",
         "peekOfCode": "led_count = 0\nwhile i<1:\n    request.set_value(motor_1, Value.ACTIVE)\n    request_2.set_value(motor_2, Value.ACTIVE)\n    request_3.set_value(motor_3, Value.ACTIVE)\n    request_4.set_value(motor_4, Value.ACTIVE)\n    print(\"Are motors running?\")\n    input_1 = input()\n    if input_1 == \"Y\":        \n        request.set_value(motor_1, Value.ACTIVE)",
         "detail": "tests.motor_test",
-        "documentation": {}
-    },
-    {
-        "label": "Sensors",
-        "kind": 6,
-        "importPath": "x-linux-msp1.applications.gtk-demo.x_linux_msp1_demo.sensor",
-        "description": "x-linux-msp1.applications.gtk-demo.x_linux_msp1_demo.sensor",
-        "peekOfCode": "class Sensors:\n    def __init__(self):\n        \"\"\" \"\"\"\n        self.sensor_dictionnary = {}\n    def found_iio_device_with_name(self, data, name):\n        prefix = \"/sys/bus/iio/devices/\"\n        of_name = \"OF_NAME=\" + name\n        print(data)\n        print(name)\n        try:",
-        "detail": "x-linux-msp1.applications.gtk-demo.x_linux_msp1_demo.sensor",
-        "documentation": {}
-    },
-    {
-        "label": "MainUIWindow",
-        "kind": 6,
-        "importPath": "x-linux-msp1.applications.gtk-demo.x_linux_msp1_demo.sensor",
-        "description": "x-linux-msp1.applications.gtk-demo.x_linux_msp1_demo.sensor",
-        "peekOfCode": "class MainUIWindow(Gtk.Window):\n    def __init__(self):\n        Gtk.Window.__init__(self, title=\"X-STM32MP1-MSP01 Sensors\")\n        # self.set_decorated(False)\n        self.maximize()\n        self.screen_width = self.get_screen().get_width()\n        self.screen_height = self.get_screen().get_height()\n        self.set_default_size(self.screen_width, self.screen_height)\n        print(\"[DEBUG] screen size: %dx%d\" % (self.screen_width, self.screen_height))\n        self.set_position(Gtk.WindowPosition.CENTER)",
-        "detail": "x-linux-msp1.applications.gtk-demo.x_linux_msp1_demo.sensor",
-        "documentation": {}
-    },
-    {
-        "label": "TIME_UPATE",
-        "kind": 5,
-        "importPath": "x-linux-msp1.applications.gtk-demo.x_linux_msp1_demo.sensor",
-        "description": "x-linux-msp1.applications.gtk-demo.x_linux_msp1_demo.sensor",
-        "peekOfCode": "TIME_UPATE = 6000\nclass Sensors:\n    def __init__(self):\n        \"\"\" \"\"\"\n        self.sensor_dictionnary = {}\n    def found_iio_device_with_name(self, data, name):\n        prefix = \"/sys/bus/iio/devices/\"\n        of_name = \"OF_NAME=\" + name\n        print(data)\n        print(name)",
-        "detail": "x-linux-msp1.applications.gtk-demo.x_linux_msp1_demo.sensor",
-        "documentation": {}
-    },
-    {
-        "label": "iis2dlpc",
-        "kind": 6,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.api.iis2dlpc",
-        "description": "x-linux-msp1.applications.sensor-sdk.api.iis2dlpc",
-        "peekOfCode": "class iis2dlpc:\n    def __init__(self, enumerator):\n            self.enumerator = enumerator\n            self.SSR_ACCEL_NAME = 'lis2dw12_accel'\n            self.SSR_ACCEL_VAL_PREFIX = 'in_accel'\n            self.accel_scale = None\n    def accel_read(self):\n        if self.accel_scale is None:\n            self.accel_get_scale()\n        x_value_prop_name = self.SSR_ACCEL_VAL_PREFIX + '_x_raw'",
-        "detail": "x-linux-msp1.applications.sensor-sdk.api.iis2dlpc",
-        "documentation": {}
-    },
-    {
-        "label": "iis2mdc",
-        "kind": 6,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.api.iis2mdc",
-        "description": "x-linux-msp1.applications.sensor-sdk.api.iis2mdc",
-        "peekOfCode": "class iis2mdc:\n    def __init__(self, enumerator):\n        self.enumerator = enumerator\n        self.SSR_MAGN_NAME = \"iis2mdc_magn\"\n        self.SSR_MAGN_VAL_PREFIX = \"in_magn\"\n        self.magn_scale = None\n    def magn_read(self):\n        if self.magn_scale is None:\n            self.magn_get_scale()\n        x_value_prop_name = self.SSR_MAGN_VAL_PREFIX + \"_x_raw\"",
-        "detail": "x-linux-msp1.applications.sensor-sdk.api.iis2mdc",
-        "documentation": {}
-    },
-    {
-        "label": "ism330dhcx",
-        "kind": 6,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.api.ism330dhcx",
-        "description": "x-linux-msp1.applications.sensor-sdk.api.ism330dhcx",
-        "peekOfCode": "class ism330dhcx:\n    def __init__(self, enumerator):\n            self.enumerator = enumerator\n            self.SSR_ACCEL_NAME = 'ism330dhcx_accel'\n            self.SSR_ACCEL_VAL_PREFIX = 'in_accel'\n            self.SSR_GYRO_NAME = 'ism330dhcx_gyro'\n            self.SSR_GYRO_VAL_PREFIX = 'in_anglvel'\n            self.accel_scale = None\n            self.gyro_scale = None\n    def accel_read(self):",
-        "detail": "x-linux-msp1.applications.sensor-sdk.api.ism330dhcx",
-        "documentation": {}
-    },
-    {
-        "label": "lps22hh",
-        "kind": 6,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.api.lps22hh",
-        "description": "x-linux-msp1.applications.sensor-sdk.api.lps22hh",
-        "peekOfCode": "class lps22hh:\n    def __init__(self, enumerator):\n        self.enumerator = enumerator\n        self.SSR_PRES_NAME = \"lps22hh\"\n        self.SSR_PRES_VAL_PREFIX = \"in_pressure\"\n        self.pres_scale = None\n    def pres_read(self):\n        if self.pres_scale is None:\n            self.pres_get_scale()\n        value_prop_name = self.SSR_PRES_VAL_PREFIX + \"_raw\"",
-        "detail": "x-linux-msp1.applications.sensor-sdk.api.lps22hh",
-        "documentation": {}
-    },
-    {
-        "label": "SensorDetails",
-        "kind": 6,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.api.sensors",
-        "description": "x-linux-msp1.applications.sensor-sdk.api.sensors",
-        "peekOfCode": "class SensorDetails:\n    def __init__(self, name, dts_node_name, sysfs_path):\n        self.name = name\n        self.dts_node_name = dts_node_name\n        self.sysfs_path = sysfs_path\n    def __str__(self):\n        return f\"Name = {self.name}, DTS Node Name = {self.dts_node_name}\"\n    def __repr__(self):\n        return f\"Name = {self.name}, DTS Node Name = {self.dts_node_name}, SysFs Path = {self.sysfs_path}\"\nclass SensorEnumerator:",
-        "detail": "x-linux-msp1.applications.sensor-sdk.api.sensors",
-        "documentation": {}
-    },
-    {
-        "label": "SensorEnumerator",
-        "kind": 6,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.api.sensors",
-        "description": "x-linux-msp1.applications.sensor-sdk.api.sensors",
-        "peekOfCode": "class SensorEnumerator:\n    def __init__(self):\n        self.SSRNAME_ISM330DHCX_ACCEL = 'ism330dhcx_accel'\n        self.SSRNAME_ISM330DHCX_GYRO = 'ism330dhcx_gyro'\n        self.SSRNAME_IIS2MDC_MAGN = 'iis2mdc_magn'\n        self.SSRNAME_IIS2DLPC_ACCEL = 'lis2dw12_accel'\n        self.SSRNAME_STTS22H_TEMP = 'stts22h'\n        self.SSRNAME_LPS22HH_PRES = 'lps22hh'\n        self.SSRADDR_VD6283TX_ALS = 0x20\n        self.SSRADDR_VL53L5CX_TOF = 0x29",
-        "detail": "x-linux-msp1.applications.sensor-sdk.api.sensors",
-        "documentation": {}
-    },
-    {
-        "label": "SensorDataSource",
-        "kind": 6,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.api.sensor_config",
-        "description": "x-linux-msp1.applications.sensor-sdk.api.sensor_config",
-        "peekOfCode": "class SensorDataSource(enum.Enum):\n    simulate = 1\n    static_file = 2\n    sense_hat = 3\n    MSP01 = 4\ndata_source = SensorDataSource.MSP01\nWS_PORT = 7890",
-        "detail": "x-linux-msp1.applications.sensor-sdk.api.sensor_config",
-        "documentation": {}
-    },
-    {
-        "label": "data_source",
-        "kind": 5,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.api.sensor_config",
-        "description": "x-linux-msp1.applications.sensor-sdk.api.sensor_config",
-        "peekOfCode": "data_source = SensorDataSource.MSP01\nWS_PORT = 7890",
-        "detail": "x-linux-msp1.applications.sensor-sdk.api.sensor_config",
-        "documentation": {}
-    },
-    {
-        "label": "WS_PORT",
-        "kind": 5,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.api.sensor_config",
-        "description": "x-linux-msp1.applications.sensor-sdk.api.sensor_config",
-        "peekOfCode": "WS_PORT = 7890",
-        "detail": "x-linux-msp1.applications.sensor-sdk.api.sensor_config",
-        "documentation": {}
-    },
-    {
-        "label": "euler_to_quaternion",
-        "kind": 2,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.api.sensor_utils",
-        "description": "x-linux-msp1.applications.sensor-sdk.api.sensor_utils",
-        "peekOfCode": "def euler_to_quaternion(angle):\n    yaw = angle[\"yaw\"]\n    pitch = angle[\"pitch\"]\n    roll = angle[\"roll\"]\n    cy = math.cos(yaw * 0.5)\n    sy = math.sin(yaw * 0.5)\n    cp = math.cos(pitch * 0.5)\n    sp = math.sin(pitch * 0.5)\n    cr = math.cos(roll * 0.5)\n    sr = math.sin(roll * 0.5)",
-        "detail": "x-linux-msp1.applications.sensor-sdk.api.sensor_utils",
-        "documentation": {}
-    },
-    {
-        "label": "quaternion_to_euler",
-        "kind": 2,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.api.sensor_utils",
-        "description": "x-linux-msp1.applications.sensor-sdk.api.sensor_utils",
-        "peekOfCode": "def quaternion_to_euler(angle):\n    # roll (x-axis rotation)\n    sinr_cosp = 2 * (angle[\"w\"] * angle[\"x\"] + angle[\"y\"] * angle[\"z\"])\n    cosr_cosp = 1 - 2 * angle[\"x\"] * angle[\"x\"] + angle[\"y\"] * angle[\"y\"]\n    roll = math.atan2(sinr_cosp, cosr_cosp)\n    # pitch (y-axis rotation)\n    sinp = 2 * (angle[\"w\"] * angle[\"y\"] - angle[\"z\"] * angle[\"x\"])\n    if abs(sinp) >= 1:\n        # use 90 degrees if value of range\n        pitch = math.copysign(math.pi / 2, sinp)",
-        "detail": "x-linux-msp1.applications.sensor-sdk.api.sensor_utils",
-        "documentation": {}
-    },
-    {
-        "label": "get_ipaddress",
-        "kind": 2,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.api.sensor_utils",
-        "description": "x-linux-msp1.applications.sensor-sdk.api.sensor_utils",
-        "peekOfCode": "def get_ipaddress():\n    conn = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\n    conn.settimeout(0)\n    try:\n        # need not be reachable\n        conn.connect((\"10.254.254.254\", 1))\n        ip = conn.getsockname()[0]\n    except Exception:\n        ip = \"127.0.0.1\"\n    finally:",
-        "detail": "x-linux-msp1.applications.sensor-sdk.api.sensor_utils",
-        "documentation": {}
-    },
-    {
-        "label": "read_board_compatibility_name",
-        "kind": 2,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.api.sensor_utils",
-        "description": "x-linux-msp1.applications.sensor-sdk.api.sensor_utils",
-        "peekOfCode": "def read_board_compatibility_name():\n    if SIMULATE > 0:\n        return \"all\"\n    else:\n        try:\n            with open(\"/proc/device-tree/compatible\") as fp:\n                string = fp.read()\n                return string.split(\",\")[-1].rstrip(\"\\x00\")\n        except:\n            return \"all\"",
-        "detail": "x-linux-msp1.applications.sensor-sdk.api.sensor_utils",
-        "documentation": {}
-    },
-    {
-        "label": "SIMULATE",
-        "kind": 5,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.api.sensor_utils",
-        "description": "x-linux-msp1.applications.sensor-sdk.api.sensor_utils",
-        "peekOfCode": "SIMULATE = 0\n# Convert Euler angle to quaternion\ndef euler_to_quaternion(angle):\n    yaw = angle[\"yaw\"]\n    pitch = angle[\"pitch\"]\n    roll = angle[\"roll\"]\n    cy = math.cos(yaw * 0.5)\n    sy = math.sin(yaw * 0.5)\n    cp = math.cos(pitch * 0.5)\n    sp = math.sin(pitch * 0.5)",
-        "detail": "x-linux-msp1.applications.sensor-sdk.api.sensor_utils",
-        "documentation": {}
-    },
-    {
-        "label": "stts22h",
-        "kind": 6,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.api.stts22h",
-        "description": "x-linux-msp1.applications.sensor-sdk.api.stts22h",
-        "peekOfCode": "class stts22h:\n    def __init__(self, enumerator):\n        self.enumerator = enumerator\n        self.SSR_TEMP_NAME = \"stts22h\"\n        self.SSR_TEMP_VAL_PREFIX = \"in_temp_ambient\"\n        self.temp_scale = None\n    def temp_read(self):\n            if self.temp_scale is None:\n                self.temp_get_scale()\n            value_prop_name = self.SSR_TEMP_VAL_PREFIX + \"_raw\"",
-        "detail": "x-linux-msp1.applications.sensor-sdk.api.stts22h",
-        "documentation": {}
-    },
-    {
-        "label": "vl53l5cx",
-        "kind": 6,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.api.vd6283",
-        "description": "x-linux-msp1.applications.sensor-sdk.api.vd6283",
-        "peekOfCode": "class vl53l5cx:\n    def __init__(self):\n        pass\n    def color_sensor_read():\n        process = subprocess.Popen(\n            BINARY_PATH_VD6283_COLOR, stdout=subprocess.PIPE, stderr=subprocess.PIPE\n        )\n        txt = process.stdout.read().decode(\"utf-8\")\n        if debug:\n            print(txt)",
-        "detail": "x-linux-msp1.applications.sensor-sdk.api.vd6283",
-        "documentation": {}
-    },
-    {
-        "label": "BINARY_PATH_VD6283_COLOR",
-        "kind": 5,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.api.vd6283",
-        "description": "x-linux-msp1.applications.sensor-sdk.api.vd6283",
-        "peekOfCode": "BINARY_PATH_VD6283_COLOR = \"../../binaries/vd6283_color\"\ndebug = False\nlux_ret = 0\nclass vl53l5cx:\n    def __init__(self):\n        pass\n    def color_sensor_read():\n        process = subprocess.Popen(\n            BINARY_PATH_VD6283_COLOR, stdout=subprocess.PIPE, stderr=subprocess.PIPE\n        )",
-        "detail": "x-linux-msp1.applications.sensor-sdk.api.vd6283",
-        "documentation": {}
-    },
-    {
-        "label": "debug",
-        "kind": 5,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.api.vd6283",
-        "description": "x-linux-msp1.applications.sensor-sdk.api.vd6283",
-        "peekOfCode": "debug = False\nlux_ret = 0\nclass vl53l5cx:\n    def __init__(self):\n        pass\n    def color_sensor_read():\n        process = subprocess.Popen(\n            BINARY_PATH_VD6283_COLOR, stdout=subprocess.PIPE, stderr=subprocess.PIPE\n        )\n        txt = process.stdout.read().decode(\"utf-8\")",
-        "detail": "x-linux-msp1.applications.sensor-sdk.api.vd6283",
-        "documentation": {}
-    },
-    {
-        "label": "lux_ret",
-        "kind": 5,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.api.vd6283",
-        "description": "x-linux-msp1.applications.sensor-sdk.api.vd6283",
-        "peekOfCode": "lux_ret = 0\nclass vl53l5cx:\n    def __init__(self):\n        pass\n    def color_sensor_read():\n        process = subprocess.Popen(\n            BINARY_PATH_VD6283_COLOR, stdout=subprocess.PIPE, stderr=subprocess.PIPE\n        )\n        txt = process.stdout.read().decode(\"utf-8\")\n        if debug:",
-        "detail": "x-linux-msp1.applications.sensor-sdk.api.vd6283",
-        "documentation": {}
-    },
-    {
-        "label": "vl53l5cx",
-        "kind": 6,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.api.vl53l5cx",
-        "description": "x-linux-msp1.applications.sensor-sdk.api.vl53l5cx",
-        "peekOfCode": "class vl53l5cx:\n    def __init__(self):\n        pass\n    def get_distance(self):\n        process = subprocess.Popen(\n            [BINARY_PATH, \"1\"], stdout=subprocess.PIPE, stderr=subprocess.PIPE\n        )\n        txt = process.stdout.read().decode(\"utf-8\")\n        if DEBUG:\n            print(txt)",
-        "detail": "x-linux-msp1.applications.sensor-sdk.api.vl53l5cx",
-        "documentation": {}
-    },
-    {
-        "label": "DEBUG",
-        "kind": 5,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.api.vl53l5cx",
-        "description": "x-linux-msp1.applications.sensor-sdk.api.vl53l5cx",
-        "peekOfCode": "DEBUG = False\nBINARY_PATH = \"../../binaries/tof\"\nclass vl53l5cx:\n    def __init__(self):\n        pass\n    def get_distance(self):\n        process = subprocess.Popen(\n            [BINARY_PATH, \"1\"], stdout=subprocess.PIPE, stderr=subprocess.PIPE\n        )\n        txt = process.stdout.read().decode(\"utf-8\")",
-        "detail": "x-linux-msp1.applications.sensor-sdk.api.vl53l5cx",
-        "documentation": {}
-    },
-    {
-        "label": "BINARY_PATH",
-        "kind": 5,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.api.vl53l5cx",
-        "description": "x-linux-msp1.applications.sensor-sdk.api.vl53l5cx",
-        "peekOfCode": "BINARY_PATH = \"../../binaries/tof\"\nclass vl53l5cx:\n    def __init__(self):\n        pass\n    def get_distance(self):\n        process = subprocess.Popen(\n            [BINARY_PATH, \"1\"], stdout=subprocess.PIPE, stderr=subprocess.PIPE\n        )\n        txt = process.stdout.read().decode(\"utf-8\")\n        if DEBUG:",
-        "detail": "x-linux-msp1.applications.sensor-sdk.api.vl53l5cx",
-        "documentation": {}
-    },
-    {
-        "label": "host",
-        "kind": 5,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.web.http_server",
-        "description": "x-linux-msp1.applications.sensor-sdk.web.http_server",
-        "peekOfCode": "host = utils.get_ipaddress()\nport = 80\nws_port = config.WS_PORT\nasync def websocket_handler(request):\n    ws = web.WebSocketResponse()\n    await ws.prepare(request)\n    async for msg in ws:\n        if msg.type == web.WSMsgType.text:\n            await ws.send_str(f\"Echo: {msg.data}\")\n        elif msg.type == web.WSMsgType.error:",
-        "detail": "x-linux-msp1.applications.sensor-sdk.web.http_server",
-        "documentation": {}
-    },
-    {
-        "label": "port",
-        "kind": 5,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.web.http_server",
-        "description": "x-linux-msp1.applications.sensor-sdk.web.http_server",
-        "peekOfCode": "port = 80\nws_port = config.WS_PORT\nasync def websocket_handler(request):\n    ws = web.WebSocketResponse()\n    await ws.prepare(request)\n    async for msg in ws:\n        if msg.type == web.WSMsgType.text:\n            await ws.send_str(f\"Echo: {msg.data}\")\n        elif msg.type == web.WSMsgType.error:\n            print(f\"WebSocket connection closed with exception: {ws.exception()}\")",
-        "detail": "x-linux-msp1.applications.sensor-sdk.web.http_server",
-        "documentation": {}
-    },
-    {
-        "label": "ws_port",
-        "kind": 5,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.web.http_server",
-        "description": "x-linux-msp1.applications.sensor-sdk.web.http_server",
-        "peekOfCode": "ws_port = config.WS_PORT\nasync def websocket_handler(request):\n    ws = web.WebSocketResponse()\n    await ws.prepare(request)\n    async for msg in ws:\n        if msg.type == web.WSMsgType.text:\n            await ws.send_str(f\"Echo: {msg.data}\")\n        elif msg.type == web.WSMsgType.error:\n            print(f\"WebSocket connection closed with exception: {ws.exception()}\")\n    print(\"WebSocket connection closed\")",
-        "detail": "x-linux-msp1.applications.sensor-sdk.web.http_server",
-        "documentation": {}
-    },
-    {
-        "label": "app",
-        "kind": 5,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.web.http_server",
-        "description": "x-linux-msp1.applications.sensor-sdk.web.http_server",
-        "peekOfCode": "app = web.Application()\napp.router.add_get(\"/\", serve_page)\napp.router.add_get(\"/ws\", websocket_handler)\napp.router.add_get(\"/{path:.*\\\\.(html|css|js|png|jpg|jpeg|gif|ico|svg)}\", serve_static)\nweb.run_app(app, host=host, port=port)",
-        "detail": "x-linux-msp1.applications.sensor-sdk.web.http_server",
-        "documentation": {}
-    },
-    {
-        "label": "file_getline",
-        "kind": 2,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.web.line_reader",
-        "description": "x-linux-msp1.applications.sensor-sdk.web.line_reader",
-        "peekOfCode": "def file_getline():\n    global data_file_lines\n    global data_file_line_current\n    if data_file_lines == 0:\n        script_path = os.path.abspath(__name__)\n        script_dir = os.path.split(script_path)[0]\n        abs_file_path = os.path.join(script_dir, TEST_DATA_FILE_PATH)\n        file1 = open(abs_file_path, \"r\")\n        data_file_lines = file1.readlines()[8:]\n        file1.close()",
-        "detail": "x-linux-msp1.applications.sensor-sdk.web.line_reader",
-        "documentation": {}
-    },
-    {
-        "label": "genbuffer_readfiles",
-        "kind": 2,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.web.line_reader",
-        "description": "x-linux-msp1.applications.sensor-sdk.web.line_reader",
-        "peekOfCode": "def genbuffer_readfiles():\n    # set_sample_result = subprocess.run([\"echo\", \"104 > /sys/bus/iio/devices/iio\\:device6/sampling_frequency\"])\n    with Popen(\n        [\n            \"stdbuf\",\n            \"-oL\",\n            \"./iio_test_sensors\",\n            \"-x\",\n            \"20\",\n            \"-a\",",
-        "detail": "x-linux-msp1.applications.sensor-sdk.web.line_reader",
-        "documentation": {}
-    },
-    {
-        "label": "TEST_DATA_FILE_PATH",
-        "kind": 5,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.web.line_reader",
-        "description": "x-linux-msp1.applications.sensor-sdk.web.line_reader",
-        "peekOfCode": "TEST_DATA_FILE_PATH = \"data/dump.txt\"\ndata_file_lines = 0\ndata_file_line_current: int = 0\ndef file_getline():\n    global data_file_lines\n    global data_file_line_current\n    if data_file_lines == 0:\n        script_path = os.path.abspath(__name__)\n        script_dir = os.path.split(script_path)[0]\n        abs_file_path = os.path.join(script_dir, TEST_DATA_FILE_PATH)",
-        "detail": "x-linux-msp1.applications.sensor-sdk.web.line_reader",
-        "documentation": {}
-    },
-    {
-        "label": "data_file_lines",
-        "kind": 5,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.web.line_reader",
-        "description": "x-linux-msp1.applications.sensor-sdk.web.line_reader",
-        "peekOfCode": "data_file_lines = 0\ndata_file_line_current: int = 0\ndef file_getline():\n    global data_file_lines\n    global data_file_line_current\n    if data_file_lines == 0:\n        script_path = os.path.abspath(__name__)\n        script_dir = os.path.split(script_path)[0]\n        abs_file_path = os.path.join(script_dir, TEST_DATA_FILE_PATH)\n        file1 = open(abs_file_path, \"r\")",
-        "detail": "x-linux-msp1.applications.sensor-sdk.web.line_reader",
-        "documentation": {}
-    },
-    {
-        "label": "euler_from_iio_accelerometer",
-        "kind": 2,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.web.sensor_reader",
-        "description": "x-linux-msp1.applications.sensor-sdk.web.sensor_reader",
-        "peekOfCode": "def euler_from_iio_accelerometer():\n    accel = ism330dhcx.accelerometer_read()\n    x = accel[0]\n    y = accel[1]\n    z = accel[2]\n    roll = math.atan2(y, z)\n    pitch = math.atan2(-x, math.sqrt(y * y + z * z))\n    yaw = 0.0\n    retVal = {\"pitch\": pitch, \"roll\": roll, \"yaw\": yaw}\n    return retVal",
-        "detail": "x-linux-msp1.applications.sensor-sdk.web.sensor_reader",
-        "documentation": {}
-    },
-    {
-        "label": "quaternion_from_gbuf_line",
-        "kind": 2,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.web.sensor_reader",
-        "description": "x-linux-msp1.applications.sensor-sdk.web.sensor_reader",
-        "peekOfCode": "def quaternion_from_gbuf_line(line):\n    line = line.strip()\n    if line.startswith(\"q(\"):\n        split_line = line[2:].split(\",\")\n        w = float(split_line[0].strip())\n        x = float(split_line[1].strip())\n        y = float(split_line[2].strip())\n        z_string = split_line[3].replace(\")\", \" \").strip()\n        z = float(z_string)\n        quaternion = {\"w\": w, \"x\": x, \"y\": y, \"z\": z}",
-        "detail": "x-linux-msp1.applications.sensor-sdk.web.sensor_reader",
-        "documentation": {}
-    },
-    {
-        "label": "euler_from_gbuf_line",
-        "kind": 2,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.web.sensor_reader",
-        "description": "x-linux-msp1.applications.sensor-sdk.web.sensor_reader",
-        "peekOfCode": "def euler_from_gbuf_line(line):\n    line = line.strip()\n    quaternion = quaternion_from_gbuf_line(line)\n    if quaternion:\n        retVal = utils.quaternion_to_euler(quaternion)\n    else:\n        retVal = None\n    return retVal\ndef euler_from_file():\n    global data_file_lines",
-        "detail": "x-linux-msp1.applications.sensor-sdk.web.sensor_reader",
-        "documentation": {}
-    },
-    {
-        "label": "euler_from_file",
-        "kind": 2,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.web.sensor_reader",
-        "description": "x-linux-msp1.applications.sensor-sdk.web.sensor_reader",
-        "peekOfCode": "def euler_from_file():\n    global data_file_lines\n    global data_file_line_current\n    if data_file_lines == 0:\n        script_path = os.path.abspath(__name__)\n        script_dir = os.path.split(script_path)[0]\n        abs_file_path = os.path.join(script_dir, data_file_path)\n        file1 = open(abs_file_path, \"r\")\n        data_file_lines = file1.readlines()[8:]\n        file1.close()",
-        "detail": "x-linux-msp1.applications.sensor-sdk.web.sensor_reader",
-        "documentation": {}
-    },
-    {
-        "label": "test",
-        "kind": 2,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.web.sensor_reader",
-        "description": "x-linux-msp1.applications.sensor-sdk.web.sensor_reader",
-        "peekOfCode": "def test():\n    for counter in range(300):\n        val = euler_from_file()\n        if val:\n            print(f'Yaw = {val[\"yaw\"]}, Pitch = {val[\"pitch\"]}, Roll = {val[\"roll\"]}')\n        else:\n            print(\"Other line\")\nif __name__ == \"__main__\":\n    test()",
-        "detail": "x-linux-msp1.applications.sensor-sdk.web.sensor_reader",
-        "documentation": {}
-    },
-    {
-        "label": "data_file_path",
-        "kind": 5,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.web.sensor_reader",
-        "description": "x-linux-msp1.applications.sensor-sdk.web.sensor_reader",
-        "peekOfCode": "data_file_path = \"data/dump.txt\"\ndata_file_lines = 0\ndata_file_line_current: int = 0\n# Reads accelerometer value from IIO and return Euler angle\ndef euler_from_iio_accelerometer():\n    accel = ism330dhcx.accelerometer_read()\n    x = accel[0]\n    y = accel[1]\n    z = accel[2]\n    roll = math.atan2(y, z)",
-        "detail": "x-linux-msp1.applications.sensor-sdk.web.sensor_reader",
-        "documentation": {}
-    },
-    {
-        "label": "data_file_lines",
-        "kind": 5,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.web.sensor_reader",
-        "description": "x-linux-msp1.applications.sensor-sdk.web.sensor_reader",
-        "peekOfCode": "data_file_lines = 0\ndata_file_line_current: int = 0\n# Reads accelerometer value from IIO and return Euler angle\ndef euler_from_iio_accelerometer():\n    accel = ism330dhcx.accelerometer_read()\n    x = accel[0]\n    y = accel[1]\n    z = accel[2]\n    roll = math.atan2(y, z)\n    pitch = math.atan2(-x, math.sqrt(y * y + z * z))",
-        "detail": "x-linux-msp1.applications.sensor-sdk.web.sensor_reader",
-        "documentation": {}
-    },
-    {
-        "label": "port",
-        "kind": 5,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.web.ws_server",
-        "description": "x-linux-msp1.applications.sensor-sdk.web.ws_server",
-        "peekOfCode": "port = config.WS_PORT\nip_address = utils.get_ipaddress()\npitch = 0.0\nroll = 0.0\nyaw = 0.0\nif config.data_source == config.SensorDataSource.simulate:\n    pitch_increment = math.pi / 40\n    roll_increment = math.pi / 60\n    yaw_increment = math.pi / 80\nif config.data_source == config.SensorDataSource.static_file:",
-        "detail": "x-linux-msp1.applications.sensor-sdk.web.ws_server",
-        "documentation": {}
-    },
-    {
-        "label": "ip_address",
-        "kind": 5,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.web.ws_server",
-        "description": "x-linux-msp1.applications.sensor-sdk.web.ws_server",
-        "peekOfCode": "ip_address = utils.get_ipaddress()\npitch = 0.0\nroll = 0.0\nyaw = 0.0\nif config.data_source == config.SensorDataSource.simulate:\n    pitch_increment = math.pi / 40\n    roll_increment = math.pi / 60\n    yaw_increment = math.pi / 80\nif config.data_source == config.SensorDataSource.static_file:\n    import sensor_reader",
-        "detail": "x-linux-msp1.applications.sensor-sdk.web.ws_server",
-        "documentation": {}
-    },
-    {
-        "label": "pitch",
-        "kind": 5,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.web.ws_server",
-        "description": "x-linux-msp1.applications.sensor-sdk.web.ws_server",
-        "peekOfCode": "pitch = 0.0\nroll = 0.0\nyaw = 0.0\nif config.data_source == config.SensorDataSource.simulate:\n    pitch_increment = math.pi / 40\n    roll_increment = math.pi / 60\n    yaw_increment = math.pi / 80\nif config.data_source == config.SensorDataSource.static_file:\n    import sensor_reader\nif config.data_source == config.SensorDataSource.sense_hat:",
-        "detail": "x-linux-msp1.applications.sensor-sdk.web.ws_server",
-        "documentation": {}
-    },
-    {
-        "label": "roll",
-        "kind": 5,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.web.ws_server",
-        "description": "x-linux-msp1.applications.sensor-sdk.web.ws_server",
-        "peekOfCode": "roll = 0.0\nyaw = 0.0\nif config.data_source == config.SensorDataSource.simulate:\n    pitch_increment = math.pi / 40\n    roll_increment = math.pi / 60\n    yaw_increment = math.pi / 80\nif config.data_source == config.SensorDataSource.static_file:\n    import sensor_reader\nif config.data_source == config.SensorDataSource.sense_hat:\n    from sense_hat import SenseHat",
-        "detail": "x-linux-msp1.applications.sensor-sdk.web.ws_server",
-        "documentation": {}
-    },
-    {
-        "label": "yaw",
-        "kind": 5,
-        "importPath": "x-linux-msp1.applications.sensor-sdk.web.ws_server",
-        "description": "x-linux-msp1.applications.sensor-sdk.web.ws_server",
-        "peekOfCode": "yaw = 0.0\nif config.data_source == config.SensorDataSource.simulate:\n    pitch_increment = math.pi / 40\n    roll_increment = math.pi / 60\n    yaw_increment = math.pi / 80\nif config.data_source == config.SensorDataSource.static_file:\n    import sensor_reader\nif config.data_source == config.SensorDataSource.sense_hat:\n    from sense_hat import SenseHat\nif config.data_source == config.SensorDataSource.MSP01:",
-        "detail": "x-linux-msp1.applications.sensor-sdk.web.ws_server",
         "documentation": {}
     },
     {
