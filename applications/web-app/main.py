@@ -1094,7 +1094,7 @@ async def map_zero_yaw():
         return JSONResponse({"ok": False}, status_code=200)
 
 
-@app.post("/calibrate_rotate")
+@app.get("/calibrate_rotate")
 async def calibrate_rotate():
     """Rotate robot left 5 s then right 5 s to warm up gyro before bias calibration."""
     import threading
