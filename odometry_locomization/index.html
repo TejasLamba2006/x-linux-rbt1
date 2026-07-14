@@ -170,42 +170,61 @@
       let recording = false;
 
       const cpcInput = document.getElementById("cpc-input");
-      let cpcSetTime = 0;
       document.getElementById("cpc-set-btn").addEventListener("click", () => {
         const value = parseFloat(cpcInput.value);
         if (!value || value <= 0) return;
-        cpcSetTime = Date.now();
-        fetch("/set_counts_per_cm", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ value }),
-        }).catch(() => {});
+        wsSend({ cmd: "set_counts_per_cm", value });
       });
 
       const SCALE = 4; // pixels per cm
 
-      // ── Fetch loop ─────────────────────────────────────────────────────────────
-      async function fetchState() {
-        try {
-          const r = await fetch("/state");
-          const d = await r.json();
-          robotX = d.x;
-          robotY = d.y;
-          robotYaw = d.yaw;
-          dist = d.distance;
-          recording = d.recording;
-          path = d.path;
-          if (document.activeElement !== cpcInput && Date.now() - cpcSetTime > 1000 && d.counts_per_cm) {
-            cpcInput.value = d.counts_per_cm;
-          }
-        } catch (e) {
-          /* server not ready yet */
-        }
+      // ── WebSocket ────────────────────────────────────────────────────────────
+      let ws;
+      let wsReady = false;
+
+      function wsSend(obj) {
+        if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(obj));
       }
-      setInterval(fetchState, 80); // ~12 Hz polling
+
+      function connectWs() {
+        const host = location.hostname || "127.0.0.1";
+        ws = new WebSocket(`ws://${host}:5001`);
+
+        ws.onopen = () => {
+          wsReady = true;
+          console.log("[WS] connected");
+        };
+
+        ws.onmessage = (evt) => {
+          try {
+            const d = JSON.parse(evt.data);
+            robotX = d.x;
+            robotY = d.y;
+            robotYaw = d.yaw;
+            dist = d.distance;
+            recording = d.recording;
+            path = d.path;
+            if (document.activeElement !== cpcInput && d.counts_per_cm) {
+              cpcInput.value = d.counts_per_cm;
+            }
+          } catch (e) { /* ignore parse errors */ }
+        };
+
+        ws.onclose = () => {
+          wsReady = false;
+          console.log("[WS] disconnected, reconnecting in 2s...");
+          setTimeout(connectWs, 2000);
+        };
+
+        ws.onerror = () => {
+          ws.close();
+        };
+      }
+
+      connectWs();
 
       document.getElementById("zero-yaw-btn").addEventListener("click", () => {
-        fetch("/zero_yaw", { method: "POST" }).catch(() => {});
+        wsSend({ cmd: "zero_yaw" });
       });
 
       // ── Draw ───────────────────────────────────────────────────────────────────
@@ -280,7 +299,7 @@
 
         ctx.save();
         ctx.translate(cx, cy);
-        ctx.rotate(((-robotYaw) * Math.PI) / 180);
+        ctx.rotate(((robotYaw) * Math.PI) / 180);
 
         // Car body
         ctx.fillStyle = "#2255ff";
