@@ -24,7 +24,7 @@ import struct
 
 from bleak import BleakClient, BleakScanner
 
-DEVICE_NAME = "BLSenBP"  # BLE Sensor Demo firmware's advertised name
+DEVICE_NAME = "HSD2v31"  # BLE Sensor Demo firmware's advertised name
 GYRO_CHAR_UUID = "00400000-0001-11e1-ac36-0002a5d5c51b"
 
 # ponytail: BlueST classic feature convention -- raw int16 is mdps, so
@@ -43,7 +43,8 @@ class MkBoxGyro:
     async def connect(self, scan_timeout=10.0):
         device = await BleakScanner.find_device_by_name(self.device_name, scan_timeout)
         if device is None:
-            raise RuntimeError(f"MKBOXPRO '{self.device_name}' not found in BLE scan")
+            raise RuntimeError(
+                f"MKBOXPRO '{self.device_name}' not found in BLE scan")
         self._client = BleakClient(device)
         await self._client.connect()
 
@@ -53,7 +54,8 @@ class MkBoxGyro:
         def handler(_, data: bytearray):
             # 2-byte timestamp + 3x int16, little-endian
             _, gx, gy, gz = struct.unpack("<Hhhh", bytes(data[:8]))
-            on_sample(gx * MDPS_PER_LSB / 1000.0, gy * MDPS_PER_LSB / 1000.0, gz * MDPS_PER_LSB / 1000.0)
+            on_sample(gx * MDPS_PER_LSB / 1000.0, gy *
+                      MDPS_PER_LSB / 1000.0, gz * MDPS_PER_LSB / 1000.0)
 
         await self._client.start_notify(GYRO_CHAR_UUID, handler)
 
