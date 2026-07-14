@@ -1094,6 +1094,34 @@ async def map_zero_yaw():
         return JSONResponse({"ok": False}, status_code=200)
 
 
+@app.post("/calibrate_rotate")
+async def calibrate_rotate():
+    """Rotate robot left 5 s then right 5 s to warm up gyro before bias calibration."""
+    import threading
+    if motor_api is None:
+        return JSONResponse({"ok": False, "error": "motor_api not ready"}, status_code=200)
+
+    def _spin():
+        try:
+            logger.info("[CAL] warmup rotate left (5 s)")
+            motor_api.rotate_angle(40)
+            time.sleep(5)
+            logger.info("[CAL] warmup rotate right (5 s)")
+            motor_api.rotate_angle(-40)
+            time.sleep(5)
+            motor_api.stop()
+            logger.info("[CAL] warmup rotation done")
+        except Exception as e:
+            logger.warning(f"[CAL] warmup rotation error: {e}")
+            try:
+                motor_api.stop()
+            except Exception:
+                pass
+
+    threading.Thread(target=_spin, daemon=True).start()
+    return JSONResponse({"ok": True})
+
+
 @app.post("/set_counts_per_cm")
 async def map_set_counts_per_cm(request: Request):
     """Proxy the map's counts-per-cm calibration input to the odometry subprocess."""

@@ -326,8 +326,26 @@ def imu_fusion_yaw_thread():
             await asyncio.sleep(0.1)
         _raw_smoothed_yaw = _latest_mag_heading
 
+        # ── Warmup: rotate robot left 5 s then right 5 s to heat up gyro ──
+        print("[FUSION] requesting warmup rotation...")
+        try:
+            import urllib.request
+            req = urllib.request.Request("http://127.0.0.1:8000/calibrate_rotate",
+                                        method="POST")
+            with urllib.request.urlopen(req, timeout=1) as resp:
+                print(f"[FUSION] warmup rotation started ({resp.read().decode()})")
+        except Exception as e:
+            print(f"[FUSION] warmup rotation request failed: {e}")
+
+        # Wait for rotation to finish (10 s) then drain stale samples
+        await asyncio.sleep(11.0)
+        for _ in range(30):
+            box.read_gyro_dps()
+            await asyncio.sleep(0.02)
+
+        print("[FUSION] warmup done, calibrating gyro bias (keep robot still)...")
+
         # ── Gyro bias calibration: sample gz while stationary for 2 s ──
-        print("[FUSION] calibrating gyro bias (keep robot still)...")
         bias_samples = []
         cal_deadline = time.time() + 2.0
         while time.time() < cal_deadline:
