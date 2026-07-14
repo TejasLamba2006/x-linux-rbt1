@@ -241,61 +241,65 @@ def imu_mag_yaw_thread():
             time.sleep(0.1)
 
 
-# ── STEVAL-MKBOXPRO gyro over BLE ────────────────────────────────────────────
-# Alternate yaw source: the box's own working LSM6DSV16X gyro, streamed
-# wirelessly, in place of either the dead onboard IMU or the magnetometer.
-# Unlike the magnetometer this is rate integration (like the onboard gyro
-# thread was), so it needs the same startup bias calibration to avoid slow
-# drift while stationary -- no accelerometer stream wired up here to also
-# gate bias re-tracking continuously (ponytail: add if drift over long runs
-# turns out to matter -- see imu_gyro_yaw_thread's accel-gating for the
-# pattern to copy).
-BLE_GYRO_BIAS_CALIB_SAMPLES = 60
+# ── STEVAL-MKBOXPRO gyro over USB (command channel still BLE) ───────────────
+# Alternate yaw source: the box's own working LSM6DSV16X gyro, in place of
+# either the dead onboard IMU or the magnetometer. Unlike the magnetometer
+# this is rate integration (like the onboard gyro thread was), so it needs
+# the same startup bias calibration to avoid slow drift while stationary --
+# no accelerometer stream wired up here to also gate bias re-tracking
+# continuously (ponytail: add if drift over long runs turns out to matter --
+# see imu_gyro_yaw_thread's accel-gating for the pattern to copy).
+#
+# Data comes over USB bulk (not BLE notify) -- see imu_usb_mkbox.py's header
+# for why: DATALOG2 firmware only accepts start/stop commands over its BLE
+# PnPL channel (direct USB command writes STALL), but once told to stream
+# with interface=1 it pushes continuous samples over USB bulk endpoints,
+# which is far more robust than BLE notifications for a robot-mounted board
+# (no BLE connection to babysit for the actual data path).
+USB_GYRO_BIAS_CALIB_SAMPLES = 60
+USB_GYRO_POLL_HZ = 200
 
 
-def imu_ble_yaw_thread():
+def imu_usb_yaw_thread():
     global _raw_smoothed_yaw
-    import imu_ble_mkbox
-
-    calib_samples = []
-    gyro_bias_dps = 0.0
-    last_t = [None]
-    _raw_smoothed_yaw = 0.0
-
-    def on_sample(gx, gy, gz):
-        nonlocal gyro_bias_dps
-        global _raw_smoothed_yaw
-        now = time.time()
-        if len(calib_samples) < BLE_GYRO_BIAS_CALIB_SAMPLES:
-            calib_samples.append(gz)
-            if len(calib_samples) == BLE_GYRO_BIAS_CALIB_SAMPLES:
-                gyro_bias_dps = sum(calib_samples) / len(calib_samples)
-                print(
-                    f"[BLE-GYRO] bias = {gyro_bias_dps:.3f} dps, integration started")
-            last_t[0] = now
-            return
-
-        dt = now - last_t[0]
-        last_t[0] = now
-        _raw_smoothed_yaw = (_raw_smoothed_yaw +
-                             (gz - gyro_bias_dps) * dt + 180) % 360 - 180
-        with lock:
-            state["yaw"] = round(angle_diff(_raw_smoothed_yaw, _yaw_offset), 2)
+    import imu_usb_mkbox
 
     async def run():
-        box = imu_ble_mkbox.MkBoxGyro()
-        print("[BLE-GYRO] scanning for STEVAL-MKBOXPRO...")
-        await box.connect()
-        print("[BLE-GYRO] connected, calibrating bias...")
-        await box.stream_gyro(on_sample)
+        global _raw_smoothed_yaw
+        box = imu_usb_mkbox.MkBoxUsbGyro()
+        print("[USB-GYRO] connecting over BLE to start USB streaming...")
+        await box.start()
+        print("[USB-GYRO] streaming started, calibrating bias...")
+
+        calib_samples = []
+        gyro_bias_dps = 0.0
+        last_t = None
+        _raw_smoothed_yaw = 0.0
+
         while True:
-            await asyncio.sleep(3600)
+            for gx, gy, gz in box.read_gyro_dps():
+                now = time.time()
+                if len(calib_samples) < USB_GYRO_BIAS_CALIB_SAMPLES:
+                    calib_samples.append(gz)
+                    if len(calib_samples) == USB_GYRO_BIAS_CALIB_SAMPLES:
+                        gyro_bias_dps = sum(calib_samples) / len(calib_samples)
+                        print(f"[USB-GYRO] bias = {gyro_bias_dps:.3f} dps, integration started")
+                    last_t = now
+                    continue
+
+                dt = now - last_t
+                last_t = now
+                _raw_smoothed_yaw = (_raw_smoothed_yaw + (gz - gyro_bias_dps) * dt + 180) % 360 - 180
+                with lock:
+                    state["yaw"] = round(angle_diff(_raw_smoothed_yaw, _yaw_offset), 2)
+
+            await asyncio.sleep(1.0 / USB_GYRO_POLL_HZ)
 
     while True:
         try:
             asyncio.run(run())
         except Exception as e:
-            print(f"[BLE-GYRO] Error: {e}")
+            print(f"[USB-GYRO] Error: {e}")
             time.sleep(2.0)
 
 
