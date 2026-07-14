@@ -580,12 +580,29 @@
         "documentation": {}
     },
     {
+        "label": "BleakClient",
+        "importPath": "bleak",
+        "description": "bleak",
+        "isExtraImport": true,
+        "detail": "bleak",
+        "documentation": {}
+    },
+    {
         "label": "fcntl",
         "kind": 6,
         "isExtraImport": true,
         "importPath": "fcntl",
         "description": "fcntl",
         "detail": "fcntl",
+        "documentation": {}
+    },
+    {
+        "label": "usb.core",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "usb.core",
+        "description": "usb.core",
+        "detail": "usb.core",
         "documentation": {}
     },
     {
@@ -3165,6 +3182,69 @@
         "documentation": {}
     },
     {
+        "label": "MkBoxUsbGyro",
+        "kind": 6,
+        "importPath": "odometry_locomization.imu_usb_mkbox",
+        "description": "odometry_locomization.imu_usb_mkbox",
+        "peekOfCode": "class MkBoxUsbGyro:\n    def __init__(self, ble_device_name=BLE_DEVICE_NAME):\n        self.ble_device_name = ble_device_name\n        self._ble_client = None\n        self._usb_dev = None\n    async def start(self, scan_timeout=10.0):\n        \"\"\"Connect over BLE just long enough to start USB streaming, then open the USB device.\"\"\"\n        from bleak import BleakScanner\n        device = await BleakScanner.find_device_by_name(self.ble_device_name, scan_timeout)\n        if device is None:",
+        "detail": "odometry_locomization.imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "BLE_DEVICE_NAME",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_usb_mkbox",
+        "description": "odometry_locomization.imu_usb_mkbox",
+        "peekOfCode": "BLE_DEVICE_NAME = \"HSD2v33\"  # update if the box's advertised name changes\nCMD_CHAR_UUID = \"0000001b-0002-11e1-ac36-0002a5d5c51b\"  # COPY_PNPLIKE_CHAR_UUID\nUSB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nGYRO_EP = 0x81\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):",
+        "detail": "odometry_locomization.imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "CMD_CHAR_UUID",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_usb_mkbox",
+        "description": "odometry_locomization.imu_usb_mkbox",
+        "peekOfCode": "CMD_CHAR_UUID = \"0000001b-0002-11e1-ac36-0002a5d5c51b\"  # COPY_PNPLIKE_CHAR_UUID\nUSB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nGYRO_EP = 0x81\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:",
+        "detail": "odometry_locomization.imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "USB_VENDOR_ID",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_usb_mkbox",
+        "description": "odometry_locomization.imu_usb_mkbox",
+        "peekOfCode": "USB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nGYRO_EP = 0x81\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([_TP_START_END]) + struct.pack(\">H\", len(payload)) + payload]",
+        "detail": "odometry_locomization.imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "USB_PRODUCT_ID",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_usb_mkbox",
+        "description": "odometry_locomization.imu_usb_mkbox",
+        "peekOfCode": "USB_PRODUCT_ID = 0x5744\nGYRO_EP = 0x81\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([_TP_START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([_TP_START]) + struct.pack(\">H\", len(payload)) + payload[:mtu_payload]]",
+        "detail": "odometry_locomization.imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "GYRO_EP",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_usb_mkbox",
+        "description": "odometry_locomization.imu_usb_mkbox",
+        "peekOfCode": "GYRO_EP = 0x81\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([_TP_START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([_TP_START]) + struct.pack(\">H\", len(payload)) + payload[:mtu_payload]]\n    rest = payload[mtu_payload:]",
+        "detail": "odometry_locomization.imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "GYRO_MDPS_PER_LSB",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_usb_mkbox",
+        "description": "odometry_locomization.imu_usb_mkbox",
+        "peekOfCode": "GYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([_TP_START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([_TP_START]) + struct.pack(\">H\", len(payload)) + payload[:mtu_payload]]\n    rest = payload[mtu_payload:]\n    while len(rest) > mtu_payload:",
+        "detail": "odometry_locomization.imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
         "label": "checkpoint",
         "kind": 5,
         "importPath": "odometry_locomization.main",
@@ -3295,7 +3375,7 @@
         "kind": 2,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "def imu_gyro_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X\n    try:\n        imu = LSM6DSV16X()\n        if not imu.check_who_am_i():\n            print(\"[IMU] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")\n            return\n        imu.configure()\n    except Exception as e:",
+        "peekOfCode": "def imu_gyro_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X\n    try:\n        imu = LSM6DSV16X()\n        if not imu.check_who_am_i():\n            print(\n                \"[IMU] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")\n            return\n        imu.configure()",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -3304,7 +3384,7 @@
         "kind": 2,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "def imu_mag_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_iis2mdc import IIS2MDC\n    try:\n        mag = IIS2MDC()\n        if not mag.check_who_am_i():\n            print(\"[MAG] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")\n            return\n        mag.configure()\n    except Exception as e:",
+        "peekOfCode": "def imu_mag_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_iis2mdc import IIS2MDC\n    try:\n        mag = IIS2MDC()\n        if not mag.check_who_am_i():\n            print(\n                \"[MAG] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")\n            return\n        mag.configure()",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -3367,7 +3447,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "COUNTS_PER_CM = 151\nUDP_PORT = 2055\nEMA_ALPHA = 0.3\nSMOOTHING_WIN = 5\n# Linux input_event layout (64-bit kernel, ARM64)\n# struct input_event { timeval(8+8), type(2), code(2), value(4) } = 24 bytes\nINPUT_EVENT_FMT = \"llHHi\"\nINPUT_EVENT_SIZE = struct.calcsize(INPUT_EVENT_FMT)\n# /linux/input-event-codes.h\nEV_SYN = 0x00",
+        "peekOfCode": "COUNTS_PER_CM = 25\nUDP_PORT = 2055\nEMA_ALPHA = 0.3\nSMOOTHING_WIN = 5\n# Linux input_event layout (64-bit kernel, ARM64)\n# struct input_event { timeval(8+8), type(2), code(2), value(4) } = 24 bytes\nINPUT_EVENT_FMT = \"llHHi\"\nINPUT_EVENT_SIZE = struct.calcsize(INPUT_EVENT_FMT)\n# /linux/input-event-codes.h\nEV_SYN = 0x00",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -3592,7 +3672,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "STATIONARY_ACCEL_MG_LOW = 950\nSTATIONARY_ACCEL_MG_HIGH = 1050\ndef imu_gyro_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X\n    try:\n        imu = LSM6DSV16X()\n        if not imu.check_who_am_i():\n            print(\"[IMU] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")\n            return",
+        "peekOfCode": "STATIONARY_ACCEL_MG_LOW = 950\nSTATIONARY_ACCEL_MG_HIGH = 1050\ndef imu_gyro_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X\n    try:\n        imu = LSM6DSV16X()\n        if not imu.check_who_am_i():\n            print(\n                \"[IMU] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -3601,7 +3681,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "STATIONARY_ACCEL_MG_HIGH = 1050\ndef imu_gyro_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X\n    try:\n        imu = LSM6DSV16X()\n        if not imu.check_who_am_i():\n            print(\"[IMU] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")\n            return\n        imu.configure()",
+        "peekOfCode": "STATIONARY_ACCEL_MG_HIGH = 1050\ndef imu_gyro_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X\n    try:\n        imu = LSM6DSV16X()\n        if not imu.check_who_am_i():\n            print(\n                \"[IMU] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")\n            return",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -3610,7 +3690,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "MAG_ODR_HZ = 100\ndef imu_mag_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_iis2mdc import IIS2MDC\n    try:\n        mag = IIS2MDC()\n        if not mag.check_who_am_i():\n            print(\"[MAG] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")\n            return\n        mag.configure()",
+        "peekOfCode": "MAG_ODR_HZ = 100\ndef imu_mag_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_iis2mdc import IIS2MDC\n    try:\n        mag = IIS2MDC()\n        if not mag.check_who_am_i():\n            print(\n                \"[MAG] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")\n            return",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
