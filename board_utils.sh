@@ -20,7 +20,7 @@
 ##############################################################################
 ##
 
-TEST_HOST_BOARD="stm32mp157f-dk2"
+TEST_HOST_BOARD="stm32mp257f-dk"
 TEST_EXPANSION_BOARD="X-STM32MP-EVG01"
 I2C_BUS_ID_EEPROM=0
 I2C_BUS_PRIMARY=1
