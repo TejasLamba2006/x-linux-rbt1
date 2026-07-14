@@ -339,7 +339,7 @@ def imu_fusion_yaw_thread():
             last_batch_t = now
 
             for gx, gy, gz in batch:
-                _raw_smoothed_yaw = (_raw_smoothed_yaw - gz * dt + 180) % 360 - 180
+                _raw_smoothed_yaw = (_raw_smoothed_yaw + gz * dt + 180) % 360 - 180
 
             if _latest_mag_heading is not None:
                 correction = angle_diff(_latest_mag_heading, _raw_smoothed_yaw)
