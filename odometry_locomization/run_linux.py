@@ -1,4 +1,5 @@
 # server.py  ── Linux / OpenSTLinux version (STM32MP257F-DK)
+import asyncio
 import math
 import os
 import socket
@@ -233,6 +234,62 @@ def imu_mag_yaw_thread():
             time.sleep(0.1)
 
 
+# ── STEVAL-MKBOXPRO gyro over BLE ────────────────────────────────────────────
+# Alternate yaw source: the box's own working LSM6DSV16X gyro, streamed
+# wirelessly, in place of either the dead onboard IMU or the magnetometer.
+# Unlike the magnetometer this is rate integration (like the onboard gyro
+# thread was), so it needs the same startup bias calibration to avoid slow
+# drift while stationary -- no accelerometer stream wired up here to also
+# gate bias re-tracking continuously (ponytail: add if drift over long runs
+# turns out to matter -- see imu_gyro_yaw_thread's accel-gating for the
+# pattern to copy).
+BLE_GYRO_BIAS_CALIB_SAMPLES = 60
+
+
+def imu_ble_yaw_thread():
+    global _raw_smoothed_yaw
+    import imu_ble_mkbox
+
+    calib_samples = []
+    gyro_bias_dps = 0.0
+    last_t = [None]
+    _raw_smoothed_yaw = 0.0
+
+    def on_sample(gx, gy, gz):
+        nonlocal gyro_bias_dps
+        global _raw_smoothed_yaw
+        now = time.time()
+        if len(calib_samples) < BLE_GYRO_BIAS_CALIB_SAMPLES:
+            calib_samples.append(gz)
+            if len(calib_samples) == BLE_GYRO_BIAS_CALIB_SAMPLES:
+                gyro_bias_dps = sum(calib_samples) / len(calib_samples)
+                print(f"[BLE-GYRO] bias = {gyro_bias_dps:.3f} dps, integration started")
+            last_t[0] = now
+            return
+
+        dt = now - last_t[0]
+        last_t[0] = now
+        _raw_smoothed_yaw = (_raw_smoothed_yaw + (gz - gyro_bias_dps) * dt + 180) % 360 - 180
+        with lock:
+            state["yaw"] = round(angle_diff(_raw_smoothed_yaw, _yaw_offset), 2)
+
+    async def run():
+        box = imu_ble_mkbox.MkBoxGyro()
+        print("[BLE-GYRO] scanning for STEVAL-MKBOXPRO...")
+        await box.connect()
+        print("[BLE-GYRO] connected, calibrating bias...")
+        await box.stream_gyro(on_sample)
+        while True:
+            await asyncio.sleep(3600)
+
+    while True:
+        try:
+            asyncio.run(run())
+        except Exception as e:
+            print(f"[BLE-GYRO] Error: {e}")
+            time.sleep(2.0)
+
+
 def _raw_input_delta_callback(raw_dx: int, raw_dy: int):
     """
     Convert mouse movement from robot frame to world frame.
@@ -429,7 +486,7 @@ def zero_yaw():
 # ── Entry Point ───────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     t_yaw = threading.Thread(
-        target=imu_mag_yaw_thread,
+        target=imu_ble_yaw_thread,
         daemon=True
     )
     t_yaw.start()
