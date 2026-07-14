@@ -10,7 +10,7 @@ from collections import deque
 from flask import Flask, jsonify, request, send_from_directory
 
 # ── Constants ─────────────────────────────────────────────────────────────────
-COUNTS_PER_CM = 25
+COUNTS_PER_CM = 15
 UDP_PORT = 2055
 EMA_ALPHA = 0.3
 SMOOTHING_WIN = 5
@@ -283,15 +283,18 @@ def imu_usb_yaw_thread():
                     calib_samples.append(gz)
                     if len(calib_samples) == USB_GYRO_BIAS_CALIB_SAMPLES:
                         gyro_bias_dps = sum(calib_samples) / len(calib_samples)
-                        print(f"[USB-GYRO] bias = {gyro_bias_dps:.3f} dps, integration started")
+                        print(
+                            f"[USB-GYRO] bias = {gyro_bias_dps:.3f} dps, integration started")
                     last_t = now
                     continue
 
                 dt = now - last_t
                 last_t = now
-                _raw_smoothed_yaw = (_raw_smoothed_yaw + (gz - gyro_bias_dps) * dt + 180) % 360 - 180
+                _raw_smoothed_yaw = (
+                    _raw_smoothed_yaw + (gz - gyro_bias_dps) * dt + 180) % 360 - 180
                 with lock:
-                    state["yaw"] = round(angle_diff(_raw_smoothed_yaw, _yaw_offset), 2)
+                    state["yaw"] = round(angle_diff(
+                        _raw_smoothed_yaw, _yaw_offset), 2)
 
             await asyncio.sleep(1.0 / USB_GYRO_POLL_HZ)
 
