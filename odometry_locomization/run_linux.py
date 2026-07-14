@@ -256,47 +256,97 @@ def imu_mag_yaw_thread():
 # with interface=1 it pushes continuous samples over USB bulk endpoints,
 # which is far more robust than BLE notifications for a robot-mounted board
 # (no BLE connection to babysit for the actual data path).
-USB_GYRO_BIAS_CALIB_SAMPLES = 60
 USB_GYRO_POLL_HZ = 200
 
 
-def imu_usb_yaw_thread():
+# ── Fusion: RBT01 onboard magnetometer (anchor) + MKBOXPRO gyro (smoother) ──
+# Per your sir's guidance: combine gyro + accel + mag for heading. RBT01's own
+# gyro/accel chip doesn't ACK on i2c-1 (see imu_lsm6dsv16x.py), so a true
+# onboard 9-DOF fusion isn't possible -- this instead fuses the two sources
+# that DO work: RBT01's own magnetometer (absolute heading, correct on
+# average but noisy/motor-magnet-distorted) with the MKBOXPRO's external
+# gyro (smooth short-term rate, but its USB decode still shows occasional
+# residual corruption -- see imu_usb_mkbox.py's notes, still being chased).
+# A complementary filter integrates gyro for smoothness between mag updates
+# and continuously pulls the estimate back toward the magnetometer's
+# absolute reading, so neither the mag's jitter nor the gyro's noise/
+# corruption can accumulate unchecked -- same principle MotionFX-style AHRS
+# fusion uses, just hand-rolled (x-linux-msp1 only references MotionFX
+# descriptively; it ships no actual fusion code to call into).
+_latest_mag_heading = None
+FUSION_MAG_GAIN = 0.05  # ponytail: how strongly each cycle pulls toward the
+                        # magnetometer -- higher trusts mag more (corrects
+                        # gyro corruption/drift faster, but noisier), lower
+                        # is smoother but slower to correct. Tune live.
+
+
+def _mag_heading_reader_thread():
+    global _latest_mag_heading
+    from imu_iis2mdc import IIS2MDC
+
+    try:
+        mag = IIS2MDC()
+        if not mag.check_who_am_i():
+            print("[FUSION-MAG] WHO_AM_I mismatch -- magnetometer correction disabled")
+            return
+        mag.configure()
+    except Exception as e:
+        print(f"[FUSION-MAG] init failed: {e}")
+        return
+
+    print("[FUSION-MAG] magnetometer heading reader started")
+    while True:
+        try:
+            mx, my, mz = mag.read_mag_mgauss()
+            _latest_mag_heading = math.degrees(math.atan2(my, mx))
+            time.sleep(1.0 / MAG_ODR_HZ)
+        except Exception as e:
+            print(f"[FUSION-MAG] Error: {e}")
+            time.sleep(0.1)
+
+
+def imu_fusion_yaw_thread():
     global _raw_smoothed_yaw
     import imu_usb_mkbox
+
+    threading.Thread(target=_mag_heading_reader_thread, daemon=True).start()
 
     async def run():
         global _raw_smoothed_yaw
         box = imu_usb_mkbox.MkBoxUsbGyro()
-        print("[USB-GYRO] connecting over BLE to start USB streaming...")
+        print("[FUSION] connecting over BLE to start USB gyro streaming...")
         await box.start()
-        print("[USB-GYRO] streaming started, calibrating bias...")
+        print("[FUSION] gyro streaming started, waiting for first mag reading...")
 
-        calib_samples = []
-        gyro_bias_dps = 0.0
-        _raw_smoothed_yaw = 0.0
+        while _latest_mag_heading is None:
+            await asyncio.sleep(0.1)
+        _raw_smoothed_yaw = _latest_mag_heading
+        print("[FUSION] fusion started")
 
+        last_batch_t = time.time()
         while True:
-            # ponytail: dt is the sensor's own fixed sample interval, not
-            # wall-clock time.time() per sample -- read_gyro_dps() usually
-            # returns a whole batch of samples decoded from one USB read
-            # (data arrives faster than we poll), and timing each sample in
-            # that batch by wall-clock time makes every sample after the
-            # first look like it took ~0s, wildly under-integrating bursts.
-            dt = imu_usb_mkbox.GYRO_SAMPLE_INTERVAL_S
-            for gx, gy, gz in box.read_gyro_dps():
-                if len(calib_samples) < USB_GYRO_BIAS_CALIB_SAMPLES:
-                    calib_samples.append(gz)
-                    if len(calib_samples) == USB_GYRO_BIAS_CALIB_SAMPLES:
-                        gyro_bias_dps = sum(calib_samples) / len(calib_samples)
-                        print(
-                            f"[USB-GYRO] bias = {gyro_bias_dps:.3f} dps, integration started")
-                    continue
+            # ponytail: dt is measured from real elapsed wall-clock time
+            # across the whole batch, divided evenly across however many
+            # samples arrived -- NOT a hardcoded assumed sample rate (an
+            # earlier assumption derived from get_status's "usb_dps" was
+            # ~20x too slow; measuring live showed ~7880 samples/sec
+            # actually arrive). Measuring the real batch interval is
+            # self-correcting regardless of what these ODR fields mean.
+            batch = box.read_gyro_dps()
+            now = time.time()
+            dt = (now - last_batch_t) / len(batch) if batch else 0.0
+            last_batch_t = now
 
+            for gx, gy, gz in batch:
+                _raw_smoothed_yaw = (_raw_smoothed_yaw + gz * dt + 180) % 360 - 180
+
+            if _latest_mag_heading is not None:
+                correction = angle_diff(_latest_mag_heading, _raw_smoothed_yaw)
                 _raw_smoothed_yaw = (
-                    _raw_smoothed_yaw + (gz - gyro_bias_dps) * dt + 180) % 360 - 180
-                with lock:
-                    state["yaw"] = round(angle_diff(
-                        _raw_smoothed_yaw, _yaw_offset), 2)
+                    _raw_smoothed_yaw + FUSION_MAG_GAIN * correction + 180) % 360 - 180
+
+            with lock:
+                state["yaw"] = round(angle_diff(_raw_smoothed_yaw, _yaw_offset), 2)
 
             await asyncio.sleep(1.0 / USB_GYRO_POLL_HZ)
 
@@ -304,7 +354,7 @@ def imu_usb_yaw_thread():
         try:
             asyncio.run(run())
         except Exception as e:
-            print(f"[USB-GYRO] Error: {e}")
+            print(f"[FUSION] Error: {e}")
             time.sleep(2.0)
 
 
@@ -504,7 +554,7 @@ def zero_yaw():
 # ── Entry Point ───────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     t_yaw = threading.Thread(
-        target=imu_usb_yaw_thread,
+        target=imu_fusion_yaw_thread,
         daemon=True
     )
     t_yaw.start()
