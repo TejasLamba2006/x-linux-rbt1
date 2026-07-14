@@ -41,7 +41,7 @@ CMD_CHAR_UUID = "0000001b-0002-11e1-ac36-0002a5d5c51b"  # COPY_PNPLIKE_CHAR_UUID
 
 USB_VENDOR_ID = 0x0483
 USB_PRODUCT_ID = 0x5744
-GYRO_EP = 0x81
+GYRO_EP = 0x82
 
 GYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor
 
@@ -53,7 +53,8 @@ _TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80
 def _encode_tp(payload: bytes, mtu_payload=17):
     if len(payload) <= mtu_payload:
         return [bytes([_TP_START_END]) + struct.pack(">H", len(payload)) + payload]
-    chunks = [bytes([_TP_START]) + struct.pack(">H", len(payload)) + payload[:mtu_payload]]
+    chunks = [bytes([_TP_START]) + struct.pack(">H",
+                                               len(payload)) + payload[:mtu_payload]]
     rest = payload[mtu_payload:]
     while len(rest) > mtu_payload:
         chunks.append(bytes([_TP_MIDDLE]) + rest[:mtu_payload])
@@ -74,7 +75,8 @@ class MkBoxUsbGyro:
 
         device = await BleakScanner.find_device_by_name(self.ble_device_name, scan_timeout)
         if device is None:
-            raise RuntimeError(f"MKBOXPRO '{self.ble_device_name}' not found in BLE scan")
+            raise RuntimeError(
+                f"MKBOXPRO '{self.ble_device_name}' not found in BLE scan")
         self._ble_client = BleakClient(device)
         await self._ble_client.connect()
         await self._ble_client.start_notify(CMD_CHAR_UUID, lambda *_: None)
@@ -85,7 +87,8 @@ class MkBoxUsbGyro:
             await asyncio.sleep(0.05)
         await asyncio.sleep(0.5)
 
-        self._usb_dev = usb.core.find(idVendor=USB_VENDOR_ID, idProduct=USB_PRODUCT_ID)
+        self._usb_dev = usb.core.find(
+            idVendor=USB_VENDOR_ID, idProduct=USB_PRODUCT_ID)
         if self._usb_dev is None:
             raise RuntimeError("MKBOXPRO USB streaming interface not found")
         if self._usb_dev.is_kernel_driver_active(0):
