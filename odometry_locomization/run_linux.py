@@ -278,10 +278,10 @@ USB_GYRO_POLL_HZ = 200
 # descriptively; it ships no actual fusion code to call into).
 _latest_mag_heading = None
 FUSION_MAG_GAIN = 0.001  # 2026-07-14: reduced from 0.05 -- at 200 Hz poll,
-                         # the old gain caused yaw to fully snap to (often
-                         # motor-distorted) mag within ~1 s. 0.001 lets gyro
-                         # dominate during rotation; mag only slowly corrects
-                         # drift at rest (~5 % per second instead of ~95 %).
+# the old gain caused yaw to fully snap to (often
+# motor-distorted) mag within ~1 s. 0.001 lets gyro
+# dominate during rotation; mag only slowly corrects
+# drift at rest (~5 % per second instead of ~95 %).
 
 
 def _mag_heading_reader_thread():
@@ -331,9 +331,10 @@ def imu_fusion_yaw_thread():
         try:
             import urllib.request
             req = urllib.request.Request("http://127.0.0.1:8000/calibrate_rotate",
-                                        method="POST")
+                                         method="POST")
             with urllib.request.urlopen(req, timeout=1) as resp:
-                print(f"[FUSION] warmup rotation started ({resp.read().decode()})")
+                print(
+                    f"[FUSION] warmup rotation started ({resp.read().decode()})")
         except Exception as e:
             print(f"[FUSION] warmup rotation request failed: {e}")
 
@@ -353,8 +354,10 @@ def imu_fusion_yaw_thread():
             for _, _, gz in b:
                 bias_samples.append(gz)
             await asyncio.sleep(0.05)
-        gyro_bias = sum(bias_samples) / len(bias_samples) if bias_samples else 0.0
-        print(f"[FUSION] gyro bias = {gyro_bias:.3f} dps ({len(bias_samples)} samples)")
+        gyro_bias = sum(bias_samples) / \
+            len(bias_samples) if bias_samples else 0.0
+        print(
+            f"[FUSION] gyro bias = {gyro_bias:.3f} dps ({len(bias_samples)} samples)")
         print("[FUSION] fusion started")
 
         last_batch_t = time.time()
@@ -367,7 +370,8 @@ def imu_fusion_yaw_thread():
             batch_mean_gz = 0.0
             for gx, gy, gz in batch:
                 if state["recording"]:
-                    _raw_smoothed_yaw = (_raw_smoothed_yaw - (gz - gyro_bias) * dt + 180) % 360 - 180
+                    _raw_smoothed_yaw = (
+                        _raw_smoothed_yaw - (gz - gyro_bias) * dt + 180) % 360 - 180
                 batch_mean_gz += gz
             if batch:
                 batch_mean_gz /= len(batch)
@@ -381,7 +385,8 @@ def imu_fusion_yaw_thread():
                     _raw_smoothed_yaw + FUSION_MAG_GAIN * correction + 180) % 360 - 180
 
             with lock:
-                state["yaw"] = round(angle_diff(_raw_smoothed_yaw, _yaw_offset), 2)
+                state["yaw"] = round(angle_diff(
+                    _raw_smoothed_yaw, _yaw_offset), 2)
 
             await asyncio.sleep(1.0 / USB_GYRO_POLL_HZ)
 
