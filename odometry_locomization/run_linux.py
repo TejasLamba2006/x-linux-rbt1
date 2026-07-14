@@ -339,12 +339,6 @@ def imu_fusion_yaw_thread():
         print(f"[FUSION] gyro bias = {gyro_bias:.3f} dps ({len(bias_samples)} samples)")
         print("[FUSION] fusion started")
 
-        # ── Online bias tracking constants ──
-        BIAS_EMA_ALPHA = 0.005        # slow EMA for bias drift
-        STATIONARY_THRESHOLD_S = 0.5  # no mouse input for this long = stationary
-        _batch_gz_sum = 0.0
-        _batch_gz_count = 0
-
         last_batch_t = time.time()
         while True:
             batch = box.read_gyro_dps()
@@ -353,16 +347,7 @@ def imu_fusion_yaw_thread():
             last_batch_t = now
 
             for gx, gy, gz in batch:
-                _raw_smoothed_yaw = (_raw_smoothed_yaw + (gz - gyro_bias) * dt + 180) % 360 - 180
-                _batch_gz_sum += gz
-                _batch_gz_count += 1
-
-            # ── Update bias once per batch when stationary ──
-            if _batch_gz_count > 0 and (now - _last_mouse_move_time) > STATIONARY_THRESHOLD_S:
-                batch_mean_gz = _batch_gz_sum / _batch_gz_count
-                gyro_bias += BIAS_EMA_ALPHA * (batch_mean_gz - gyro_bias)
-            _batch_gz_sum = 0.0
-            _batch_gz_count = 0
+                _raw_smoothed_yaw = (_raw_smoothed_yaw - (gz - gyro_bias) * dt + 180) % 360 - 180
 
             if _latest_mag_heading is not None:
                 correction = angle_diff(_latest_mag_heading, _raw_smoothed_yaw)
