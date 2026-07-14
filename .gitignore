@@ -369,3 +369,13 @@ Thumbs.db
 # Self-signed TLS cert/key generated at runtime by main.py (ensure_tls_cert)
 applications/web-app/tls_cert.pem
 applications/web-app/tls_key.pem
+
+# Intent classifier ONNX models (>100 MB, regenerate on board via export_onnx.py)
+intent_classifier/embedder_onnx/model_int8.onnx
+intent_classifier/embedder_onnx/model_int8_q.onnx
+intent_classifier/embedder_onnx/model.onnx
+intent_classifier/embedder_onnx/tokenizer.json
+intent_classifier/embedder_onnx/tokenizer_config.json
+intent_classifier/embedder_onnx/vocab.txt
+intent_classifier/embedder_onnx/special_tokens_map.json
+intent_classifier/embedder_onnx/added_tokens.json
