@@ -3447,7 +3447,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "COUNTS_PER_CM = 25\nUDP_PORT = 2055\nEMA_ALPHA = 0.3\nSMOOTHING_WIN = 5\n# Linux input_event layout (64-bit kernel, ARM64)\n# struct input_event { timeval(8+8), type(2), code(2), value(4) } = 24 bytes\nINPUT_EVENT_FMT = \"llHHi\"\nINPUT_EVENT_SIZE = struct.calcsize(INPUT_EVENT_FMT)\n# /linux/input-event-codes.h\nEV_SYN = 0x00",
+        "peekOfCode": "COUNTS_PER_CM = 15\nUDP_PORT = 2055\nEMA_ALPHA = 0.3\nSMOOTHING_WIN = 5\n# Linux input_event layout (64-bit kernel, ARM64)\n# struct input_event { timeval(8+8), type(2), code(2), value(4) } = 24 bytes\nINPUT_EVENT_FMT = \"llHHi\"\nINPUT_EVENT_SIZE = struct.calcsize(INPUT_EVENT_FMT)\n# /linux/input-event-codes.h\nEV_SYN = 0x00",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
