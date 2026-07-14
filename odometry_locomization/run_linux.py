@@ -330,11 +330,14 @@ def imu_fusion_yaw_thread():
         print("[FUSION] requesting warmup rotation...")
         try:
             import urllib.request
-            req = urllib.request.Request("http://127.0.0.1:8000/calibrate_rotate",
-                                         method="POST")
-            with urllib.request.urlopen(req, timeout=1) as resp:
-                print(
-                    f"[FUSION] warmup rotation started ({resp.read().decode()})")
+            import ssl
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+            req = urllib.request.Request("https://127.0.0.1:8000/calibrate_rotate",
+                                        method="POST")
+            with urllib.request.urlopen(req, timeout=1, context=ctx) as resp:
+                print(f"[FUSION] warmup rotation started ({resp.read().decode()})")
         except Exception as e:
             print(f"[FUSION] warmup rotation request failed: {e}")
 
