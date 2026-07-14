@@ -3202,7 +3202,7 @@
         "kind": 6,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "class MkBoxUsbGyro:\n    def __init__(self, ble_device_name=BLE_DEVICE_NAME):\n        self.ble_device_name = ble_device_name\n        self._ble_client = None\n        self._usb_dev = None\n    async def start(self, scan_timeout=10.0):\n        \"\"\"Connect over BLE just long enough to start USB streaming, then open the USB device.\"\"\"\n        from bleak import BleakScanner\n        device = await BleakScanner.find_device_by_name(self.ble_device_name, scan_timeout)\n        if device is None:",
+        "peekOfCode": "class MkBoxUsbGyro:\n    def __init__(self, ble_device_name=BLE_DEVICE_NAME):\n        self.ble_device_name = ble_device_name\n        self._usb_dev = None\n        self._buf = bytearray()\n        self._sample_count = 0\n    async def start(self, scan_timeout=10.0):\n        \"\"\"Connect over BLE just long enough to start USB streaming, then\n        disconnect BLE entirely and open the USB device -- once\n        log_controller*start_log has been accepted, the box keeps streaming",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3211,7 +3211,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "BLE_DEVICE_NAME = \"HSD2v33\"  # update if the box's advertised name changes\nCMD_CHAR_UUID = \"0000001b-0002-11e1-ac36-0002a5d5c51b\"  # COPY_PNPLIKE_CHAR_UUID\nUSB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nGYRO_EP = 0x85\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):",
+        "peekOfCode": "BLE_DEVICE_NAME = \"HSD2v33\"  # update if the box's advertised name changes\nCMD_CHAR_UUID = \"0000001b-0002-11e1-ac36-0002a5d5c51b\"  # COPY_PNPLIKE_CHAR_UUID\nUSB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nGYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3220,7 +3220,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "CMD_CHAR_UUID = \"0000001b-0002-11e1-ac36-0002a5d5c51b\"  # COPY_PNPLIKE_CHAR_UUID\nUSB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nGYRO_EP = 0x85\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:",
+        "peekOfCode": "CMD_CHAR_UUID = \"0000001b-0002-11e1-ac36-0002a5d5c51b\"  # COPY_PNPLIKE_CHAR_UUID\nUSB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nGYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3229,7 +3229,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "USB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nGYRO_EP = 0x85\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([_TP_START_END]) + struct.pack(\">H\", len(payload)) + payload]",
+        "peekOfCode": "USB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nGYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3238,7 +3238,16 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "USB_PRODUCT_ID = 0x5744\nGYRO_EP = 0x85\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([_TP_START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([_TP_START]) + struct.pack(\">H\",",
+        "peekOfCode": "USB_PRODUCT_ID = 0x5744\nGYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):",
+        "detail": "odometry_locomization.imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "GYRO_EP_ID",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_usb_mkbox",
+        "description": "odometry_locomization.imu_usb_mkbox",
+        "peekOfCode": "GYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3247,7 +3256,16 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "GYRO_EP = 0x85\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([_TP_START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([_TP_START]) + struct.pack(\">H\",\n                                               len(payload)) + payload[:mtu_payload]]",
+        "peekOfCode": "GYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([_TP_START_END]) + struct.pack(\">H\", len(payload)) + payload]",
+        "detail": "odometry_locomization.imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "GYRO_SAMPLES_PER_TS",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_usb_mkbox",
+        "description": "odometry_locomization.imu_usb_mkbox",
+        "peekOfCode": "GYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([_TP_START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([_TP_START]) + struct.pack(\">H\",",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3306,6 +3324,15 @@
         "documentation": {}
     },
     {
+        "label": "SensorStreamDecoder",
+        "kind": 6,
+        "importPath": "odometry_locomization.mkbox_live_debug",
+        "description": "odometry_locomization.mkbox_live_debug",
+        "peekOfCode": "class SensorStreamDecoder:\n    \"\"\"Tracks one endpoint's continuous byte buffer + sample/timestamp framing.\"\"\"\n    def __init__(self, name, dim, dtype, samples_per_ts, sensitivity):\n        self.name = name\n        self.dim = dim\n        self.dtype = dtype  # \"int16\" or \"float_t\"\n        self.sample_bytes = dim * (2 if dtype == \"int16\" else 4)\n        self.spts = max(1, samples_per_ts)\n        self.sensitivity = sensitivity\n        self.buf = bytearray()",
+        "detail": "odometry_locomization.mkbox_live_debug",
+        "documentation": {}
+    },
+    {
         "label": "encode_tp",
         "kind": 2,
         "importPath": "odometry_locomization.mkbox_live_debug",
@@ -3315,20 +3342,11 @@
         "documentation": {}
     },
     {
-        "label": "decode_int16le",
-        "kind": 2,
-        "importPath": "odometry_locomization.mkbox_live_debug",
-        "description": "odometry_locomization.mkbox_live_debug",
-        "peekOfCode": "def decode_int16le(raw: bytes, n=6):\n    \"\"\"First n int16-LE values, for a quick eyeball of magnitude/sign.\"\"\"\n    count = min(n, len(raw) // 2)\n    return struct.unpack_from(f\"<{count}h\", raw)\nlatest = {ep: b\"\" for ep in ENDPOINTS}\ncounts = {ep: 0 for ep in ENDPOINTS}\nlock = threading.Lock()\ndef usb_poll_thread(stop_event):\n    dev = usb.core.find(idVendor=USB_VENDOR_ID, idProduct=USB_PRODUCT_ID)\n    if dev is None:",
-        "detail": "odometry_locomization.mkbox_live_debug",
-        "documentation": {}
-    },
-    {
         "label": "usb_poll_thread",
         "kind": 2,
         "importPath": "odometry_locomization.mkbox_live_debug",
         "description": "odometry_locomization.mkbox_live_debug",
-        "peekOfCode": "def usb_poll_thread(stop_event):\n    dev = usb.core.find(idVendor=USB_VENDOR_ID, idProduct=USB_PRODUCT_ID)\n    if dev is None:\n        print(\"[USB] device not found -- is it plugged in?\")\n        stop_event.set()\n        return\n    if dev.is_kernel_driver_active(0):\n        dev.detach_kernel_driver(0)\n    dev.set_configuration()\n    while not stop_event.is_set():",
+        "peekOfCode": "def usb_poll_thread(stop_event, ep_map):\n    dev = usb.core.find(idVendor=USB_VENDOR_ID, idProduct=USB_PRODUCT_ID)\n    if dev is None:\n        print(\"[USB] device not found -- is it plugged in?\")\n        stop_event.set()\n        return\n    if dev.is_kernel_driver_active(0):\n        dev.detach_kernel_driver(0)\n    dev.set_configuration()\n    while not stop_event.is_set():",
         "detail": "odometry_locomization.mkbox_live_debug",
         "documentation": {}
     },
@@ -3337,7 +3355,7 @@
         "kind": 2,
         "importPath": "odometry_locomization.mkbox_live_debug",
         "description": "odometry_locomization.mkbox_live_debug",
-        "peekOfCode": "def print_loop(stop_event):\n    while not stop_event.is_set():\n        time.sleep(0.3)\n        with lock:\n            snapshot = {ep: (latest[ep], counts[ep]) for ep in ENDPOINTS}\n        sys.stdout.write(\"\\033[2J\\033[H\")  # clear screen\n        print(\"=== MKBOXPRO live USB endpoints (Ctrl+C to stop) ===\")\n        print(\"Rotate / tilt / shake the box and watch which line's numbers react.\\n\")\n        for ep in ENDPOINTS:\n            raw, n = snapshot[ep]",
+        "peekOfCode": "def print_loop(stop_event):\n    while not stop_event.is_set():\n        time.sleep(0.3)\n        sys.stdout.write(\"\\033[2J\\033[H\")\n        print(\"=== MKBOXPRO live USB gyro/accel/press/temp (Ctrl+C to stop) ===\")\n        print(\"Rotate / tilt / shake the box and watch which line's numbers react.\\n\")\n        with lock:\n            for ep, dec in decoders.items():\n                print(f\"EP {hex(ep)}  {dec.name:18s}  n={dec.n_samples_seen:7d}  \"\n                      f\"values={dec.last_values}\")",
         "detail": "odometry_locomization.mkbox_live_debug",
         "documentation": {}
     },
@@ -3346,7 +3364,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.mkbox_live_debug",
         "description": "odometry_locomization.mkbox_live_debug",
-        "peekOfCode": "BLE_DEVICE_NAME = \"HSD2v33\"  # change here if the box's advertised name differs\nCMD_UUID = \"0000001b-0002-11e1-ac36-0002a5d5c51b\"\nUSB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nENDPOINTS = [0x81, 0x82, 0x83, 0x84, 0x85]\nSTART, START_END, MIDDLE, END = 0x00, 0x20, 0x40, 0x80\ndef encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([START]) + struct.pack(\">H\", len(payload)) + payload[:mtu_payload]]",
+        "peekOfCode": "BLE_DEVICE_NAME = \"HSD2v33\"  # change if the box's advertised name differs\nCMD_UUID = \"0000001b-0002-11e1-ac36-0002a5d5c51b\"\nUSB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nSTART, START_END, MIDDLE, END = 0x00, 0x20, 0x40, 0x80\ndef encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([START]) + struct.pack(\">H\", len(payload)) + payload[:mtu_payload]]\n    rest = payload[mtu_payload:]",
         "detail": "odometry_locomization.mkbox_live_debug",
         "documentation": {}
     },
@@ -3355,7 +3373,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.mkbox_live_debug",
         "description": "odometry_locomization.mkbox_live_debug",
-        "peekOfCode": "CMD_UUID = \"0000001b-0002-11e1-ac36-0002a5d5c51b\"\nUSB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nENDPOINTS = [0x81, 0x82, 0x83, 0x84, 0x85]\nSTART, START_END, MIDDLE, END = 0x00, 0x20, 0x40, 0x80\ndef encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([START]) + struct.pack(\">H\", len(payload)) + payload[:mtu_payload]]\n    rest = payload[mtu_payload:]",
+        "peekOfCode": "CMD_UUID = \"0000001b-0002-11e1-ac36-0002a5d5c51b\"\nUSB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nSTART, START_END, MIDDLE, END = 0x00, 0x20, 0x40, 0x80\ndef encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([START]) + struct.pack(\">H\", len(payload)) + payload[:mtu_payload]]\n    rest = payload[mtu_payload:]\n    while len(rest) > mtu_payload:",
         "detail": "odometry_locomization.mkbox_live_debug",
         "documentation": {}
     },
@@ -3364,7 +3382,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.mkbox_live_debug",
         "description": "odometry_locomization.mkbox_live_debug",
-        "peekOfCode": "USB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nENDPOINTS = [0x81, 0x82, 0x83, 0x84, 0x85]\nSTART, START_END, MIDDLE, END = 0x00, 0x20, 0x40, 0x80\ndef encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([START]) + struct.pack(\">H\", len(payload)) + payload[:mtu_payload]]\n    rest = payload[mtu_payload:]\n    while len(rest) > mtu_payload:",
+        "peekOfCode": "USB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nSTART, START_END, MIDDLE, END = 0x00, 0x20, 0x40, 0x80\ndef encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([START]) + struct.pack(\">H\", len(payload)) + payload[:mtu_payload]]\n    rest = payload[mtu_payload:]\n    while len(rest) > mtu_payload:\n        chunks.append(bytes([MIDDLE]) + rest[:mtu_payload])",
         "detail": "odometry_locomization.mkbox_live_debug",
         "documentation": {}
     },
@@ -3373,34 +3391,25 @@
         "kind": 5,
         "importPath": "odometry_locomization.mkbox_live_debug",
         "description": "odometry_locomization.mkbox_live_debug",
-        "peekOfCode": "USB_PRODUCT_ID = 0x5744\nENDPOINTS = [0x81, 0x82, 0x83, 0x84, 0x85]\nSTART, START_END, MIDDLE, END = 0x00, 0x20, 0x40, 0x80\ndef encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([START]) + struct.pack(\">H\", len(payload)) + payload[:mtu_payload]]\n    rest = payload[mtu_payload:]\n    while len(rest) > mtu_payload:\n        chunks.append(bytes([MIDDLE]) + rest[:mtu_payload])",
+        "peekOfCode": "USB_PRODUCT_ID = 0x5744\nSTART, START_END, MIDDLE, END = 0x00, 0x20, 0x40, 0x80\ndef encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([START]) + struct.pack(\">H\", len(payload)) + payload[:mtu_payload]]\n    rest = payload[mtu_payload:]\n    while len(rest) > mtu_payload:\n        chunks.append(bytes([MIDDLE]) + rest[:mtu_payload])\n        rest = rest[mtu_payload:]",
         "detail": "odometry_locomization.mkbox_live_debug",
         "documentation": {}
     },
     {
-        "label": "ENDPOINTS",
+        "label": "SENSOR_NAMES",
         "kind": 5,
         "importPath": "odometry_locomization.mkbox_live_debug",
         "description": "odometry_locomization.mkbox_live_debug",
-        "peekOfCode": "ENDPOINTS = [0x81, 0x82, 0x83, 0x84, 0x85]\nSTART, START_END, MIDDLE, END = 0x00, 0x20, 0x40, 0x80\ndef encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([START]) + struct.pack(\">H\", len(payload)) + payload[:mtu_payload]]\n    rest = payload[mtu_payload:]\n    while len(rest) > mtu_payload:\n        chunks.append(bytes([MIDDLE]) + rest[:mtu_payload])\n        rest = rest[mtu_payload:]",
+        "peekOfCode": "SENSOR_NAMES = [\n    \"lsm6dsv16x_gyro\", \"lsm6dsv16x_acc\", \"lps22df_press\", \"stts22h_temp\",\n    \"mp23db01hp_mic\", \"lis2du12_acc\",\n]\nclass SensorStreamDecoder:\n    \"\"\"Tracks one endpoint's continuous byte buffer + sample/timestamp framing.\"\"\"\n    def __init__(self, name, dim, dtype, samples_per_ts, sensitivity):\n        self.name = name\n        self.dim = dim\n        self.dtype = dtype  # \"int16\" or \"float_t\"",
         "detail": "odometry_locomization.mkbox_live_debug",
         "documentation": {}
     },
     {
-        "label": "latest",
+        "label": "decoders",
         "kind": 5,
         "importPath": "odometry_locomization.mkbox_live_debug",
         "description": "odometry_locomization.mkbox_live_debug",
-        "peekOfCode": "latest = {ep: b\"\" for ep in ENDPOINTS}\ncounts = {ep: 0 for ep in ENDPOINTS}\nlock = threading.Lock()\ndef usb_poll_thread(stop_event):\n    dev = usb.core.find(idVendor=USB_VENDOR_ID, idProduct=USB_PRODUCT_ID)\n    if dev is None:\n        print(\"[USB] device not found -- is it plugged in?\")\n        stop_event.set()\n        return\n    if dev.is_kernel_driver_active(0):",
-        "detail": "odometry_locomization.mkbox_live_debug",
-        "documentation": {}
-    },
-    {
-        "label": "counts",
-        "kind": 5,
-        "importPath": "odometry_locomization.mkbox_live_debug",
-        "description": "odometry_locomization.mkbox_live_debug",
-        "peekOfCode": "counts = {ep: 0 for ep in ENDPOINTS}\nlock = threading.Lock()\ndef usb_poll_thread(stop_event):\n    dev = usb.core.find(idVendor=USB_VENDOR_ID, idProduct=USB_PRODUCT_ID)\n    if dev is None:\n        print(\"[USB] device not found -- is it plugged in?\")\n        stop_event.set()\n        return\n    if dev.is_kernel_driver_active(0):\n        dev.detach_kernel_driver(0)",
+        "peekOfCode": "decoders = {}  # ep -> SensorStreamDecoder\nlock = threading.Lock()\nasync def fetch_sensor_configs(client):\n    results = {}\n    def on_notify(_, data):\n        hdr = data[0]\n        payload = data[1:]\n        if not hasattr(on_notify, \"buf\"):\n            on_notify.buf = bytearray()\n        if hdr in (START, START_END):",
         "detail": "odometry_locomization.mkbox_live_debug",
         "documentation": {}
     },
@@ -3409,7 +3418,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.mkbox_live_debug",
         "description": "odometry_locomization.mkbox_live_debug",
-        "peekOfCode": "lock = threading.Lock()\ndef usb_poll_thread(stop_event):\n    dev = usb.core.find(idVendor=USB_VENDOR_ID, idProduct=USB_PRODUCT_ID)\n    if dev is None:\n        print(\"[USB] device not found -- is it plugged in?\")\n        stop_event.set()\n        return\n    if dev.is_kernel_driver_active(0):\n        dev.detach_kernel_driver(0)\n    dev.set_configuration()",
+        "peekOfCode": "lock = threading.Lock()\nasync def fetch_sensor_configs(client):\n    results = {}\n    def on_notify(_, data):\n        hdr = data[0]\n        payload = data[1:]\n        if not hasattr(on_notify, \"buf\"):\n            on_notify.buf = bytearray()\n        if hdr in (START, START_END):\n            on_notify.buf.clear()",
         "detail": "odometry_locomization.mkbox_live_debug",
         "documentation": {}
     },

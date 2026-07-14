@@ -1,21 +1,28 @@
 #!/usr/bin/env python3
 """
-mkbox_live.py -- manual live inspector for the STEVAL-MKBOXPRO's USB data
-streams, so you can eyeball which endpoint is really the gyro instead of
-trusting a remote guess.
+mkbox_live.py -- manual live inspector for the STEVAL-MKBOXPRO's USB gyro
+stream, with CORRECT byte-stream framing this time.
 
-Run directly on the board:  python3 /tmp/mkbox_live.py
+Two bugs in the first version of this script (and the first imu_usb_mkbox.py
+driver) made every endpoint look like garbage:
+  1. USB bulk reads return up to 64 bytes at a time, but samples are 6 bytes
+     (3x int16) -- 64 is not a multiple of 6, so treating each independent
+     64-byte read as starting fresh at a sample boundary silently drifted
+     the byte alignment by 4 bytes on every single read.
+  2. Per DATALOG2's own firmware source (DatalogAppTask.c), the wire format
+     is actually [samples_per_ts raw samples][8-byte double timestamp]
+     [more samples]... -- confirmed live via get_status: lsm6dsv16x_gyro
+     has samples_per_ts=1000, so at its actual streamed rate a timestamp
+     block interrupts the sample stream roughly every 2-3 seconds. Any
+     capture longer than that hit an un-skipped 8-byte timestamp treated as
+     more sample data, permanently desyncing everything after it.
 
-What it does:
-  1. Connects over BLE and sends {"log_controller*start_log":{"interface":1}}
-     (commands only work over BLE on this firmware -- USB writes to the
-     command endpoint STALL, confirmed by direct testing).
-  2. Polls all 5 USB bulk IN endpoints (0x81-0x85) in a loop and prints each
-     one's raw bytes AND a couple of int16-LE decodings, refreshed in place,
-     so you can rotate/tilt/shake the box and watch which endpoint's numbers
-     actually move in response.
+This version keeps one persistent byte buffer per endpoint across reads and
+tracks a per-endpoint sample counter to correctly skip the 8-byte timestamp
+exactly every samples_per_ts samples, using each sensor's real dim/dtype/
+samples_per_ts pulled live from get_status instead of assumed.
 
-Ctrl+C to stop (also sends stop_log so the box doesn't keep logging to SD).
+Run directly on the board: python3 /tmp/mkbox_live.py
 """
 import asyncio
 import struct
@@ -26,11 +33,10 @@ import time
 import usb.core
 from bleak import BleakClient, BleakScanner
 
-BLE_DEVICE_NAME = "HSD2v33"  # change here if the box's advertised name differs
+BLE_DEVICE_NAME = "HSD2v33"  # change if the box's advertised name differs
 CMD_UUID = "0000001b-0002-11e1-ac36-0002a5d5c51b"
 USB_VENDOR_ID = 0x0483
 USB_PRODUCT_ID = 0x5744
-ENDPOINTS = [0x81, 0x82, 0x83, 0x84, 0x85]
 
 START, START_END, MIDDLE, END = 0x00, 0x20, 0x40, 0x80
 
@@ -47,18 +53,85 @@ def encode_tp(payload: bytes, mtu_payload=17):
     return chunks
 
 
-def decode_int16le(raw: bytes, n=6):
-    """First n int16-LE values, for a quick eyeball of magnitude/sign."""
-    count = min(n, len(raw) // 2)
-    return struct.unpack_from(f"<{count}h", raw)
+SENSOR_NAMES = [
+    "lsm6dsv16x_gyro", "lsm6dsv16x_acc", "lps22df_press", "stts22h_temp",
+    "mp23db01hp_mic", "lis2du12_acc",
+]
 
 
-latest = {ep: b"" for ep in ENDPOINTS}
-counts = {ep: 0 for ep in ENDPOINTS}
+class SensorStreamDecoder:
+    """Tracks one endpoint's continuous byte buffer + sample/timestamp framing."""
+
+    def __init__(self, name, dim, dtype, samples_per_ts, sensitivity):
+        self.name = name
+        self.dim = dim
+        self.dtype = dtype  # "int16" or "float_t"
+        self.sample_bytes = dim * (2 if dtype == "int16" else 4)
+        self.spts = max(1, samples_per_ts)
+        self.sensitivity = sensitivity
+        self.buf = bytearray()
+        self.sample_count = 0
+        self.last_values = None
+        self.n_samples_seen = 0
+
+    def feed(self, raw: bytes):
+        self.buf.extend(raw)
+        while True:
+            if self.sample_count >= self.spts:
+                if len(self.buf) < 8:
+                    break
+                del self.buf[:8]  # skip the 8-byte double timestamp
+                self.sample_count = 0
+                continue
+            if len(self.buf) < self.sample_bytes:
+                break
+            chunk = bytes(self.buf[:self.sample_bytes])
+            del self.buf[:self.sample_bytes]
+            self.sample_count += 1
+            self.n_samples_seen += 1
+            if self.dtype == "int16":
+                vals = struct.unpack(f"<{self.dim}h", chunk)
+            else:
+                vals = struct.unpack(f"<{self.dim}f", chunk)
+            self.last_values = tuple(v * self.sensitivity for v in vals)
+
+
+decoders = {}  # ep -> SensorStreamDecoder
 lock = threading.Lock()
 
 
-def usb_poll_thread(stop_event):
+async def fetch_sensor_configs(client):
+    results = {}
+
+    def on_notify(_, data):
+        hdr = data[0]
+        payload = data[1:]
+        if not hasattr(on_notify, "buf"):
+            on_notify.buf = bytearray()
+        if hdr in (START, START_END):
+            on_notify.buf.clear()
+        on_notify.buf.extend(payload)
+        if hdr in (START_END, END):
+            import json
+            try:
+                obj = json.loads(bytes(on_notify.buf).rstrip(b"\x00").decode())
+                for k, v in obj.items():
+                    if isinstance(v, dict) and "ep_id" in v:
+                        results[k] = v
+            except Exception:
+                pass
+
+    await client.start_notify(CMD_UUID, on_notify)
+    await asyncio.sleep(0.3)
+    for name in SENSOR_NAMES:
+        for chunk in encode_tp(f'{{"get_status":"{name}"}}'.encode()):
+            await client.write_gatt_char(CMD_UUID, chunk, response=False)
+            await asyncio.sleep(0.05)
+        await asyncio.sleep(0.4)
+    return results
+
+
+def usb_poll_thread(stop_event, ep_map):
     dev = usb.core.find(idVendor=USB_VENDOR_ID, idProduct=USB_PRODUCT_ID)
     if dev is None:
         print("[USB] device not found -- is it plugged in?")
@@ -68,12 +141,11 @@ def usb_poll_thread(stop_event):
         dev.detach_kernel_driver(0)
     dev.set_configuration()
     while not stop_event.is_set():
-        for ep in ENDPOINTS:
+        for ep in ep_map:
             try:
                 d = bytes(dev.read(ep, 64, timeout=50))
                 with lock:
-                    latest[ep] = d
-                    counts[ep] += 1
+                    decoders[ep].feed(d)
             except usb.core.USBError:
                 pass
 
@@ -81,17 +153,13 @@ def usb_poll_thread(stop_event):
 def print_loop(stop_event):
     while not stop_event.is_set():
         time.sleep(0.3)
-        with lock:
-            snapshot = {ep: (latest[ep], counts[ep]) for ep in ENDPOINTS}
-        sys.stdout.write("\033[2J\033[H")  # clear screen
-        print("=== MKBOXPRO live USB endpoints (Ctrl+C to stop) ===")
+        sys.stdout.write("\033[2J\033[H")
+        print("=== MKBOXPRO live USB gyro/accel/press/temp (Ctrl+C to stop) ===")
         print("Rotate / tilt / shake the box and watch which line's numbers react.\n")
-        for ep in ENDPOINTS:
-            raw, n = snapshot[ep]
-            vals = decode_int16le(raw)
-            print(f"EP {hex(ep)}  reads={n:6d}  bytes={len(raw):2d}  "
-                  f"hex={raw.hex()[:32]}")
-            print(f"          int16 (first {len(vals)}): {vals}")
+        with lock:
+            for ep, dec in decoders.items():
+                print(f"EP {hex(ep)}  {dec.name:18s}  n={dec.n_samples_seen:7d}  "
+                      f"values={dec.last_values}")
         sys.stdout.flush()
 
 
@@ -99,21 +167,39 @@ async def main():
     print(f"Scanning for '{BLE_DEVICE_NAME}'...")
     device = await BleakScanner.find_device_by_name(BLE_DEVICE_NAME, 10.0)
     if device is None:
-        print(f"'{BLE_DEVICE_NAME}' not found. Is BLE advertising on? "
-              f"(check the name matches what's currently advertised)")
+        print(f"'{BLE_DEVICE_NAME}' not found.")
         return
 
     async with BleakClient(device, timeout=20.0) as client:
-        print("BLE connected, starting USB log stream...")
-        await client.start_notify(CMD_UUID, lambda *_: None)
-        await asyncio.sleep(0.3)
+        print("BLE connected. Reading sensor configs...")
+        configs = await fetch_sensor_configs(client)
+
+        ep_map = {}
+        for name, cfg in configs.items():
+            if cfg.get("ep_id", -1) < 0:
+                continue
+            ep = 0x81 + cfg["ep_id"]
+            ep_map[ep] = SensorStreamDecoder(
+                name, cfg["dim"], cfg["data_type"],
+                cfg["samples_per_ts"], cfg["sensitivity"],
+            )
+            print(f"  {name}: ep_id={cfg['ep_id']} -> USB EP {hex(ep)}, "
+                  f"dim={cfg['dim']}, dtype={cfg['data_type']}, "
+                  f"spts={cfg['samples_per_ts']}, sensitivity={cfg['sensitivity']}")
+
+        if not ep_map:
+            print("No active sensor streams found (nothing enabled?).")
+            return
+        decoders.update(ep_map)
+
+        print("\nStarting USB log stream...")
         for chunk in encode_tp(b'{"log_controller*start_log":{"interface":1}}'):
             await client.write_gatt_char(CMD_UUID, chunk, response=False)
             await asyncio.sleep(0.05)
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(0.3)
 
         stop_event = threading.Event()
-        t_usb = threading.Thread(target=usb_poll_thread, args=(stop_event,), daemon=True)
+        t_usb = threading.Thread(target=usb_poll_thread, args=(stop_event, ep_map), daemon=True)
         t_print = threading.Thread(target=print_loop, args=(stop_event,), daemon=True)
         t_usb.start()
         t_print.start()
