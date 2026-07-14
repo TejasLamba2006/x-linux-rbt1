@@ -47,6 +47,8 @@ PORT = 8000
 LOG_LEVEL = logging.INFO
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+if not os.path.isdir(os.path.join(REPO_ROOT, "odometry_locomization")):
+    REPO_ROOT = SCRIPT_DIR
 CONFIG_FILE = os.path.join(SCRIPT_DIR, "robot_config.json")
 SERVICE_NAME = "x-linux-rbt1"
 SERVICE_FILE = os.path.join(SCRIPT_DIR, f"{SERVICE_NAME}.service")

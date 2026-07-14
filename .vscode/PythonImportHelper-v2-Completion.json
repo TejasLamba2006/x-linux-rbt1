@@ -2131,7 +2131,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "PORT = 8000\nLOG_LEVEL = logging.INFO\nSCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))\nREPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\nTLS_CERT_FILE = os.path.join(SCRIPT_DIR, \"tls_cert.pem\")\nTLS_KEY_FILE = os.path.join(SCRIPT_DIR, \"tls_key.pem\")\n# =============================================================================",
+        "peekOfCode": "PORT = 8000\nLOG_LEVEL = logging.INFO\nSCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))\nREPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))\nif not os.path.isdir(os.path.join(REPO_ROOT, \"odometry_locomization\")):\n    REPO_ROOT = SCRIPT_DIR\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\nTLS_CERT_FILE = os.path.join(SCRIPT_DIR, \"tls_cert.pem\")",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -2140,7 +2140,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "LOG_LEVEL = logging.INFO\nSCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))\nREPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\nTLS_CERT_FILE = os.path.join(SCRIPT_DIR, \"tls_cert.pem\")\nTLS_KEY_FILE = os.path.join(SCRIPT_DIR, \"tls_key.pem\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)",
+        "peekOfCode": "LOG_LEVEL = logging.INFO\nSCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))\nREPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))\nif not os.path.isdir(os.path.join(REPO_ROOT, \"odometry_locomization\")):\n    REPO_ROOT = SCRIPT_DIR\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\nTLS_CERT_FILE = os.path.join(SCRIPT_DIR, \"tls_cert.pem\")\nTLS_KEY_FILE = os.path.join(SCRIPT_DIR, \"tls_key.pem\")",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -2149,7 +2149,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))\nREPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\nTLS_CERT_FILE = os.path.join(SCRIPT_DIR, \"tls_cert.pem\")\nTLS_KEY_FILE = os.path.join(SCRIPT_DIR, \"tls_key.pem\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================",
+        "peekOfCode": "SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))\nREPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))\nif not os.path.isdir(os.path.join(REPO_ROOT, \"odometry_locomization\")):\n    REPO_ROOT = SCRIPT_DIR\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\nTLS_CERT_FILE = os.path.join(SCRIPT_DIR, \"tls_cert.pem\")\nTLS_KEY_FILE = os.path.join(SCRIPT_DIR, \"tls_key.pem\")\n# =============================================================================",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -2158,7 +2158,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "REPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\nTLS_CERT_FILE = os.path.join(SCRIPT_DIR, \"tls_cert.pem\")\nTLS_KEY_FILE = os.path.join(SCRIPT_DIR, \"tls_key.pem\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)\n# =============================================================================\nVOICE_SPEED = 60             # duty for pulsed voice-driven moves, -100..100",
+        "peekOfCode": "REPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))\nif not os.path.isdir(os.path.join(REPO_ROOT, \"odometry_locomization\")):\n    REPO_ROOT = SCRIPT_DIR\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"robot_config.json\")\nSERVICE_NAME = \"x-linux-rbt1\"\nSERVICE_FILE = os.path.join(SCRIPT_DIR, f\"{SERVICE_NAME}.service\")\nTLS_CERT_FILE = os.path.join(SCRIPT_DIR, \"tls_cert.pem\")\nTLS_KEY_FILE = os.path.join(SCRIPT_DIR, \"tls_key.pem\")\n# =============================================================================\n# VOICE / INTENT CLASSIFICATION (optional -- see handle_voice_command)",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
