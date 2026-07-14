@@ -10,7 +10,7 @@ from collections import deque
 from flask import Flask, jsonify, request, send_from_directory
 
 # ── Constants ─────────────────────────────────────────────────────────────────
-COUNTS_PER_CM = 151
+COUNTS_PER_CM = 25
 UDP_PORT = 2055
 EMA_ALPHA = 0.3
 SMOOTHING_WIN = 5
@@ -102,7 +102,8 @@ def udp_listener():
                 _raw_smoothed_yaw = (_raw_smoothed_yaw + 180) % 360 - 180
 
             with lock:
-                state["yaw"] = round(angle_diff(_raw_smoothed_yaw, _yaw_offset), 2)
+                state["yaw"] = round(angle_diff(
+                    _raw_smoothed_yaw, _yaw_offset), 2)
 
         except socket.timeout:
             continue
@@ -132,7 +133,8 @@ def imu_gyro_yaw_thread():
     try:
         imu = LSM6DSV16X()
         if not imu.check_who_am_i():
-            print("[IMU] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled")
+            print(
+                "[IMU] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled")
             return
         imu.configure()
     except Exception as e:
@@ -168,12 +170,15 @@ def imu_gyro_yaw_thread():
             accel_mag = math.sqrt(ax * ax + ay * ay + az * az)
             if (STATIONARY_ACCEL_MG_LOW < accel_mag < STATIONARY_ACCEL_MG_HIGH
                     and abs(gyro_z_dps - gyro_bias_dps) < 5):
-                gyro_bias_dps += GYRO_BIAS_EMA_ALPHA * (gyro_z_dps - gyro_bias_dps)
+                gyro_bias_dps += GYRO_BIAS_EMA_ALPHA * \
+                    (gyro_z_dps - gyro_bias_dps)
 
-            _raw_smoothed_yaw = (_raw_smoothed_yaw + (gyro_z_dps - gyro_bias_dps) * dt + 180) % 360 - 180
+            _raw_smoothed_yaw = (
+                _raw_smoothed_yaw + (gyro_z_dps - gyro_bias_dps) * dt + 180) % 360 - 180
 
             with lock:
-                state["yaw"] = round(angle_diff(_raw_smoothed_yaw, _yaw_offset), 2)
+                state["yaw"] = round(angle_diff(
+                    _raw_smoothed_yaw, _yaw_offset), 2)
 
             time.sleep(1.0 / GYRO_ODR_HZ)
         except Exception as e:
@@ -204,7 +209,8 @@ def imu_mag_yaw_thread():
     try:
         mag = IIS2MDC()
         if not mag.check_who_am_i():
-            print("[MAG] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled")
+            print(
+                "[MAG] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled")
             return
         mag.configure()
     except Exception as e:
@@ -226,7 +232,8 @@ def imu_mag_yaw_thread():
                 _raw_smoothed_yaw = (_raw_smoothed_yaw + 180) % 360 - 180
 
             with lock:
-                state["yaw"] = round(angle_diff(_raw_smoothed_yaw, _yaw_offset), 2)
+                state["yaw"] = round(angle_diff(
+                    _raw_smoothed_yaw, _yaw_offset), 2)
 
             time.sleep(1.0 / MAG_ODR_HZ)
         except Exception as e:
@@ -263,13 +270,15 @@ def imu_ble_yaw_thread():
             calib_samples.append(gz)
             if len(calib_samples) == BLE_GYRO_BIAS_CALIB_SAMPLES:
                 gyro_bias_dps = sum(calib_samples) / len(calib_samples)
-                print(f"[BLE-GYRO] bias = {gyro_bias_dps:.3f} dps, integration started")
+                print(
+                    f"[BLE-GYRO] bias = {gyro_bias_dps:.3f} dps, integration started")
             last_t[0] = now
             return
 
         dt = now - last_t[0]
         last_t[0] = now
-        _raw_smoothed_yaw = (_raw_smoothed_yaw + (gz - gyro_bias_dps) * dt + 180) % 360 - 180
+        _raw_smoothed_yaw = (_raw_smoothed_yaw +
+                             (gz - gyro_bias_dps) * dt + 180) % 360 - 180
         with lock:
             state["yaw"] = round(angle_diff(_raw_smoothed_yaw, _yaw_offset), 2)
 
