@@ -24,7 +24,7 @@ import struct
 
 from bleak import BleakClient, BleakScanner
 
-DEVICE_NAME = "HSD2v31"  # BLE Sensor Demo firmware's advertised name
+DEVICE_NAME = "STB_PRO"  # BLE Sensor Demo firmware's advertised name
 GYRO_CHAR_UUID = "00400000-0001-11e1-ac36-0002a5d5c51b"
 
 # ponytail: BlueST classic feature convention -- raw int16 is mdps, so
