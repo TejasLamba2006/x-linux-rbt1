@@ -223,20 +223,20 @@ show_accel_bars() {
 }
 
 
-if [ "$1" = "test" ]; then
-	echo ">>>Testing LSM6DSV16X accelerometer Who Am i"
-	lsm6dsv16x_read_whoami
+# if [ "$1" = "test" ]; then
+# 	echo ">>>Testing LSM6DSV16X accelerometer Who Am i"
+# 	lsm6dsv16x_read_whoami
 
-	echo ">>>Testing LSM6DSV16X accelerometer data read"
-	lsm6dsv16x_config
-	sleep 0.01
-	accel_data=$(lsm6dsv16x_read_accel)
+# 	echo ">>>Testing LSM6DSV16X accelerometer data read"
+# 	lsm6dsv16x_config
+# 	sleep 0.01
+# 	accel_data=$(lsm6dsv16x_read_accel)
 
-	set -- $accel_data
-	xval=$1  yval=$2  zval=$3
+# 	set -- $accel_data
+# 	xval=$1  yval=$2  zval=$3
 
-	printf "Acceleration [mg]  X=%d  Y=%d  Z=%d\n" "$xval" "$yval" "$zval"
-fi
+# 	printf "Acceleration [mg]  X=%d  Y=%d  Z=%d\n" "$xval" "$yval" "$zval"
+# fi
 
 if [ "$1" = "stream" ]; then
 	lsm6dsv16x_config              # put sensor in 120 Hz HP mode
