@@ -499,7 +499,7 @@ def zero_yaw():
 # ── Entry Point ───────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     t_yaw = threading.Thread(
-        target=imu_ble_yaw_thread,
+        target=imu_usb_yaw_thread,
         daemon=True
     )
     t_yaw.start()
