@@ -382,7 +382,7 @@ def imu_fusion_yaw_thread():
                 if not state["recording"]:
                     gyro_bias += 0.01 * (batch_mean_gz - gyro_bias)
 
-            if _latest_mag_heading is not None:
+            if _latest_mag_heading is not None and state["recording"]:
                 correction = angle_diff(_latest_mag_heading, _raw_smoothed_yaw)
                 _raw_smoothed_yaw = (
                     _raw_smoothed_yaw + FUSION_MAG_GAIN * correction + 180) % 360 - 180
