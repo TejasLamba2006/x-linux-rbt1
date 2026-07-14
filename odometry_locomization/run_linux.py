@@ -495,78 +495,6 @@ def _evdev_thread(device_path: str):
             time.sleep(0.1)
 
 
-# ── WebSocket Server (state push + commands) ──────────────────────────────────
-WS_PORT = 5001
-_ws_clients = set()
-
-
-async def _ws_handler(websocket):
-    global _yaw_offset
-    _ws_clients.add(websocket)
-    remote = websocket.remote_address
-    print(f"[WS] client connected: {remote}")
-    try:
-        # Sender coroutine: push state at ~20 Hz
-        async def _sender():
-            while True:
-                with lock:
-                    snap = {
-                        "x":             round(state["x"], 2),
-                        "y":             round(state["y"], 2),
-                        "yaw":           state["yaw"],
-                        "distance":      round(state["distance"], 2),
-                        "recording":     state["recording"],
-                        "path":          state["path"][-500:],
-                        "counts_per_cm": state["counts_per_cm"],
-                    }
-                await websocket.send(json.dumps(snap))
-                await asyncio.sleep(0.05)
-
-        sender = asyncio.create_task(_sender())
-
-        # Receiver loop: handle commands from client
-        async for message in websocket:
-            try:
-                msg = json.loads(message)
-            except Exception:
-                continue
-            cmd = msg.get("cmd")
-            if cmd == "set_counts_per_cm":
-                val = float(msg.get("value", 0))
-                if val > 0:
-                    with lock:
-                        state["counts_per_cm"] = val
-                    print(f"[WS] counts_per_cm = {val}")
-            elif cmd == "zero_yaw":
-                with lock:
-                    if _raw_smoothed_yaw is not None:
-                        _yaw_offset = _raw_smoothed_yaw
-                        state["yaw"] = 0.0
-                    print(f"[WS] yaw zeroed (offset={_yaw_offset:.2f})")
-            elif cmd == "set_recording":
-                active = bool(msg.get("active", False))
-                with lock:
-                    state["recording"] = active
-    except Exception:
-        pass
-    finally:
-        sender.cancel()
-        _ws_clients.discard(websocket)
-        print(f"[WS] client disconnected: {remote}")
-
-
-def _ws_server_thread():
-    """Run the websockets server in its own asyncio loop."""
-    import websockets
-
-    async def _main():
-        async with websockets.serve(_ws_handler, "0.0.0.0", WS_PORT):
-            print(f"[WS] listening on ws://0.0.0.0:{WS_PORT}")
-            await asyncio.Future()  # run forever
-
-    asyncio.run(_main())
-
-
 # ── Flask Routes ──────────────────────────────────────────────────────────────
 
 
@@ -649,9 +577,6 @@ if __name__ == "__main__":
         daemon=True
     )
     t_mouse.start()
-
-    t_ws = threading.Thread(target=_ws_server_thread, daemon=True)
-    t_ws.start()
 
     app.run(
         host="0.0.0.0",

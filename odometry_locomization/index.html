@@ -170,62 +170,40 @@
       let recording = false;
 
       const cpcInput = document.getElementById("cpc-input");
+      const host = location.hostname || "127.0.0.1";
+
       document.getElementById("cpc-set-btn").addEventListener("click", () => {
         const value = parseFloat(cpcInput.value);
         if (!value || value <= 0) return;
-        wsSend({ cmd: "set_counts_per_cm", value });
+        fetch(`http://${host}:5000/set_counts_per_cm`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ value }),
+        });
+      });
+
+      document.getElementById("zero-yaw-btn").addEventListener("click", () => {
+        fetch(`http://${host}:5000/zero_yaw`, { method: "POST" });
       });
 
       const SCALE = 4; // pixels per cm
 
-      // ── WebSocket ────────────────────────────────────────────────────────────
-      let ws;
-      let wsReady = false;
-
-      function wsSend(obj) {
-        if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(obj));
-      }
-
-      function connectWs() {
-        const host = location.hostname || "127.0.0.1";
-        ws = new WebSocket(`ws://${host}:5001`);
-
-        ws.onopen = () => {
-          wsReady = true;
-          console.log("[WS] connected");
-        };
-
-        ws.onmessage = (evt) => {
-          try {
-            const d = JSON.parse(evt.data);
-            robotX = d.x;
-            robotY = d.y;
-            robotYaw = d.yaw;
-            dist = d.distance;
-            recording = d.recording;
-            path = d.path;
-            if (document.activeElement !== cpcInput && d.counts_per_cm) {
-              cpcInput.value = d.counts_per_cm;
-            }
-          } catch (e) { /* ignore parse errors */ }
-        };
-
-        ws.onclose = () => {
-          wsReady = false;
-          console.log("[WS] disconnected, reconnecting in 2s...");
-          setTimeout(connectWs, 2000);
-        };
-
-        ws.onerror = () => {
-          ws.close();
-        };
-      }
-
-      connectWs();
-
-      document.getElementById("zero-yaw-btn").addEventListener("click", () => {
-        wsSend({ cmd: "zero_yaw" });
-      });
+      // ── HTTP polling ─────────────────────────────────────────────────────────
+      setInterval(async () => {
+        try {
+          const res = await fetch(`http://${host}:5000/state`);
+          const d = await res.json();
+          robotX = d.x;
+          robotY = d.y;
+          robotYaw = d.yaw;
+          dist = d.distance;
+          recording = d.recording;
+          path = d.path;
+          if (document.activeElement !== cpcInput && d.counts_per_cm) {
+            cpcInput.value = d.counts_per_cm;
+          }
+        } catch (e) { /* retry next tick */ }
+      }, 80);
 
       // ── Draw ───────────────────────────────────────────────────────────────────
       function drawGrid(offsetX, offsetY) {

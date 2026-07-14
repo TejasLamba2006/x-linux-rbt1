@@ -4476,24 +4476,6 @@
         "documentation": {}
     },
     {
-        "label": "WS_PORT",
-        "kind": 5,
-        "importPath": "odometry_locomization.run_linux",
-        "description": "odometry_locomization.run_linux",
-        "peekOfCode": "WS_PORT = 5001\n_ws_clients = set()\nasync def _ws_handler(websocket):\n    global _yaw_offset\n    _ws_clients.add(websocket)\n    remote = websocket.remote_address\n    print(f\"[WS] client connected: {remote}\")\n    try:\n        # Sender coroutine: push state at ~20 Hz\n        async def _sender():",
-        "detail": "odometry_locomization.run_linux",
-        "documentation": {}
-    },
-    {
-        "label": "_ws_clients",
-        "kind": 5,
-        "importPath": "odometry_locomization.run_linux",
-        "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_ws_clients = set()\nasync def _ws_handler(websocket):\n    global _yaw_offset\n    _ws_clients.add(websocket)\n    remote = websocket.remote_address\n    print(f\"[WS] client connected: {remote}\")\n    try:\n        # Sender coroutine: push state at ~20 Hz\n        async def _sender():\n            while True:",
-        "detail": "odometry_locomization.run_linux",
-        "documentation": {}
-    },
-    {
         "label": "RAWINPUTDEVICE",
         "kind": 6,
         "importPath": "odometry_locomization.run_windows",
