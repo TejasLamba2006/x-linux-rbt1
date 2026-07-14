@@ -1,0 +1,12 @@
+Application:
+    Name: X-LINUX-MSP1
+    Description: X-STM32MP-MSP08
+    Icon: application/x_linux_msp1_demo/pictures/Menu-logo.png
+    Board:
+        List: all
+    Type: python
+    Python:
+        Module: application.x_linux_msp1_demo.sensor
+    Action:
+        button_release_event: python_start
+        button_press_event: highlight_eventBox
