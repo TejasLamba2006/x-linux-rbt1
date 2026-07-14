@@ -45,16 +45,24 @@ class PWMController:
         with open(f"{self.pwm_path}/enable", "w") as f:
             f.write("1" if enable else "0")
 
+    def get_pwm_duty_cycle(self):
+        with open(f"{self.pwm_path}/duty_cycle", "r") as f:
+            return int(f.read().strip())
+
     # Motor control methods
     def set_motor_speed(self, speed_percent, value = True):
         period_ns = 500000  # 1 ms period for example
         duty_cycle_ns = int(period_ns * (speed_percent / 100))
-        # A channel left exported by a crashed run keeps its old duty_cycle;
-        # if that's bigger than the new period the kernel rejects the period
+        # A channel left exported by a crashed run keeps its old duty_cycle
+        # (the STM32 timer's compare register survives export/unexport); if
+        # that's bigger than the new period the kernel rejects the period
         # write with EINVAL (duty_cycle can never exceed period). Zero it
-        # first so the period write always succeeds regardless of leftover
-        # hardware state.
-        self.set_pwm_duty_cycle(0)
+        # first in that case only -- a *fresh* channel has period=0, and
+        # this same driver also rejects writing duty_cycle while period==0,
+        # so unconditionally zeroing first breaks the common fresh-channel
+        # path instead.
+        if self.get_pwm_duty_cycle() > period_ns:
+            self.set_pwm_duty_cycle(0)
         self.set_pwm_period(period_ns)
         self.set_pwm_duty_cycle(duty_cycle_ns)
         self.enable_pwm(value)
