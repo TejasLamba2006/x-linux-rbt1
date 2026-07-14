@@ -115,15 +115,29 @@ class MkBoxUsbGyro:
         self._usb_dev.set_configuration()
 
     def read_gyro_dps(self, timeout_ms=200):
-        """Returns a list of (gx, gy, gz) dps tuples decoded from one USB bulk read (may be empty)."""
+        """Returns a list of (gx, gy, gz) dps tuples decoded from whatever's
+        newly arrived, correctly stitched across USB read boundaries and
+        with the periodic 8-byte timestamp block skipped (see module header
+        for why both of those matter -- may be empty)."""
         try:
             raw = bytes(self._usb_dev.read(GYRO_EP, 64, timeout=timeout_ms))
         except usb.core.USBError:
             return []
-        n_samples = len(raw) // 6
+
+        self._buf.extend(raw)
         samples = []
-        for i in range(n_samples):
-            gx, gy, gz = struct.unpack_from("<hhh", raw, i * 6)
+        while True:
+            if self._sample_count >= GYRO_SAMPLES_PER_TS:
+                if len(self._buf) < 8:
+                    break
+                del self._buf[:8]  # skip the 8-byte double timestamp
+                self._sample_count = 0
+                continue
+            if len(self._buf) < 6:
+                break
+            gx, gy, gz = struct.unpack_from("<hhh", self._buf, 0)
+            del self._buf[:6]
+            self._sample_count += 1
             samples.append((
                 gx * GYRO_MDPS_PER_LSB / 1000.0,
                 gy * GYRO_MDPS_PER_LSB / 1000.0,
