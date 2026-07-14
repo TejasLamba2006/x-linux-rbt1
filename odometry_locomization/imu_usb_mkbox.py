@@ -41,7 +41,7 @@ CMD_CHAR_UUID = "0000001b-0002-11e1-ac36-0002a5d5c51b"  # COPY_PNPLIKE_CHAR_UUID
 
 USB_VENDOR_ID = 0x0483
 USB_PRODUCT_ID = 0x5744
-GYRO_EP = 0x82
+GYRO_EP = 0x83
 
 GYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor
 
