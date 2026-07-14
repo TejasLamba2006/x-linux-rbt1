@@ -273,23 +273,25 @@ def imu_usb_yaw_thread():
 
         calib_samples = []
         gyro_bias_dps = 0.0
-        last_t = None
         _raw_smoothed_yaw = 0.0
 
         while True:
+            # ponytail: dt is the sensor's own fixed sample interval, not
+            # wall-clock time.time() per sample -- read_gyro_dps() usually
+            # returns a whole batch of samples decoded from one USB read
+            # (data arrives faster than we poll), and timing each sample in
+            # that batch by wall-clock time makes every sample after the
+            # first look like it took ~0s, wildly under-integrating bursts.
+            dt = imu_usb_mkbox.GYRO_SAMPLE_INTERVAL_S
             for gx, gy, gz in box.read_gyro_dps():
-                now = time.time()
                 if len(calib_samples) < USB_GYRO_BIAS_CALIB_SAMPLES:
                     calib_samples.append(gz)
                     if len(calib_samples) == USB_GYRO_BIAS_CALIB_SAMPLES:
                         gyro_bias_dps = sum(calib_samples) / len(calib_samples)
                         print(
                             f"[USB-GYRO] bias = {gyro_bias_dps:.3f} dps, integration started")
-                    last_t = now
                     continue
 
-                dt = now - last_t
-                last_t = now
                 _raw_smoothed_yaw = (
                     _raw_smoothed_yaw + (gz - gyro_bias_dps) * dt + 180) % 360 - 180
                 with lock:

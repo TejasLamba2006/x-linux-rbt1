@@ -3211,7 +3211,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "BLE_DEVICE_NAME = \"HSD2v33\"  # update if the box's advertised name changes\nCMD_CHAR_UUID = \"0000001b-0002-11e1-ac36-0002a5d5c51b\"  # COPY_PNPLIKE_CHAR_UUID\nUSB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nGYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command",
+        "peekOfCode": "BLE_DEVICE_NAME = \"HSD2v33\"  # update if the box's advertised name changes\nCMD_CHAR_UUID = \"0000001b-0002-11e1-ac36-0002a5d5c51b\"  # COPY_PNPLIKE_CHAR_UUID\nUSB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nGYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Fixed per-sample time interval, derived from get_status:lsm6dsv16x_gyro's",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3220,7 +3220,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "CMD_CHAR_UUID = \"0000001b-0002-11e1-ac36-0002a5d5c51b\"  # COPY_PNPLIKE_CHAR_UUID\nUSB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nGYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).",
+        "peekOfCode": "CMD_CHAR_UUID = \"0000001b-0002-11e1-ac36-0002a5d5c51b\"  # COPY_PNPLIKE_CHAR_UUID\nUSB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nGYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Fixed per-sample time interval, derived from get_status:lsm6dsv16x_gyro's\n# own \"usb_dps\" (bytes/sec actually streamed over USB): 2304 / 6 bytes-per-",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3229,7 +3229,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "USB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nGYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80",
+        "peekOfCode": "USB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nGYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Fixed per-sample time interval, derived from get_status:lsm6dsv16x_gyro's\n# own \"usb_dps\" (bytes/sec actually streamed over USB): 2304 / 6 bytes-per-\n# sample = 384 samples/sec. Used instead of wall-clock time.time() per",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3238,7 +3238,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "USB_PRODUCT_ID = 0x5744\nGYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):",
+        "peekOfCode": "USB_PRODUCT_ID = 0x5744\nGYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Fixed per-sample time interval, derived from get_status:lsm6dsv16x_gyro's\n# own \"usb_dps\" (bytes/sec actually streamed over USB): 2304 / 6 bytes-per-\n# sample = 384 samples/sec. Used instead of wall-clock time.time() per\n# sample for yaw integration -- read_gyro_dps() often returns a whole batch",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3247,7 +3247,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "GYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:",
+        "peekOfCode": "GYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Fixed per-sample time interval, derived from get_status:lsm6dsv16x_gyro's\n# own \"usb_dps\" (bytes/sec actually streamed over USB): 2304 / 6 bytes-per-\n# sample = 384 samples/sec. Used instead of wall-clock time.time() per\n# sample for yaw integration -- read_gyro_dps() often returns a whole batch\n# of samples decoded from one USB read (data arrives faster than we poll),",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3256,7 +3256,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "GYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([_TP_START_END]) + struct.pack(\">H\", len(payload)) + payload]",
+        "peekOfCode": "GYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Fixed per-sample time interval, derived from get_status:lsm6dsv16x_gyro's\n# own \"usb_dps\" (bytes/sec actually streamed over USB): 2304 / 6 bytes-per-\n# sample = 384 samples/sec. Used instead of wall-clock time.time() per\n# sample for yaw integration -- read_gyro_dps() often returns a whole batch\n# of samples decoded from one USB read (data arrives faster than we poll),\n# and timing each sample in that batch by wall-clock time makes every",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3265,7 +3265,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "GYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([_TP_START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([_TP_START]) + struct.pack(\">H\",",
+        "peekOfCode": "GYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Fixed per-sample time interval, derived from get_status:lsm6dsv16x_gyro's\n# own \"usb_dps\" (bytes/sec actually streamed over USB): 2304 / 6 bytes-per-\n# sample = 384 samples/sec. Used instead of wall-clock time.time() per\n# sample for yaw integration -- read_gyro_dps() often returns a whole batch\n# of samples decoded from one USB read (data arrives faster than we poll),\n# and timing each sample in that batch by wall-clock time makes every\n# sample after the first look like it took ~0s (just loop overhead),",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3274,7 +3274,16 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "GYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([_TP_START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([_TP_START]) + struct.pack(\">H\",\n                                               len(payload)) + payload[:mtu_payload]]\n    rest = payload[mtu_payload:]",
+        "peekOfCode": "GYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Fixed per-sample time interval, derived from get_status:lsm6dsv16x_gyro's\n# own \"usb_dps\" (bytes/sec actually streamed over USB): 2304 / 6 bytes-per-\n# sample = 384 samples/sec. Used instead of wall-clock time.time() per\n# sample for yaw integration -- read_gyro_dps() often returns a whole batch\n# of samples decoded from one USB read (data arrives faster than we poll),\n# and timing each sample in that batch by wall-clock time makes every\n# sample after the first look like it took ~0s (just loop overhead),\n# wildly under-integrating bursts. The real time between consecutive\n# samples is this fixed interval, not however long the Python loop took.",
+        "detail": "odometry_locomization.imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "GYRO_SAMPLE_INTERVAL_S",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_usb_mkbox",
+        "description": "odometry_locomization.imu_usb_mkbox",
+        "peekOfCode": "GYRO_SAMPLE_INTERVAL_S = 6.0 / 2304.0\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([_TP_START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([_TP_START]) + struct.pack(\">H\",\n                                               len(payload)) + payload[:mtu_payload]]\n    rest = payload[mtu_payload:]",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
