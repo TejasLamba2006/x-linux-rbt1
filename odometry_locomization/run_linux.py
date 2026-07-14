@@ -10,7 +10,7 @@ from collections import deque
 from flask import Flask, jsonify, request, send_from_directory
 
 # ── Constants ─────────────────────────────────────────────────────────────────
-COUNTS_PER_CM = 15
+COUNTS_PER_CM = 35
 UDP_PORT = 2055
 EMA_ALPHA = 0.3
 SMOOTHING_WIN = 5
