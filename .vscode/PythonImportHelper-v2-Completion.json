@@ -4156,7 +4156,7 @@
         "kind": 2,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "def get_state():\n    with lock:\n        return jsonify({\n            \"x\":              round(state[\"x\"], 2),\n            \"y\":              round(state[\"y\"], 2),\n            \"yaw\":            state[\"yaw\"],\n            \"distance\":       round(state[\"distance\"], 2),\n            \"recording\":      state[\"recording\"],\n            \"path\":           state[\"path\"][-500:],\n            \"counts_per_cm\":  COUNTS_PER_CM,",
+        "peekOfCode": "def get_state():\n    with lock:\n        return jsonify({\n            \"x\":              round(state[\"x\"], 2),\n            \"y\":              round(state[\"y\"], 2),\n            \"yaw\":            state[\"yaw\"],\n            \"distance\":       round(state[\"distance\"], 2),\n            \"recording\":      state[\"recording\"],\n            \"path\":           state[\"path\"][-500:],\n            \"counts_per_cm\":  state[\"counts_per_cm\"],",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -4165,7 +4165,7 @@
         "kind": 2,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "def set_counts_per_cm():\n    \"\"\"Update the mouse-counts-to-cm calibration factor at runtime (see\n    calibrate_linux.py for how to derive an accurate value).\"\"\"\n    global COUNTS_PER_CM\n    try:\n        value = float(request.get_json(force=True)[\"value\"])\n        if value <= 0:\n            raise ValueError\n    except Exception:\n        return jsonify({\"ok\": False}), 400",
+        "peekOfCode": "def set_counts_per_cm():\n    \"\"\"Update the mouse-counts-to-cm calibration factor at runtime (see\n    calibrate_linux.py for how to derive an accurate value).\"\"\"\n    try:\n        value = float(request.get_json(force=True)[\"value\"])\n        if value <= 0:\n            raise ValueError\n    except Exception:\n        return jsonify({\"ok\": False}), 400\n    with lock:",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -4318,7 +4318,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "lock = threading.Lock()\nstate = {\n    \"x\":         0.0,\n    \"y\":         0.0,\n    \"yaw\":       0.0,\n    \"distance\":  0.0,\n    \"recording\": False,\n    \"path\":      [[0.0, 0.0]],\n}\n_raw_dx_buf = deque(maxlen=SMOOTHING_WIN)",
+        "peekOfCode": "lock = threading.Lock()\nstate = {\n    \"x\":         0.0,\n    \"y\":         0.0,\n    \"yaw\":       0.0,\n    \"distance\":  0.0,\n    \"recording\": False,\n    \"path\":      [[0.0, 0.0]],\n    \"counts_per_cm\": COUNTS_PER_CM,\n}",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -4327,7 +4327,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "state = {\n    \"x\":         0.0,\n    \"y\":         0.0,\n    \"yaw\":       0.0,\n    \"distance\":  0.0,\n    \"recording\": False,\n    \"path\":      [[0.0, 0.0]],\n}\n_raw_dx_buf = deque(maxlen=SMOOTHING_WIN)\n_ema_distance = 0.0",
+        "peekOfCode": "state = {\n    \"x\":         0.0,\n    \"y\":         0.0,\n    \"yaw\":       0.0,\n    \"distance\":  0.0,\n    \"recording\": False,\n    \"path\":      [[0.0, 0.0]],\n    \"counts_per_cm\": COUNTS_PER_CM,\n}\n_raw_dx_buf = deque(maxlen=SMOOTHING_WIN)",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -4336,7 +4336,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_raw_dx_buf = deque(maxlen=SMOOTHING_WIN)\n_ema_distance = 0.0\n_click_count = 0\n_last_click = 0.0\n# Phone's raw (un-zeroed) smoothed yaw, and the offset subtracted from it to\n# produce state[\"yaw\"]. The phone's quaternion is referenced to its own\n# arbitrary/magnetic-north origin, not the robot's facing direction, so a\n# zero point must be captured at run start (see /zero_yaw).\n_raw_smoothed_yaw = None\n_yaw_offset = 0.0",
+        "peekOfCode": "_raw_dx_buf = deque(maxlen=SMOOTHING_WIN)\n_ema_distance = 0.0\n_click_count = 0\n_last_click = 0.0\n_last_mouse_move_time = 0.0  # monotonic time of last REL_X/REL_Y event\n# Phone's raw (un-zeroed) smoothed yaw, and the offset subtracted from it to\n# produce state[\"yaw\"]. The phone's quaternion is referenced to its own\n# arbitrary/magnetic-north origin, not the robot's facing direction, so a\n# zero point must be captured at run start (see /zero_yaw).\n_raw_smoothed_yaw = None",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -4345,7 +4345,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_ema_distance = 0.0\n_click_count = 0\n_last_click = 0.0\n# Phone's raw (un-zeroed) smoothed yaw, and the offset subtracted from it to\n# produce state[\"yaw\"]. The phone's quaternion is referenced to its own\n# arbitrary/magnetic-north origin, not the robot's facing direction, so a\n# zero point must be captured at run start (see /zero_yaw).\n_raw_smoothed_yaw = None\n_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────",
+        "peekOfCode": "_ema_distance = 0.0\n_click_count = 0\n_last_click = 0.0\n_last_mouse_move_time = 0.0  # monotonic time of last REL_X/REL_Y event\n# Phone's raw (un-zeroed) smoothed yaw, and the offset subtracted from it to\n# produce state[\"yaw\"]. The phone's quaternion is referenced to its own\n# arbitrary/magnetic-north origin, not the robot's facing direction, so a\n# zero point must be captured at run start (see /zero_yaw).\n_raw_smoothed_yaw = None\n_yaw_offset = 0.0",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -4354,7 +4354,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_click_count = 0\n_last_click = 0.0\n# Phone's raw (un-zeroed) smoothed yaw, and the offset subtracted from it to\n# produce state[\"yaw\"]. The phone's quaternion is referenced to its own\n# arbitrary/magnetic-north origin, not the robot's facing direction, so a\n# zero point must be captured at run start (see /zero_yaw).\n_raw_smoothed_yaw = None\n_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef quaternion_to_yaw(x, y, z):",
+        "peekOfCode": "_click_count = 0\n_last_click = 0.0\n_last_mouse_move_time = 0.0  # monotonic time of last REL_X/REL_Y event\n# Phone's raw (un-zeroed) smoothed yaw, and the offset subtracted from it to\n# produce state[\"yaw\"]. The phone's quaternion is referenced to its own\n# arbitrary/magnetic-north origin, not the robot's facing direction, so a\n# zero point must be captured at run start (see /zero_yaw).\n_raw_smoothed_yaw = None\n_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -4363,7 +4363,16 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_last_click = 0.0\n# Phone's raw (un-zeroed) smoothed yaw, and the offset subtracted from it to\n# produce state[\"yaw\"]. The phone's quaternion is referenced to its own\n# arbitrary/magnetic-north origin, not the robot's facing direction, so a\n# zero point must be captured at run start (see /zero_yaw).\n_raw_smoothed_yaw = None\n_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef quaternion_to_yaw(x, y, z):\n    w = math.sqrt(max(0.0, 1.0 - x*x - y*y - z*z))",
+        "peekOfCode": "_last_click = 0.0\n_last_mouse_move_time = 0.0  # monotonic time of last REL_X/REL_Y event\n# Phone's raw (un-zeroed) smoothed yaw, and the offset subtracted from it to\n# produce state[\"yaw\"]. The phone's quaternion is referenced to its own\n# arbitrary/magnetic-north origin, not the robot's facing direction, so a\n# zero point must be captured at run start (see /zero_yaw).\n_raw_smoothed_yaw = None\n_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef quaternion_to_yaw(x, y, z):",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "_last_mouse_move_time",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "_last_mouse_move_time = 0.0  # monotonic time of last REL_X/REL_Y event\n# Phone's raw (un-zeroed) smoothed yaw, and the offset subtracted from it to\n# produce state[\"yaw\"]. The phone's quaternion is referenced to its own\n# arbitrary/magnetic-north origin, not the robot's facing direction, so a\n# zero point must be captured at run start (see /zero_yaw).\n_raw_smoothed_yaw = None\n_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef quaternion_to_yaw(x, y, z):\n    w = math.sqrt(max(0.0, 1.0 - x*x - y*y - z*z))",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -4471,7 +4480,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "WS_PORT = 5001\n_ws_clients = set()\nasync def _ws_handler(websocket):\n    _ws_clients.add(websocket)\n    remote = websocket.remote_address\n    print(f\"[WS] client connected: {remote}\")\n    try:\n        # Sender coroutine: push state at ~20 Hz\n        async def _sender():\n            while True:",
+        "peekOfCode": "WS_PORT = 5001\n_ws_clients = set()\nasync def _ws_handler(websocket):\n    global _yaw_offset\n    _ws_clients.add(websocket)\n    remote = websocket.remote_address\n    print(f\"[WS] client connected: {remote}\")\n    try:\n        # Sender coroutine: push state at ~20 Hz\n        async def _sender():",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -4480,7 +4489,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_ws_clients = set()\nasync def _ws_handler(websocket):\n    _ws_clients.add(websocket)\n    remote = websocket.remote_address\n    print(f\"[WS] client connected: {remote}\")\n    try:\n        # Sender coroutine: push state at ~20 Hz\n        async def _sender():\n            while True:\n                with lock:",
+        "peekOfCode": "_ws_clients = set()\nasync def _ws_handler(websocket):\n    global _yaw_offset\n    _ws_clients.add(websocket)\n    remote = websocket.remote_address\n    print(f\"[WS] client connected: {remote}\")\n    try:\n        # Sender coroutine: push state at ~20 Hz\n        async def _sender():\n            while True:",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },

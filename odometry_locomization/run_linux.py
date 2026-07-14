@@ -43,12 +43,14 @@ state = {
     "distance":  0.0,
     "recording": False,
     "path":      [[0.0, 0.0]],
+    "counts_per_cm": COUNTS_PER_CM,
 }
 
 _raw_dx_buf = deque(maxlen=SMOOTHING_WIN)
 _ema_distance = 0.0
 _click_count = 0
 _last_click = 0.0
+_last_mouse_move_time = 0.0  # monotonic time of last REL_X/REL_Y event
 
 # Phone's raw (un-zeroed) smoothed yaw, and the offset subtracted from it to
 # produce state["yaw"]. The phone's quaternion is referenced to its own
@@ -324,7 +326,7 @@ def imu_fusion_yaw_thread():
             await asyncio.sleep(0.1)
         _raw_smoothed_yaw = _latest_mag_heading
 
-        # ── Gyro bias calibration: sample gz while stationary for 2 s ──
+        # ── Initial bias calibration: sample gz while stationary for 2 s ──
         print("[FUSION] calibrating gyro bias (keep robot still)...")
         bias_samples = []
         cal_deadline = time.time() + 2.0
@@ -334,8 +336,12 @@ def imu_fusion_yaw_thread():
                 bias_samples.append(gz)
             await asyncio.sleep(0.05)
         gyro_bias = sum(bias_samples) / len(bias_samples) if bias_samples else 0.0
-        print(f"[FUSION] gyro bias = {gyro_bias:.3f} dps ({len(bias_samples)} samples)")
-        print("[FUSION] fusion started")
+        print(f"[FUSION] initial gyro bias = {gyro_bias:.3f} dps ({len(bias_samples)} samples)")
+        print("[FUSION] fusion started (continuous bias tracking active)")
+
+        # ── Online bias tracking constants ──
+        BIAS_EMA_ALPHA = 0.002        # slow EMA for bias drift (0.2% per sample)
+        STATIONARY_THRESHOLD_S = 1.0  # no mouse input for this long = stationary
 
         last_batch_t = time.time()
         while True:
@@ -346,6 +352,10 @@ def imu_fusion_yaw_thread():
 
             for gx, gy, gz in batch:
                 _raw_smoothed_yaw = (_raw_smoothed_yaw - (gz - gyro_bias) * dt + 180) % 360 - 180
+
+                # ── Continuous bias tracking: nudge bias while stationary ──
+                if (now - _last_mouse_move_time) > STATIONARY_THRESHOLD_S:
+                    gyro_bias = gyro_bias + BIAS_EMA_ALPHA * (gz - gyro_bias)
 
             if _latest_mag_heading is not None:
                 correction = angle_diff(_latest_mag_heading, _raw_smoothed_yaw)
@@ -370,8 +380,8 @@ def _raw_input_delta_callback(raw_dx: int, raw_dy: int):
     Convert mouse movement from robot frame to world frame.
     """
 
-    local_x_cm = raw_dx / COUNTS_PER_CM
-    local_y_cm = -raw_dy / COUNTS_PER_CM
+    local_x_cm = raw_dx / state["counts_per_cm"]
+    local_y_cm = -raw_dy / state["counts_per_cm"]
 
     with lock:
 
@@ -449,6 +459,7 @@ def _evdev_thread(device_path: str):
                 INPUT_EVENT_FMT, raw)
 
             if ev_type == EV_REL:
+                _last_mouse_move_time = time.monotonic()
                 if ev_code == REL_X:
                     pending_dx += ev_value
                 elif ev_code == REL_Y:
@@ -498,6 +509,7 @@ _ws_clients = set()
 
 
 async def _ws_handler(websocket):
+    global _yaw_offset
     _ws_clients.add(websocket)
     remote = websocket.remote_address
     print(f"[WS] client connected: {remote}")
@@ -513,7 +525,7 @@ async def _ws_handler(websocket):
                         "distance":      round(state["distance"], 2),
                         "recording":     state["recording"],
                         "path":          state["path"][-500:],
-                        "counts_per_cm": COUNTS_PER_CM,
+                        "counts_per_cm": state["counts_per_cm"],
                     }
                 await websocket.send(json.dumps(snap))
                 await asyncio.sleep(0.05)
@@ -528,14 +540,12 @@ async def _ws_handler(websocket):
                 continue
             cmd = msg.get("cmd")
             if cmd == "set_counts_per_cm":
-                global COUNTS_PER_CM
                 val = float(msg.get("value", 0))
                 if val > 0:
                     with lock:
-                        COUNTS_PER_CM = val
-                    print(f"[WS] counts_per_cm = {COUNTS_PER_CM}")
+                        state["counts_per_cm"] = val
+                    print(f"[WS] counts_per_cm = {val}")
             elif cmd == "zero_yaw":
-                global _yaw_offset
                 with lock:
                     if _raw_smoothed_yaw is not None:
                         _yaw_offset = _raw_smoothed_yaw
@@ -583,7 +593,7 @@ def get_state():
             "distance":       round(state["distance"], 2),
             "recording":      state["recording"],
             "path":           state["path"][-500:],
-            "counts_per_cm":  COUNTS_PER_CM,
+            "counts_per_cm":  state["counts_per_cm"],
         })
 
 
@@ -591,7 +601,6 @@ def get_state():
 def set_counts_per_cm():
     """Update the mouse-counts-to-cm calibration factor at runtime (see
     calibrate_linux.py for how to derive an accurate value)."""
-    global COUNTS_PER_CM
     try:
         value = float(request.get_json(force=True)["value"])
         if value <= 0:
@@ -599,8 +608,8 @@ def set_counts_per_cm():
     except Exception:
         return jsonify({"ok": False}), 400
     with lock:
-        COUNTS_PER_CM = value
-    return jsonify({"ok": True, "counts_per_cm": COUNTS_PER_CM})
+        state["counts_per_cm"] = value
+    return jsonify({"ok": True, "counts_per_cm": value})
 
 
 @app.route("/set_recording", methods=["POST"])
