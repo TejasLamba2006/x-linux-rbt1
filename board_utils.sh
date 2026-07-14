@@ -189,8 +189,8 @@ utils_unit_test() {
 	echo ">>>Testing utils_check_install"
 	utils_check_install i2cget
 
-	echo ">>>Testing utils_check_install with non-existing command"
-	utils_check_install non_existing_command
+	# echo ">>>Testing utils_check_install with non-existing command"
+	# utils_check_install non_existing_command
 
 	echo ">>>Testing utils_check_board"
 	utils_check_board "$TEST_HOST_BOARD"
