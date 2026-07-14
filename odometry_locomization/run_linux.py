@@ -326,7 +326,7 @@ def imu_fusion_yaw_thread():
             await asyncio.sleep(0.1)
         _raw_smoothed_yaw = _latest_mag_heading
 
-        # ── Initial bias calibration: sample gz while stationary for 2 s ──
+        # ── Gyro bias calibration: sample gz while stationary for 2 s ──
         print("[FUSION] calibrating gyro bias (keep robot still)...")
         bias_samples = []
         cal_deadline = time.time() + 2.0
@@ -336,12 +336,14 @@ def imu_fusion_yaw_thread():
                 bias_samples.append(gz)
             await asyncio.sleep(0.05)
         gyro_bias = sum(bias_samples) / len(bias_samples) if bias_samples else 0.0
-        print(f"[FUSION] initial gyro bias = {gyro_bias:.3f} dps ({len(bias_samples)} samples)")
-        print("[FUSION] fusion started (continuous bias tracking active)")
+        print(f"[FUSION] gyro bias = {gyro_bias:.3f} dps ({len(bias_samples)} samples)")
+        print("[FUSION] fusion started")
 
         # ── Online bias tracking constants ──
-        BIAS_EMA_ALPHA = 0.002        # slow EMA for bias drift (0.2% per sample)
-        STATIONARY_THRESHOLD_S = 1.0  # no mouse input for this long = stationary
+        BIAS_EMA_ALPHA = 0.005        # slow EMA for bias drift
+        STATIONARY_THRESHOLD_S = 0.5  # no mouse input for this long = stationary
+        _batch_gz_sum = 0.0
+        _batch_gz_count = 0
 
         last_batch_t = time.time()
         while True:
@@ -351,11 +353,16 @@ def imu_fusion_yaw_thread():
             last_batch_t = now
 
             for gx, gy, gz in batch:
-                _raw_smoothed_yaw = (_raw_smoothed_yaw - (gz - gyro_bias) * dt + 180) % 360 - 180
+                _raw_smoothed_yaw = (_raw_smoothed_yaw + (gz - gyro_bias) * dt + 180) % 360 - 180
+                _batch_gz_sum += gz
+                _batch_gz_count += 1
 
-                # ── Continuous bias tracking: nudge bias while stationary ──
-                if (now - _last_mouse_move_time) > STATIONARY_THRESHOLD_S:
-                    gyro_bias = gyro_bias + BIAS_EMA_ALPHA * (gz - gyro_bias)
+            # ── Update bias once per batch when stationary ──
+            if _batch_gz_count > 0 and (now - _last_mouse_move_time) > STATIONARY_THRESHOLD_S:
+                batch_mean_gz = _batch_gz_sum / _batch_gz_count
+                gyro_bias += BIAS_EMA_ALPHA * (batch_mean_gz - gyro_bias)
+            _batch_gz_sum = 0.0
+            _batch_gz_count = 0
 
             if _latest_mag_heading is not None:
                 correction = angle_diff(_latest_mag_heading, _raw_smoothed_yaw)
