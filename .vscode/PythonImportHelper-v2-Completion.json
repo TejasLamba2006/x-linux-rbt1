@@ -572,6 +572,15 @@
         "documentation": {}
     },
     {
+        "label": "os,",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os.",
+        "description": "os.",
+        "detail": "os.",
+        "documentation": {}
+    },
+    {
         "label": "urllib.request,",
         "kind": 6,
         "isExtraImport": true,
@@ -586,6 +595,15 @@
         "description": "pywinusb",
         "isExtraImport": true,
         "detail": "pywinusb",
+        "documentation": {}
+    },
+    {
+        "label": "imu_usb_mkbox",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "imu_usb_mkbox",
+        "description": "imu_usb_mkbox",
+        "detail": "imu_usb_mkbox",
         "documentation": {}
     },
     {
@@ -3342,6 +3360,24 @@
         "documentation": {}
     },
     {
+        "label": "pid",
+        "kind": 5,
+        "importPath": "odometry_locomization.check_threads",
+        "description": "odometry_locomization.check_threads",
+        "peekOfCode": "pid = 7332\ntasks = glob.glob(f\"/proc/{pid}/task/*\")\nprint(f\"Thread count: {len(tasks)}\")\nfor t in tasks:\n    tid = os.path.basename(t)\n    try:\n        with open(f\"{t}/comm\") as f:\n            name = f.read().strip()\n        with open(f\"{t}/status\") as f:\n            lines = f.readlines()",
+        "detail": "odometry_locomization.check_threads",
+        "documentation": {}
+    },
+    {
+        "label": "tasks",
+        "kind": 5,
+        "importPath": "odometry_locomization.check_threads",
+        "description": "odometry_locomization.check_threads",
+        "peekOfCode": "tasks = glob.glob(f\"/proc/{pid}/task/*\")\nprint(f\"Thread count: {len(tasks)}\")\nfor t in tasks:\n    tid = os.path.basename(t)\n    try:\n        with open(f\"{t}/comm\") as f:\n            name = f.read().strip()\n        with open(f\"{t}/status\") as f:\n            lines = f.readlines()\n        state = [l for l in lines if l.startswith(\"State:\")]",
+        "detail": "odometry_locomization.check_threads",
+        "documentation": {}
+    },
+    {
         "label": "handler",
         "kind": 2,
         "importPath": "odometry_locomization.dpi",
@@ -4017,6 +4053,42 @@
         "documentation": {}
     },
     {
+        "label": "get_yaw",
+        "kind": 2,
+        "importPath": "odometry_locomization.rotation_90",
+        "description": "odometry_locomization.rotation_90",
+        "peekOfCode": "def get_yaw():\n    r = urllib.request.urlopen('http://localhost:5000/state')\n    return json.loads(r.read())['yaw']\ndef zero_yaw():\n    req = urllib.request.Request(\"http://localhost:5000/zero_yaw\", data=b\"\", method=\"POST\")\n    urllib.request.urlopen(req)\nasync def main():\n    print(\"=== PHASE 1: Zero heading ===\")\n    zero_yaw()\n    await asyncio.sleep(2)",
+        "detail": "odometry_locomization.rotation_90",
+        "documentation": {}
+    },
+    {
+        "label": "zero_yaw",
+        "kind": 2,
+        "importPath": "odometry_locomization.rotation_90",
+        "description": "odometry_locomization.rotation_90",
+        "peekOfCode": "def zero_yaw():\n    req = urllib.request.Request(\"http://localhost:5000/zero_yaw\", data=b\"\", method=\"POST\")\n    urllib.request.urlopen(req)\nasync def main():\n    print(\"=== PHASE 1: Zero heading ===\")\n    zero_yaw()\n    await asyncio.sleep(2)\n    baseline = get_yaw()\n    print(f\"  Baseline after zero: {baseline:.2f}\")\n    async with websockets.connect(\"ws://localhost:8000/ws\") as ws:",
+        "detail": "odometry_locomization.rotation_90",
+        "documentation": {}
+    },
+    {
+        "label": "get_yaw",
+        "kind": 2,
+        "importPath": "odometry_locomization.rotation_test",
+        "description": "odometry_locomization.rotation_test",
+        "peekOfCode": "def get_yaw():\n    r = urllib.request.urlopen('http://localhost:5000/state')\n    return json.loads(r.read())['yaw']\nasync def main():\n    print(\"=== Baseline yaw ===\")\n    baseline = get_yaw()\n    print(f\"  yaw = {baseline:.2f}\")\n    time.sleep(1)\n    baseline = get_yaw()\n    print(f\"  yaw = {baseline:.2f}\")",
+        "detail": "odometry_locomization.rotation_test",
+        "documentation": {}
+    },
+    {
+        "label": "get_yaw",
+        "kind": 2,
+        "importPath": "odometry_locomization.rotation_test2",
+        "description": "odometry_locomization.rotation_test2",
+        "peekOfCode": "def get_yaw():\n    r = urllib.request.urlopen('http://localhost:5000/state')\n    return json.loads(r.read())['yaw']\nasync def main():\n    baseline = get_yaw()\n    print(f\"Baseline yaw = {baseline:.2f}\")\n    async with websockets.connect(\"ws://localhost:8000/ws\") as ws:\n        msg = await asyncio.wait_for(ws.recv(), timeout=5)\n        print(f\"Connected: {msg[:60]}\")\n        await ws.send(json.dumps({\"mode\": \"controller\"}))",
+        "detail": "odometry_locomization.rotation_test2",
+        "documentation": {}
+    },
+    {
         "label": "quaternion_to_yaw",
         "kind": 2,
         "importPath": "odometry_locomization.run_linux",
@@ -4381,7 +4453,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_latest_mag_heading = None\nFUSION_MAG_GAIN = 0.05  # ponytail: how strongly each cycle pulls toward the\n                        # magnetometer -- higher trusts mag more (corrects\n                        # gyro corruption/drift faster, but noisier), lower\n                        # is smoother but slower to correct. Tune live.\ndef _mag_heading_reader_thread():\n    global _latest_mag_heading\n    from imu_iis2mdc import IIS2MDC\n    try:\n        mag = IIS2MDC()",
+        "peekOfCode": "_latest_mag_heading = None\nFUSION_MAG_GAIN = 0.001  # 2026-07-14: reduced from 0.05 -- at 200 Hz poll,\n                         # the old gain caused yaw to fully snap to (often\n                         # motor-distorted) mag within ~1 s. 0.001 lets gyro\n                         # dominate during rotation; mag only slowly corrects\n                         # drift at rest (~5 % per second instead of ~95 %).\ndef _mag_heading_reader_thread():\n    global _latest_mag_heading\n    from imu_iis2mdc import IIS2MDC\n    try:",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -4390,7 +4462,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "FUSION_MAG_GAIN = 0.05  # ponytail: how strongly each cycle pulls toward the\n                        # magnetometer -- higher trusts mag more (corrects\n                        # gyro corruption/drift faster, but noisier), lower\n                        # is smoother but slower to correct. Tune live.\ndef _mag_heading_reader_thread():\n    global _latest_mag_heading\n    from imu_iis2mdc import IIS2MDC\n    try:\n        mag = IIS2MDC()\n        if not mag.check_who_am_i():",
+        "peekOfCode": "FUSION_MAG_GAIN = 0.001  # 2026-07-14: reduced from 0.05 -- at 200 Hz poll,\n                         # the old gain caused yaw to fully snap to (often\n                         # motor-distorted) mag within ~1 s. 0.001 lets gyro\n                         # dominate during rotation; mag only slowly corrects\n                         # drift at rest (~5 % per second instead of ~95 %).\ndef _mag_heading_reader_thread():\n    global _latest_mag_heading\n    from imu_iis2mdc import IIS2MDC\n    try:\n        mag = IIS2MDC()",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },

@@ -274,10 +274,11 @@ USB_GYRO_POLL_HZ = 200
 # fusion uses, just hand-rolled (x-linux-msp1 only references MotionFX
 # descriptively; it ships no actual fusion code to call into).
 _latest_mag_heading = None
-FUSION_MAG_GAIN = 0.05  # ponytail: how strongly each cycle pulls toward the
-                        # magnetometer -- higher trusts mag more (corrects
-                        # gyro corruption/drift faster, but noisier), lower
-                        # is smoother but slower to correct. Tune live.
+FUSION_MAG_GAIN = 0.001  # 2026-07-14: reduced from 0.05 -- at 200 Hz poll,
+                         # the old gain caused yaw to fully snap to (often
+                         # motor-distorted) mag within ~1 s. 0.001 lets gyro
+                         # dominate during rotation; mag only slowly corrects
+                         # drift at rest (~5 % per second instead of ~95 %).
 
 
 def _mag_heading_reader_thread():
@@ -338,7 +339,7 @@ def imu_fusion_yaw_thread():
             last_batch_t = now
 
             for gx, gy, gz in batch:
-                _raw_smoothed_yaw = (_raw_smoothed_yaw + gz * dt + 180) % 360 - 180
+                _raw_smoothed_yaw = (_raw_smoothed_yaw - gz * dt + 180) % 360 - 180
 
             if _latest_mag_heading is not None:
                 correction = angle_diff(_latest_mag_heading, _raw_smoothed_yaw)
