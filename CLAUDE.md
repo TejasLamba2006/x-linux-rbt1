@@ -70,8 +70,17 @@ runtime, not at build time:
 model or `onnxruntime` is unavailable, `INTENT_AVAILABLE` is `False` and voice control is silently
 disabled — everything else still runs. The browser transcribes speech client-side (Web Speech API)
 and sends `{"voice_text": ...}` over the WebSocket; `handle_voice_command()` classifies it with
-`intent_classifier/robot_intent_5.onnx` and pulse-drives the active drive module's throttle/dir/rotate
-functions directly (bypassing the controller/hybrid mode gate — works in any mode except `locked`).
+the two-stage ONNX classifier (`embedder_onnx/model_int8.onnx` + `intent_head.onnx`) and
+pulse-drives the active drive module's throttle/dir/rotate functions directly (bypassing the
+controller/hybrid mode gate — works in any mode except `locked`). A confidence gate
+(`< 0.6 → NOP`) prevents misclassifications from reaching the motors.
+
+The classifier uses `paraphrase-multilingual-MiniLM-L12-v2` (INT8 quantized, 112.7 MB) for
+384-dim multilingual embeddings, with manual mean-pooling + L2-normalization in `infer.py`.
+Tokenizer is bundled locally via `tokenizers` lib (no `transformers` runtime dependency).
+9 intent labels: FORWARD, BACKWARD, STRAFE_LEFT, STRAFE_RIGHT, ROTATE_LEFT, ROTATE_RIGHT,
+STOP, PULSE, NOP. PULSE = directionless brief nudge (e.g. "jaldi aage" → FORWARD, not PULSE).
+
 Serving over HTTPS is required for the Web Speech API to work in most browsers, so `main.py`
 self-generates a TLS cert/key pair via `openssl` (`ensure_tls_cert()`) if one isn't already present.
 
@@ -93,8 +102,10 @@ same `CAPTIVE_PORTAL_HTML` — so that connecting to the robot's hotspot trigger
 ### Directory map
 
 - `applications/web-app/` — the actual running application (see above).
-- `intent_classifier/` — ONNX voice-intent model (`robot_intent_5.onnx`) + `infer.py`, imported
-  lazily by `main.py` for voice control (see above).
+- `intent_classifier/` — ONNX voice-intent model (two-stage: INT8 embedder + MLP head) +
+  `infer.py` (production), `export_onnx.py` (export/test/bench), `train_intent.py` (data gen),
+  `train_head.py` (MLP training), `test_intent.py` (58 pytest tests), `mobile_code.py`
+  (multi-command splitting). Imported lazily by `main.py` for voice control (see above).
 - `odometry_locomization/` — standalone Flask mouse-odometry map server, launched as a companion
   subprocess by `main.py` (`run_linux.py` on the board; `run_windows.py`/`calibrate.py` for
   dev-machine testing/calibration).
