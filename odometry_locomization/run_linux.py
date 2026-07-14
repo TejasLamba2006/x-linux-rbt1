@@ -348,12 +348,13 @@ def imu_fusion_yaw_thread():
 
             batch_mean_gz = 0.0
             for gx, gy, gz in batch:
-                _raw_smoothed_yaw = (_raw_smoothed_yaw - (gz - gyro_bias) * dt + 180) % 360 - 180
+                if state["recording"]:
+                    _raw_smoothed_yaw = (_raw_smoothed_yaw - (gz - gyro_bias) * dt + 180) % 360 - 180
                 batch_mean_gz += gz
             if batch:
                 batch_mean_gz /= len(batch)
                 # When stationary, slowly track drift in gyro bias (EMA, alpha=0.01)
-                if (now - _last_mouse_move_time) > 1.0:
+                if not state["recording"]:
                     gyro_bias += 0.01 * (batch_mean_gz - gyro_bias)
 
             if _latest_mag_heading is not None:
