@@ -580,6 +580,47 @@
         "documentation": {}
     },
     {
+        "label": "usb.core",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "usb.core",
+        "description": "usb.core",
+        "detail": "usb.core",
+        "documentation": {}
+    },
+    {
+        "label": "MkBoxUsbGyro",
+        "importPath": "imu_usb_mkbox",
+        "description": "imu_usb_mkbox",
+        "isExtraImport": true,
+        "detail": "imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "GYRO_EP",
+        "importPath": "imu_usb_mkbox",
+        "description": "imu_usb_mkbox",
+        "isExtraImport": true,
+        "detail": "imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "MkBoxUsbGyro",
+        "importPath": "imu_usb_mkbox",
+        "description": "imu_usb_mkbox",
+        "isExtraImport": true,
+        "detail": "imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "GYRO_MDPS_PER_LSB",
+        "importPath": "imu_usb_mkbox",
+        "description": "imu_usb_mkbox",
+        "isExtraImport": true,
+        "detail": "imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
         "label": "BleakClient",
         "importPath": "bleak",
         "description": "bleak",
@@ -626,15 +667,6 @@
         "importPath": "fcntl",
         "description": "fcntl",
         "detail": "fcntl",
-        "documentation": {}
-    },
-    {
-        "label": "usb.core",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "usb.core",
-        "description": "usb.core",
-        "detail": "usb.core",
         "documentation": {}
     },
     {
@@ -3210,6 +3242,42 @@
         "description": "odometry_locomization.dpi",
         "peekOfCode": "def handler(data):\n    print(data)\nfor device in hid.HidDeviceFilter(\n    vendor_id=0x30FA,\n    product_id=0x1440\n).get_devices():\n    try:\n        device.open()\n        device.set_raw_data_handler(handler)\n        print(\"Opened:\", device)",
         "detail": "odometry_locomization.dpi",
+        "documentation": {}
+    },
+    {
+        "label": "N_READS",
+        "kind": 5,
+        "importPath": "odometry_locomization.gyro_raw_probe",
+        "description": "odometry_locomization.gyro_raw_probe",
+        "peekOfCode": "N_READS = 40\nREAD_SIZE = 16384\nasync def main():\n    g = MkBoxUsbGyro()\n    print(\"starting stream via BLE...\")\n    await g.start()\n    dev = g._usb_dev\n    reads = []\n    for _ in range(N_READS):\n        try:",
+        "detail": "odometry_locomization.gyro_raw_probe",
+        "documentation": {}
+    },
+    {
+        "label": "READ_SIZE",
+        "kind": 5,
+        "importPath": "odometry_locomization.gyro_raw_probe",
+        "description": "odometry_locomization.gyro_raw_probe",
+        "peekOfCode": "READ_SIZE = 16384\nasync def main():\n    g = MkBoxUsbGyro()\n    print(\"starting stream via BLE...\")\n    await g.start()\n    dev = g._usb_dev\n    reads = []\n    for _ in range(N_READS):\n        try:\n            reads.append(bytes(dev.read(GYRO_EP, READ_SIZE, timeout=500)))",
+        "detail": "odometry_locomization.gyro_raw_probe",
+        "documentation": {}
+    },
+    {
+        "label": "stats",
+        "kind": 2,
+        "importPath": "odometry_locomization.gyro_rest_test",
+        "description": "odometry_locomization.gyro_rest_test",
+        "peekOfCode": "def stats(vals):\n    n = len(vals)\n    mean = sum(vals) / n\n    var = sum((v - mean) ** 2 for v in vals) / n\n    return mean, var ** 0.5, min(vals), max(vals)\nasync def main():\n    gyro = MkBoxUsbGyro()\n    print(\"starting stream (BLE cmd -> USB data)...\")\n    await gyro.start()\n    print(f\"capturing {DURATION}s at rest -- DO NOT MOVE THE ROBOT\")",
+        "detail": "odometry_locomization.gyro_rest_test",
+        "documentation": {}
+    },
+    {
+        "label": "DURATION",
+        "kind": 5,
+        "importPath": "odometry_locomization.gyro_rest_test",
+        "description": "odometry_locomization.gyro_rest_test",
+        "peekOfCode": "DURATION = float(sys.argv[1]) if len(sys.argv) > 1 else 10.0\ndef stats(vals):\n    n = len(vals)\n    mean = sum(vals) / n\n    var = sum((v - mean) ** 2 for v in vals) / n\n    return mean, var ** 0.5, min(vals), max(vals)\nasync def main():\n    gyro = MkBoxUsbGyro()\n    print(\"starting stream (BLE cmd -> USB data)...\")\n    await gyro.start()",
+        "detail": "odometry_locomization.gyro_rest_test",
         "documentation": {}
     },
     {
