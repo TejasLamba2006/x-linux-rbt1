@@ -572,6 +572,15 @@
         "documentation": {}
     },
     {
+        "label": "urllib.request,",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "urllib.request.",
+        "description": "urllib.request.",
+        "detail": "urllib.request.",
+        "documentation": {}
+    },
+    {
         "label": "hid",
         "importPath": "pywinusb",
         "description": "pywinusb",
@@ -580,12 +589,83 @@
         "documentation": {}
     },
     {
-        "label": "usb.core",
-        "kind": 6,
+        "label": "MkBoxUsbGyro",
+        "importPath": "imu_usb_mkbox",
+        "description": "imu_usb_mkbox",
         "isExtraImport": true,
-        "importPath": "usb.core",
-        "description": "usb.core",
-        "detail": "usb.core",
+        "detail": "imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "GYRO_MDPS_PER_LSB",
+        "importPath": "imu_usb_mkbox",
+        "description": "imu_usb_mkbox",
+        "isExtraImport": true,
+        "detail": "imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "MkBoxUsbGyro",
+        "importPath": "imu_usb_mkbox",
+        "description": "imu_usb_mkbox",
+        "isExtraImport": true,
+        "detail": "imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "GYRO_EP",
+        "importPath": "imu_usb_mkbox",
+        "description": "imu_usb_mkbox",
+        "isExtraImport": true,
+        "detail": "imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "GYRO_MDPS_PER_LSB",
+        "importPath": "imu_usb_mkbox",
+        "description": "imu_usb_mkbox",
+        "isExtraImport": true,
+        "detail": "imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "GYRO_SAMPLES_PER_TS",
+        "importPath": "imu_usb_mkbox",
+        "description": "imu_usb_mkbox",
+        "isExtraImport": true,
+        "detail": "imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "MkBoxUsbGyro",
+        "importPath": "imu_usb_mkbox",
+        "description": "imu_usb_mkbox",
+        "isExtraImport": true,
+        "detail": "imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "GYRO_EP",
+        "importPath": "imu_usb_mkbox",
+        "description": "imu_usb_mkbox",
+        "isExtraImport": true,
+        "detail": "imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "GYRO_MDPS_PER_LSB",
+        "importPath": "imu_usb_mkbox",
+        "description": "imu_usb_mkbox",
+        "isExtraImport": true,
+        "detail": "imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "GYRO_SAMPLES_PER_TS",
+        "importPath": "imu_usb_mkbox",
+        "description": "imu_usb_mkbox",
+        "isExtraImport": true,
+        "detail": "imu_usb_mkbox",
         "documentation": {}
     },
     {
@@ -618,6 +698,23 @@
         "description": "imu_usb_mkbox",
         "isExtraImport": true,
         "detail": "imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "MkBoxUsbGyro",
+        "importPath": "imu_usb_mkbox",
+        "description": "imu_usb_mkbox",
+        "isExtraImport": true,
+        "detail": "imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "usb.core",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "usb.core",
+        "description": "usb.core",
+        "detail": "usb.core",
         "documentation": {}
     },
     {
@@ -3245,6 +3342,78 @@
         "documentation": {}
     },
     {
+        "label": "stats",
+        "kind": 2,
+        "importPath": "odometry_locomization.gyro_fixed_test",
+        "description": "odometry_locomization.gyro_fixed_test",
+        "peekOfCode": "def stats(vals):\n    n = len(vals)\n    if n == 0:\n        return 0, 0, 0, 0\n    mean = sum(vals) / n\n    var = sum((v - mean) ** 2 for v in vals) / n\n    return mean, var ** 0.5, min(vals), max(vals)\nasync def main():\n    gyro = MkBoxUsbGyro()\n    print(\"starting stream (BLE cmd -> USB data)...\")",
+        "detail": "odometry_locomization.gyro_fixed_test",
+        "documentation": {}
+    },
+    {
+        "label": "DURATION",
+        "kind": 5,
+        "importPath": "odometry_locomization.gyro_fixed_test",
+        "description": "odometry_locomization.gyro_fixed_test",
+        "peekOfCode": "DURATION = float(sys.argv[1]) if len(sys.argv) > 1 else 10.0\ndef stats(vals):\n    n = len(vals)\n    if n == 0:\n        return 0, 0, 0, 0\n    mean = sum(vals) / n\n    var = sum((v - mean) ** 2 for v in vals) / n\n    return mean, var ** 0.5, min(vals), max(vals)\nasync def main():\n    gyro = MkBoxUsbGyro()",
+        "detail": "odometry_locomization.gyro_fixed_test",
+        "documentation": {}
+    },
+    {
+        "label": "decode_with_timestamp_skip",
+        "kind": 2,
+        "importPath": "odometry_locomization.gyro_full_decode",
+        "description": "odometry_locomization.gyro_full_decode",
+        "peekOfCode": "def decode_with_timestamp_skip(payload, header_size, samples_per_ts, label=\"\"):\n    \"\"\"Decode int16 triplets from payload, skipping 8-byte double timestamps\n    every samples_per_ts samples. Returns list of (gz dps) values.\"\"\"\n    buf = bytearray(payload[header_size:])\n    sc = 0\n    gz_vals = []\n    ts_found = 0\n    while len(buf) >= 6:\n        if sc >= samples_per_ts:\n            if len(buf) < 8:",
+        "detail": "odometry_locomization.gyro_full_decode",
+        "documentation": {}
+    },
+    {
+        "label": "N_READS",
+        "kind": 5,
+        "importPath": "odometry_locomization.gyro_full_decode",
+        "description": "odometry_locomization.gyro_full_decode",
+        "peekOfCode": "N_READS = 50\nREAD_SIZE = 16384\nHEADER_SIZE = 5  # 1 byte stream-id + 4 byte LE u32 counter\ndef decode_with_timestamp_skip(payload, header_size, samples_per_ts, label=\"\"):\n    \"\"\"Decode int16 triplets from payload, skipping 8-byte double timestamps\n    every samples_per_ts samples. Returns list of (gz dps) values.\"\"\"\n    buf = bytearray(payload[header_size:])\n    sc = 0\n    gz_vals = []\n    ts_found = 0",
+        "detail": "odometry_locomization.gyro_full_decode",
+        "documentation": {}
+    },
+    {
+        "label": "READ_SIZE",
+        "kind": 5,
+        "importPath": "odometry_locomization.gyro_full_decode",
+        "description": "odometry_locomization.gyro_full_decode",
+        "peekOfCode": "READ_SIZE = 16384\nHEADER_SIZE = 5  # 1 byte stream-id + 4 byte LE u32 counter\ndef decode_with_timestamp_skip(payload, header_size, samples_per_ts, label=\"\"):\n    \"\"\"Decode int16 triplets from payload, skipping 8-byte double timestamps\n    every samples_per_ts samples. Returns list of (gz dps) values.\"\"\"\n    buf = bytearray(payload[header_size:])\n    sc = 0\n    gz_vals = []\n    ts_found = 0\n    while len(buf) >= 6:",
+        "detail": "odometry_locomization.gyro_full_decode",
+        "documentation": {}
+    },
+    {
+        "label": "HEADER_SIZE",
+        "kind": 5,
+        "importPath": "odometry_locomization.gyro_full_decode",
+        "description": "odometry_locomization.gyro_full_decode",
+        "peekOfCode": "HEADER_SIZE = 5  # 1 byte stream-id + 4 byte LE u32 counter\ndef decode_with_timestamp_skip(payload, header_size, samples_per_ts, label=\"\"):\n    \"\"\"Decode int16 triplets from payload, skipping 8-byte double timestamps\n    every samples_per_ts samples. Returns list of (gz dps) values.\"\"\"\n    buf = bytearray(payload[header_size:])\n    sc = 0\n    gz_vals = []\n    ts_found = 0\n    while len(buf) >= 6:\n        if sc >= samples_per_ts:",
+        "detail": "odometry_locomization.gyro_full_decode",
+        "documentation": {}
+    },
+    {
+        "label": "N_READS",
+        "kind": 5,
+        "importPath": "odometry_locomization.gyro_offset_test",
+        "description": "odometry_locomization.gyro_offset_test",
+        "peekOfCode": "N_READS = 20\nREAD_SIZE = 16384\nasync def main():\n    g = MkBoxUsbGyro()\n    print(\"starting stream via BLE...\")\n    await g.start()\n    dev = g._usb_dev\n    # Collect raw USB reads\n    reads = []\n    for _ in range(N_READS):",
+        "detail": "odometry_locomization.gyro_offset_test",
+        "documentation": {}
+    },
+    {
+        "label": "READ_SIZE",
+        "kind": 5,
+        "importPath": "odometry_locomization.gyro_offset_test",
+        "description": "odometry_locomization.gyro_offset_test",
+        "peekOfCode": "READ_SIZE = 16384\nasync def main():\n    g = MkBoxUsbGyro()\n    print(\"starting stream via BLE...\")\n    await g.start()\n    dev = g._usb_dev\n    # Collect raw USB reads\n    reads = []\n    for _ in range(N_READS):\n        try:",
+        "detail": "odometry_locomization.gyro_offset_test",
+        "documentation": {}
+    },
+    {
         "label": "N_READS",
         "kind": 5,
         "importPath": "odometry_locomization.gyro_raw_probe",
@@ -3555,7 +3724,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "BLE_DEVICE_NAME = \"HSD2v33\"  # update if the box's advertised name changes\nCMD_CHAR_UUID = \"0000001b-0002-11e1-ac36-0002a5d5c51b\"  # COPY_PNPLIKE_CHAR_UUID\nUSB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nGYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Fixed per-sample time interval, derived from get_status:lsm6dsv16x_gyro's",
+        "peekOfCode": "BLE_DEVICE_NAME = \"HSD2v33\"  # update if the box's advertised name changes\nCMD_CHAR_UUID = \"0000001b-0002-11e1-ac36-0002a5d5c51b\"  # COPY_PNPLIKE_CHAR_UUID\nUSB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nGYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Per-sample time interval: live measurement showed samples arrive at ~7880 Hz",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3564,7 +3733,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "CMD_CHAR_UUID = \"0000001b-0002-11e1-ac36-0002a5d5c51b\"  # COPY_PNPLIKE_CHAR_UUID\nUSB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nGYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Fixed per-sample time interval, derived from get_status:lsm6dsv16x_gyro's\n# own \"usb_dps\" (bytes/sec actually streamed over USB): 2304 / 6 bytes-per-",
+        "peekOfCode": "CMD_CHAR_UUID = \"0000001b-0002-11e1-ac36-0002a5d5c51b\"  # COPY_PNPLIKE_CHAR_UUID\nUSB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nGYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Per-sample time interval: live measurement showed samples arrive at ~7880 Hz\n# (not the ~384 Hz that get_status's \"usb_dps\" field implied). Used only as",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3573,7 +3742,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "USB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nGYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Fixed per-sample time interval, derived from get_status:lsm6dsv16x_gyro's\n# own \"usb_dps\" (bytes/sec actually streamed over USB): 2304 / 6 bytes-per-\n# sample = 384 samples/sec. Used instead of wall-clock time.time() per",
+        "peekOfCode": "USB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nGYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Per-sample time interval: live measurement showed samples arrive at ~7880 Hz\n# (not the ~384 Hz that get_status's \"usb_dps\" field implied). Used only as\n# a fallback if the caller doesn't measure dt from wall-clock time (the fusion",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3582,7 +3751,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "USB_PRODUCT_ID = 0x5744\nGYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Fixed per-sample time interval, derived from get_status:lsm6dsv16x_gyro's\n# own \"usb_dps\" (bytes/sec actually streamed over USB): 2304 / 6 bytes-per-\n# sample = 384 samples/sec. Used instead of wall-clock time.time() per\n# sample for yaw integration -- read_gyro_dps() often returns a whole batch",
+        "peekOfCode": "USB_PRODUCT_ID = 0x5744\nGYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Per-sample time interval: live measurement showed samples arrive at ~7880 Hz\n# (not the ~384 Hz that get_status's \"usb_dps\" field implied). Used only as\n# a fallback if the caller doesn't measure dt from wall-clock time (the fusion\n# thread in run_linux.py does measure dt live, so this constant isn't critical).",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3591,7 +3760,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "GYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Fixed per-sample time interval, derived from get_status:lsm6dsv16x_gyro's\n# own \"usb_dps\" (bytes/sec actually streamed over USB): 2304 / 6 bytes-per-\n# sample = 384 samples/sec. Used instead of wall-clock time.time() per\n# sample for yaw integration -- read_gyro_dps() often returns a whole batch\n# of samples decoded from one USB read (data arrives faster than we poll),",
+        "peekOfCode": "GYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Per-sample time interval: live measurement showed samples arrive at ~7880 Hz\n# (not the ~384 Hz that get_status's \"usb_dps\" field implied). Used only as\n# a fallback if the caller doesn't measure dt from wall-clock time (the fusion\n# thread in run_linux.py does measure dt live, so this constant isn't critical).\nGYRO_SAMPLE_INTERVAL_S = 1.0 / 7880.0",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3600,7 +3769,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "GYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Fixed per-sample time interval, derived from get_status:lsm6dsv16x_gyro's\n# own \"usb_dps\" (bytes/sec actually streamed over USB): 2304 / 6 bytes-per-\n# sample = 384 samples/sec. Used instead of wall-clock time.time() per\n# sample for yaw integration -- read_gyro_dps() often returns a whole batch\n# of samples decoded from one USB read (data arrives faster than we poll),\n# and timing each sample in that batch by wall-clock time makes every",
+        "peekOfCode": "GYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Per-sample time interval: live measurement showed samples arrive at ~7880 Hz\n# (not the ~384 Hz that get_status's \"usb_dps\" field implied). Used only as\n# a fallback if the caller doesn't measure dt from wall-clock time (the fusion\n# thread in run_linux.py does measure dt live, so this constant isn't critical).\nGYRO_SAMPLE_INTERVAL_S = 1.0 / 7880.0\n# Each USB bulk read from the device starts with a 5-byte header:",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3609,7 +3778,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "GYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Fixed per-sample time interval, derived from get_status:lsm6dsv16x_gyro's\n# own \"usb_dps\" (bytes/sec actually streamed over USB): 2304 / 6 bytes-per-\n# sample = 384 samples/sec. Used instead of wall-clock time.time() per\n# sample for yaw integration -- read_gyro_dps() often returns a whole batch\n# of samples decoded from one USB read (data arrives faster than we poll),\n# and timing each sample in that batch by wall-clock time makes every\n# sample after the first look like it took ~0s (just loop overhead),",
+        "peekOfCode": "GYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Per-sample time interval: live measurement showed samples arrive at ~7880 Hz\n# (not the ~384 Hz that get_status's \"usb_dps\" field implied). Used only as\n# a fallback if the caller doesn't measure dt from wall-clock time (the fusion\n# thread in run_linux.py does measure dt live, so this constant isn't critical).\nGYRO_SAMPLE_INTERVAL_S = 1.0 / 7880.0\n# Each USB bulk read from the device starts with a 5-byte header:\n#   byte 0: stream ID (always 0x00)",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3618,7 +3787,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "GYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Fixed per-sample time interval, derived from get_status:lsm6dsv16x_gyro's\n# own \"usb_dps\" (bytes/sec actually streamed over USB): 2304 / 6 bytes-per-\n# sample = 384 samples/sec. Used instead of wall-clock time.time() per\n# sample for yaw integration -- read_gyro_dps() often returns a whole batch\n# of samples decoded from one USB read (data arrives faster than we poll),\n# and timing each sample in that batch by wall-clock time makes every\n# sample after the first look like it took ~0s (just loop overhead),\n# wildly under-integrating bursts. The real time between consecutive\n# samples is this fixed interval, not however long the Python loop took.",
+        "peekOfCode": "GYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Per-sample time interval: live measurement showed samples arrive at ~7880 Hz\n# (not the ~384 Hz that get_status's \"usb_dps\" field implied). Used only as\n# a fallback if the caller doesn't measure dt from wall-clock time (the fusion\n# thread in run_linux.py does measure dt live, so this constant isn't critical).\nGYRO_SAMPLE_INTERVAL_S = 1.0 / 7880.0\n# Each USB bulk read from the device starts with a 5-byte header:\n#   byte 0: stream ID (always 0x00)\n#   bytes 1-4: LE uint32 packet counter (increments by data-payload-size)\n# This header must be stripped before sample decoding. Reading only 64 bytes",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3627,7 +3796,16 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "GYRO_SAMPLE_INTERVAL_S = 6.0 / 2304.0\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([_TP_START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([_TP_START]) + struct.pack(\">H\",\n                                               len(payload)) + payload[:mtu_payload]]\n    rest = payload[mtu_payload:]",
+        "peekOfCode": "GYRO_SAMPLE_INTERVAL_S = 1.0 / 7880.0\n# Each USB bulk read from the device starts with a 5-byte header:\n#   byte 0: stream ID (always 0x00)\n#   bytes 1-4: LE uint32 packet counter (increments by data-payload-size)\n# This header must be stripped before sample decoding. Reading only 64 bytes\n# at a time mixes header bytes into the sample stream, causing byte\n# misalignment and ~35 dps corruption at rest. Reading full packets (≥4096)\n# and stripping the header fixes this.\n_USB_HEADER_SIZE = 5\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command",
+        "detail": "odometry_locomization.imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "_USB_HEADER_SIZE",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_usb_mkbox",
+        "description": "odometry_locomization.imu_usb_mkbox",
+        "peekOfCode": "_USB_HEADER_SIZE = 5\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([_TP_START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([_TP_START]) + struct.pack(\">H\",\n                                               len(payload)) + payload[:mtu_payload]]\n    rest = payload[mtu_payload:]",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
