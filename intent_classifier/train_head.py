@@ -49,8 +49,9 @@ def preprocess(text: str) -> str:
     return text
 
 
-def cmd_train(_args):
-    """Embed + train + validate."""
+def cmd_train(args):
+    """Embed + train + validate. Usage: train_head.py train [--onnx]"""
+    use_onnx = "--onnx" in args
     print("Loading training data...")
     with open(TRAIN_PATH) as f:
         train_data = json.load(f)
@@ -65,22 +66,61 @@ def cmd_train(_args):
     test_texts = [preprocess(ex["text"]) for ex in test_data]
     test_labels = [ex["intent"] for ex in test_data]
 
-    # Load sentence-transformer
-    print(f"\nLoading model: {MODEL_NAME}")
-    model = SentenceTransformer(MODEL_NAME)
-    embedding_dim = model.get_sentence_embedding_dimension()
-    print(f"Embedding dimension: {embedding_dim}")
+    # Load sentence-transformer or ONNX embedder
+    if use_onnx:
+        print("\nLoading ONNX embedder...")
+        import onnxruntime as ort
+        from tokenizers import Tokenizer
+        embed_session = ort.InferenceSession(
+            os.path.join(_DIR, "embedder_onnx", "model_int8.onnx"),
+            providers=["CPUExecutionProvider"],
+        )
+        embed_input_names = [inp.name for inp in embed_session.get_inputs()]
+        tok = Tokenizer.from_file(os.path.join(_DIR, "embedder_onnx", "tokenizer.json"))
+
+        def _onnx_embed(texts):
+            embeddings = []
+            for text in texts:
+                enc = tok.encode(text)
+                ids = np.array([enc.ids], dtype=np.int64)
+                mask = np.array([enc.attention_mask], dtype=np.int64)
+                feed = {}
+                for name in embed_input_names:
+                    if "input_ids" in name:
+                        feed[name] = ids
+                    elif "attention_mask" in name:
+                        feed[name] = mask
+                raw = embed_session.run(None, feed)[0]  # [1, seq, 384]
+                m = mask[..., None].astype(np.float32)
+                summed = (raw * m).sum(axis=1)
+                counts = np.clip(m.sum(axis=1), a_min=1e-9, a_max=None)
+                pooled = (summed / counts)[0]
+                norm = np.linalg.norm(pooled)
+                if norm > 0:
+                    pooled = pooled / norm
+                embeddings.append(pooled.astype(np.float32))
+            return np.array(embeddings)
+
+        embedding_dim = 384
+        print(f"Embedding dimension: {embedding_dim}")
+        embed_func = _onnx_embed
+    else:
+        print(f"\nLoading model: {MODEL_NAME}")
+        model = SentenceTransformer(MODEL_NAME)
+        embedding_dim = model.get_sentence_embedding_dimension()
+        print(f"Embedding dimension: {embedding_dim}")
+        embed_func = lambda texts: model.encode(texts, show_progress_bar=True, batch_size=64)
 
     # Embed training data
     print("\nEmbedding training data...")
     t0 = time.time()
-    train_embeddings = model.encode(train_texts, show_progress_bar=True, batch_size=64)
+    train_embeddings = embed_func(train_texts)
     t1 = time.time()
     print(f"Training embeddings: {train_embeddings.shape} in {t1-t0:.1f}s")
 
     # Embed test data
     print("Embedding test data...")
-    test_embeddings = model.encode(test_texts, show_progress_bar=True, batch_size=64)
+    test_embeddings = embed_func(test_texts)
     print(f"Test embeddings: {test_embeddings.shape}")
 
     # Train MLP classifier head
@@ -115,7 +155,7 @@ def cmd_train(_args):
     print("\n--- TEST_CASES Results ---")
     test_case_texts = [t for t, _ in _get_test_cases()]
     test_case_labels = [l for _, l in _get_test_cases()]
-    tc_embeddings = model.encode(test_case_texts, batch_size=64)
+    tc_embeddings = embed_func(test_case_texts)
     tc_pred = clf.predict(tc_embeddings)
     tc_acc = sum(1 for p, l in zip(tc_pred, test_case_labels) if p == l) / len(test_case_labels)
     print(f"TEST_CASES accuracy: {tc_acc:.4f} ({sum(1 for p,l in zip(tc_pred, test_case_labels) if p==l)}/{len(test_case_labels)})")
@@ -124,7 +164,7 @@ def cmd_train(_args):
     print("\n--- STT_NOISE_CASES Results ---")
     stt_texts = [t for t, _ in _get_stt_cases()]
     stt_labels = [l for _, l in _get_stt_cases()]
-    stt_embeddings = model.encode(stt_texts, batch_size=64)
+    stt_embeddings = embed_func(stt_texts)
     stt_pred = clf.predict(stt_embeddings)
     stt_acc = sum(1 for p, l in zip(stt_pred, stt_labels) if p == l) / len(stt_labels)
     print(f"STT_NOISE_CASES accuracy: {stt_acc:.4f} ({sum(1 for p,l in zip(stt_pred, stt_labels) if p==l)}/{len(stt_labels)})")

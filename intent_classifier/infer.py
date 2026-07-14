@@ -8,27 +8,54 @@
 #                        opensource.org/licenses/BSD-3-Clause
 
 """
-ONNX-backed intent classifier.
+ONNX-backed intent classifier (v2).
 
-robot_intent_5.onnx is a full sklearn pipeline (TfIdfVectorizer + linear
-classifier) exported via skl2onnx, so it takes raw text and returns the
-predicted intent label directly -- no separate vectorizer.pkl needed (unlike
-mobile_code.py's older joblib-based path, which this replaces).
+Two-stage inference:
+  1. Tokenize → ONNX embedder → mean-pool → L2-normalize → 384-dim vector
+  2. MLP classifier head → softmax → intent + confidence
 
-Labels: FORWARD, BACKWARD, LEFT, RIGHT, TURN_LEFT, TURN_RIGHT, ROTATE_LEFT,
-ROTATE_RIGHT, STOP.
+Models:
+  - embedder_onnx/model_int8.onnx  (sentence-transformers INT8 quantized)
+  - intent_head.onnx               (skl2onnx MLP classifier)
+  - intent_labels.json             (class order)
+  - embedder_onnx/tokenizer.json   (tokenizers lib bundled tokenizer)
+
+Labels: FORWARD, BACKWARD, STRAFE_LEFT, STRAFE_RIGHT, ROTATE_LEFT,
+        ROTATE_RIGHT, STOP, PULSE, NOP.
 """
 
+import json
 import os
 import re
 
 import numpy as np
 import onnxruntime as ort
 
-MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "robot_intent_5.onnx")
+_DIR = os.path.dirname(os.path.abspath(__file__))
 
-_session = ort.InferenceSession(MODEL_PATH, providers=["CPUExecutionProvider"])
-_input_name = _session.get_inputs()[0].name
+# --- Load models at import time ---
+_embed_session = ort.InferenceSession(
+    os.path.join(_DIR, "embedder_onnx", "model_int8.onnx"),
+    providers=["CPUExecutionProvider"],
+)
+_embed_input_names = [inp.name for inp in _embed_session.get_inputs()]
+
+_head_session = ort.InferenceSession(
+    os.path.join(_DIR, "intent_head.onnx"),
+    providers=["CPUExecutionProvider"],
+)
+_head_input_name = _head_session.get_inputs()[0].name
+
+with open(os.path.join(_DIR, "intent_labels.json")) as f:
+    LABELS = json.load(f)  # ["BACKWARD", "FORWARD", "NOP", ...]
+
+# --- Load bundled tokenizer (tokenizers lib, not transformers) ---
+from tokenizers import Tokenizer as _Tokenizer
+_tokenizer = _Tokenizer.from_file(os.path.join(_DIR, "embedder_onnx", "tokenizer.json"))
+
+# --- Constants ---
+CONFIDENCE_THRESHOLD = 0.6
+MAX_LENGTH = 128
 
 NUMBER_WORDS = {
     "zero": 0, "one": 1, "two": 2, "three": 3, "four": 4,
@@ -37,53 +64,110 @@ NUMBER_WORDS = {
     "sixty": 60, "seventy": 70, "eighty": 80, "ninety": 90, "hundred": 100,
 }
 
-# The model's TF-IDF vocab was built from exact training tokens (forward,
-# backward, left, right, ...). Web Speech API commonly transcribes these with
-# a trailing "s" (forwards/backwards); unseen tokens get zero TF-IDF weight
-# and the classifier falls back to its bias term, misfiring as BACKWARD/RIGHT.
-# Normalize known speech-recognition variants back to the trained tokens.
-WORD_VARIANTS = {
-    "forwards": "forward",
-    "backwards": "backward",
-    "lefts": "left",
-    "rights": "right",
-}
+DEVANAGARI_RE = re.compile(r"[\u0900-\u097F]+")
+DIGIT_RE = re.compile(r"\d+")
+WHITESPACE_RE = re.compile(r"\s+")
+
+# Units to strip from value extraction
+UNITS_RE = re.compile(
+    r"\b(cm|mm|m|km|inch|inches|ft|feet|degree|degrees|deg|steps?|step)\b",
+    re.IGNORECASE,
+)
 
 
-def _apply_word_variants(text: str) -> str:
-    return re.sub(
-        r"\b(" + "|".join(WORD_VARIANTS) + r")\b",
-        lambda m: WORD_VARIANTS[m.group(1)],
-        text,
-    )
+# ---------------------------------------------------------------------------
+# Preprocessing
+# ---------------------------------------------------------------------------
 
+def _preprocess(text: str) -> str:
+    """Normalize raw speech text for embedding model."""
+    text = text.lower()
+    text = DEVANAGARI_RE.sub("", text)        # strip Devanagari script
+    text = DIGIT_RE.sub(" NUM ", text)         # replace digits
+    text = UNITS_RE.sub("", text)              # remove units
+    text = WHITESPACE_RE.sub(" ", text).strip()
+    return text
+
+
+# ---------------------------------------------------------------------------
+# Value extraction
+# ---------------------------------------------------------------------------
 
 def extract_value(command: str) -> int:
     """Pull a numeric magnitude (digits or spelled-out) out of a command."""
     match = re.search(r"\d+", command)
     if match:
         return int(match.group())
-
     for word in command.lower().split():
         if word in NUMBER_WORDS:
             return NUMBER_WORDS[word]
-
     return 0
 
 
-def classify_single_command(command: str) -> dict:
-    """Classify one command string -> {"intent": str, "value": int}."""
-    value = extract_value(command)
+# ---------------------------------------------------------------------------
+# Embedding (ONNX + manual mean-pooling + L2-normalize)
+# ---------------------------------------------------------------------------
 
-    normalized = re.sub(r"\d+", "NUM", command.lower())
-    normalized = _apply_word_variants(normalized)
-    for word in NUMBER_WORDS:
-        normalized = normalized.replace(word, "NUM")
+def _embed(text: str) -> np.ndarray:
+    """Tokenize → ONNX embedder → mean-pool → L2-normalize → [384] float32."""
+    enc = _tokenizer.encode(text)
+    input_ids = np.array([enc.ids], dtype=np.int64)
+    attention_mask = np.array([enc.attention_mask], dtype=np.int64)
 
-    X = np.array([[normalized]], dtype=object)
-    label = _session.run(None, {_input_name: X})[0][0]
+    feed = {}
+    for name in _embed_input_names:
+        if "input_ids" in name:
+            feed[name] = input_ids
+        elif "attention_mask" in name:
+            feed[name] = attention_mask
 
-    return {"intent": str(label), "value": value}
+    raw = _embed_session.run(None, feed)[0]  # [1, seq, 384]
+
+    # Mean-pool over non-padding tokens
+    mask = attention_mask[..., None].astype(np.float32)  # [1, seq, 1]
+    summed = (raw * mask).sum(axis=1)                     # [1, 384]
+    counts = np.clip(mask.sum(axis=1), a_min=1e-9, a_max=None)
+    pooled = (summed / counts)[0]                         # [384]
+
+    # L2-normalize
+    norm = np.linalg.norm(pooled)
+    if norm > 0:
+        pooled = pooled / norm
+    return pooled.astype(np.float32)
+
+
+# ---------------------------------------------------------------------------
+# Classification
+# ---------------------------------------------------------------------------
+
+def classify_single_command(text: str) -> dict:
+    """Classify one command string.
+
+    Returns:
+        {"intent": str, "value": int, "confidence": float}
+
+    Confidence threshold: if max softmax prob < CONFIDENCE_THRESHOLD and
+    intent is not NOP, return NOP with that confidence.
+    """
+    value = extract_value(text)
+    preprocessed = _preprocess(text)
+
+    # Embed
+    embedding = _embed(preprocessed).reshape(1, -1)
+
+    # Classify — head outputs [label, probabilities] with zipmap=False
+    outputs = _head_session.run(None, {_head_input_name: embedding})
+    probs = outputs[1][0]  # [9] softmax probabilities
+
+    best_idx = int(np.argmax(probs))
+    confidence = float(probs[best_idx])
+    intent = LABELS[best_idx]
+
+    # Safety gate
+    if confidence < CONFIDENCE_THRESHOLD and intent != "NOP":
+        intent = "NOP"
+
+    return {"intent": intent, "value": value, "confidence": confidence}
 
 
 if __name__ == "__main__":
