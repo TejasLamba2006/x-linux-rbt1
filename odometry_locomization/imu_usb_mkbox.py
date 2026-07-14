@@ -58,6 +58,17 @@ GYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte
                             # timestamp is interleaved into the sample stream
 GYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor
 
+# Fixed per-sample time interval, derived from get_status:lsm6dsv16x_gyro's
+# own "usb_dps" (bytes/sec actually streamed over USB): 2304 / 6 bytes-per-
+# sample = 384 samples/sec. Used instead of wall-clock time.time() per
+# sample for yaw integration -- read_gyro_dps() often returns a whole batch
+# of samples decoded from one USB read (data arrives faster than we poll),
+# and timing each sample in that batch by wall-clock time makes every
+# sample after the first look like it took ~0s (just loop overhead),
+# wildly under-integrating bursts. The real time between consecutive
+# samples is this fixed interval, not however long the Python loop took.
+GYRO_SAMPLE_INTERVAL_S = 6.0 / 2304.0
+
 # BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command
 # characteristic -- see imu_ble_mkbox.py's header note / prior probing).
 _TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80
