@@ -11,7 +11,7 @@ set -e
 cd "$(dirname "$0")"
 
 echo "=== Step 1: Generate training data ==="
-python3 train_intent.py
+python3 train_intent.py generate
 
 echo ""
 echo "=== Step 2: Train MLP on ONNX embeddings ==="
