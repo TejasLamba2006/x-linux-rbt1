@@ -1,44 +1,21 @@
-# imu_usb_mkbox.py — STEVAL-MKBOXPRO (SensorTile.box PRO) gyroscope over USB,
-# used as an external yaw source since the robot's own onboard IMU doesn't
-# ACK on i2c-1 (see imu_lsm6dsv16x.py).
+# imu_usb_mkbox.py — STEVAL-MKBOXPRO (SensorTile.box PRO) gyro + accel over USB
 #
-# Split-transport protocol, reverse-engineered live against the box (DATALOG2
-# firmware, advertises as HSD2v3x over BLE) and cross-checked against the
-# actual firmware source (STMicroelectronics/fp-sns-datalog2,
-# DatalogAppTask.c):
-#   - Commands (incl. "start streaming") ALWAYS go over BLE's PnPL command
-#     characteristic, even when the actual sensor data is routed over USB.
-#     Direct USB bulk writes to the command-shaped OUT endpoint (0x06) were
-#     tried and always came back STALL (EPIPE) -- USB is data-out only here.
-#     Once "log_controller*start_log" is accepted with {"interface": 1}, the
-#     box keeps streaming over USB on its own, so the BLE connection is
-#     dropped immediately after -- no need to hold it open.
-#   - USB interface is vendor id 0x0483:0x5744 ("Sensortile.box_PRO_Multi_
-#     Sensor_Streaming"), one bulk IN endpoint per active sensor stream:
-#     endpoint address = 0x81 + ep_id, where ep_id comes from that sensor's
-#     {"get_status":"<name>"} response. lsm6dsv16x_gyro reports ep_id=0, so
-#     gyro data is on 0x81 -- confirmed live (see mkbox_live_debug.py) by
-#     rotating the box and watching ONLY that endpoint's decoded values
-#     track the motion and settle back near zero afterward.
-#   - Wire format per DatalogAppTask.c is NOT a flat stream of samples:
-#     [samples_per_ts raw samples][8-byte double timestamp][more samples]...
-#     samples_per_ts for the gyro is 1000 (from get_status), and at its
-#     streamed rate that timestamp block interrupts the stream every ~2-3s --
-#     long enough to corrupt any capture that doesn't skip it. Also, USB
-#     bulk reads return up to 64 bytes at a time but samples are 6 bytes (3x
-#     int16), and 64 isn't a multiple of 6, so treating each independent
-#     read as sample-aligned silently drifts the byte offset every read.
-#     Both are handled here with a persistent per-stream byte buffer and a
-#     sample counter that skips exactly 8 bytes every samples_per_ts samples.
-#   - Scale factor (0.14 dps/LSB) is NOT guessed -- it's the exact
-#     "multiply_factor"/"sensitivity" the box itself reported for
-#     lsm6dsv16x_gyro via {"get_status":"lsm6dsv16x_gyro"} over BLE.
+# Split-transport protocol (DATALOG2 firmware, HSD2v3x BLE name):
+#   - Commands ALWAYS go over BLE PnPL characteristic, even when sensor data
+#     is routed over USB. Once log_controller*start_log is accepted with
+#     {"interface":1}, the box streams over USB on its own — no BLE needed.
+#   - USB interface 0x0483:0x5744, one bulk IN endpoint per active sensor:
+#     endpoint address = 0x81 + ep_id (from get_status response).
+#     Gyro ep_id=0 → 0x81, Accel ep_id=1 → 0x82.
+#   - Wire format: [N raw samples][8-byte double timestamp][N samples]...
+#     Each sample is 6 bytes (3× int16 LE). The 8-byte timestamp interrupts
+#     every samples_per_ts samples and must be skipped. A persistent byte
+#     buffer + sample counter handles both the timestamp skip and USB read
+#     boundary alignment (64-byte reads aren't sample-aligned).
+#   - Scale factors from get_status: gyro 0.14 dps/LSB, accel 0.061 mg/LSB.
 #
-# ponytail: axis order/sign (which of gx/gy/gz is "up" on this box, and
-# whether any axis is inverted vs. the robot's mounting) is unverified --
-# only gz is used here as the yaw-rate axis, matching a box mounted flat.
-# Rotate the box while it's actually fixed to the robot and check the sign
-# in run_linux.py's HUD if yaw goes the wrong direction.
+# ponytail: axis order/sign is unverified — only gz (yaw-rate) and accel
+# gravity are used here. Check sign in run_linux.py HUD if yaw is wrong.
 
 import asyncio
 import struct
@@ -46,35 +23,24 @@ import struct
 import usb.core
 from bleak import BleakClient
 
-BLE_DEVICE_NAME = "HSD2v33"  # update if the box's advertised name changes
-CMD_CHAR_UUID = "0000001b-0002-11e1-ac36-0002a5d5c51b"  # COPY_PNPLIKE_CHAR_UUID
+BLE_DEVICE_NAME = "HSD2v33"
+CMD_CHAR_UUID = "0000001b-0002-11e1-ac36-0002a5d5c51b"
 
 USB_VENDOR_ID = 0x0483
 USB_PRODUCT_ID = 0x5744
-GYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id
-GYRO_EP = 0x81 + GYRO_EP_ID
 
-GYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte
-                            # timestamp is interleaved into the sample stream
-GYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor
+# Gyro endpoint (ep_id=0 → 0x81)
+GYRO_EP = 0x81
+GYRO_SAMPLES_PER_TS = 1000
+GYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB
 
-# Per-sample time interval: live measurement showed samples arrive at ~7880 Hz
-# (not the ~384 Hz that get_status's "usb_dps" field implied). Used only as
-# a fallback if the caller doesn't measure dt from wall-clock time (the fusion
-# thread in run_linux.py does measure dt live, so this constant isn't critical).
-GYRO_SAMPLE_INTERVAL_S = 1.0 / 7880.0
+# Accel endpoint (ep_id=1 → 0x82)
+ACCEL_EP = 0x82
+ACCEL_SAMPLES_PER_TS = 1000
+ACCEL_MG_PER_LSB = 0.061   # mg/LSB at ±2g range
 
-# Each USB bulk read from the device starts with a 5-byte header:
-#   byte 0: stream ID (always 0x00)
-#   bytes 1-4: LE uint32 packet counter (increments by data-payload-size)
-# This header must be stripped before sample decoding. Reading only 64 bytes
-# at a time mixes header bytes into the sample stream, causing byte
-# misalignment and ~35 dps corruption at rest. Reading full packets (≥4096)
-# and stripping the header fixes this.
 _USB_HEADER_SIZE = 5
 
-# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command
-# characteristic -- see imu_ble_mkbox.py's header note / prior probing).
 _TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80
 
 
@@ -91,19 +57,54 @@ def _encode_tp(payload: bytes, mtu_payload=17):
     return chunks
 
 
+class _StreamDecoder:
+    """Decodes one USB endpoint's sample stream (handles timestamp skip +
+    byte buffer alignment)."""
+
+    def __init__(self, samples_per_ts, sensitivity):
+        self.spts = samples_per_ts
+        self.sensitivity = sensitivity
+        self._buf = bytearray()
+        self._sample_count = 0
+
+    def feed_and_decode(self, raw: bytes):
+        """Feed raw USB bytes, return list of decoded sample tuples (float)."""
+        if len(raw) <= _USB_HEADER_SIZE:
+            return []
+        self._buf.extend(raw[_USB_HEADER_SIZE:])
+
+        samples = []
+        while True:
+            if self._sample_count >= self.spts:
+                if len(self._buf) < 8:
+                    break
+                (ts,) = struct.unpack_from("<d", self._buf, 0)
+                if not (0 < ts < 1e6):
+                    del self._buf[:6]
+                    self._sample_count = max(0, self._sample_count - 1)
+                    continue
+                del self._buf[:8]
+                self._sample_count = 0
+                continue
+            if len(self._buf) < 6:
+                break
+            raw_vals = struct.unpack_from("<hhh", self._buf, 0)
+            del self._buf[:6]
+            self._sample_count += 1
+            samples.append(tuple(v * self.sensitivity for v in raw_vals))
+        return samples
+
+
 class MkBoxUsbGyro:
     def __init__(self, ble_device_name=BLE_DEVICE_NAME):
         self.ble_device_name = ble_device_name
         self._usb_dev = None
-        self._buf = bytearray()
-        self._sample_count = 0
+        self._gyro = _StreamDecoder(GYRO_SAMPLES_PER_TS, GYRO_MDPS_PER_LSB / 1000.0)
+        self._accel = _StreamDecoder(ACCEL_SAMPLES_PER_TS, ACCEL_MG_PER_LSB)
 
     async def start(self, scan_timeout=10.0):
         """Connect over BLE just long enough to start USB streaming, then
-        disconnect BLE entirely and open the USB device -- once
-        log_controller*start_log has been accepted, the box keeps streaming
-        over USB on its own; it doesn't need a live BLE connection held for
-        that."""
+        disconnect BLE entirely and open the USB device."""
         from bleak import BleakScanner
 
         device = await BleakScanner.find_device_by_name(self.ble_device_name, scan_timeout)
@@ -130,53 +131,28 @@ class MkBoxUsbGyro:
         self._usb_dev.set_configuration()
 
     def read_gyro_dps(self, timeout_ms=200):
-        """Returns a list of (gx, gy, gz) dps tuples decoded from whatever's
-        newly arrived, correctly stitched across USB read boundaries and
-        with the periodic 8-byte timestamp block skipped (see module header
-        for why both of those matter -- may be empty)."""
+        """Returns a list of (gx, gy, gz) dps tuples from the gyro endpoint."""
         try:
             raw = bytes(self._usb_dev.read(GYRO_EP, 4096, timeout=timeout_ms))
         except usb.core.USBError:
             return []
+        return self._gyro.feed_and_decode(raw)
 
-        # Strip the per-packet USB header (5 bytes: 1 stream-id + 4 counter)
-        if len(raw) <= _USB_HEADER_SIZE:
+    def read_accel_mg(self, timeout_ms=200):
+        """Returns a list of (ax, ay, az) mg tuples from the accel endpoint."""
+        try:
+            raw = bytes(self._usb_dev.read(ACCEL_EP, 4096, timeout=timeout_ms))
+        except usb.core.USBError:
             return []
-        self._buf.extend(raw[_USB_HEADER_SIZE:])
+        return self._accel.feed_and_decode(raw)
 
-        samples = []
-        while True:
-            if self._sample_count >= GYRO_SAMPLES_PER_TS:
-                if len(self._buf) < 8:
-                    break
-                # Validate the 8-byte timestamp: must decode to a plausible
-                # boot-time double (0 < t < 1e6 seconds). If it doesn't, our
-                # sample counter drifted out of sync (e.g. first read started
-                # mid-cycle). Scan forward up to 12 bytes to re-sync.
-                (ts,) = struct.unpack_from("<d", self._buf, 0)
-                if not (0 < ts < 1e6):
-                    # resync: skip 6 bytes (one sample) and retry
-                    del self._buf[:6]
-                    self._sample_count = max(0, self._sample_count - 1)
-                    continue
-                del self._buf[:8]  # valid timestamp -- skip it
-                self._sample_count = 0
-                continue
-            if len(self._buf) < 6:
-                break
-            gx, gy, gz = struct.unpack_from("<hhh", self._buf, 0)
-            del self._buf[:6]
-            self._sample_count += 1
-            samples.append((
-                gx * GYRO_MDPS_PER_LSB / 1000.0,
-                gy * GYRO_MDPS_PER_LSB / 1000.0,
-                gz * GYRO_MDPS_PER_LSB / 1000.0,
-            ))
-        return samples
+    def read_gyro_and_accel(self, timeout_ms=200):
+        """Read both endpoints in one call. Returns (gyro_samples, accel_samples)
+        where gyro_samples is [(gx,gy,gz) dps] and accel_samples is [(ax,ay,az) mg]."""
+        return self.read_gyro_dps(timeout_ms), self.read_accel_mg(timeout_ms)
 
     async def stop(self):
-        """Reconnect briefly over BLE to send stop_log -- USB streaming has
-        no live BLE connection to tear down (see start())."""
+        """Reconnect briefly over BLE to send stop_log."""
         from bleak import BleakScanner
 
         device = await BleakScanner.find_device_by_name(self.ble_device_name, 10.0)

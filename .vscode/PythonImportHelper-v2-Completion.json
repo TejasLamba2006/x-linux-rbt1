@@ -438,15 +438,6 @@
         "documentation": {}
     },
     {
-        "label": "re",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "re",
-        "description": "re",
-        "detail": "re",
-        "documentation": {}
-    },
-    {
         "label": "numpy",
         "kind": 6,
         "isExtraImport": true,
@@ -465,12 +456,94 @@
         "documentation": {}
     },
     {
-        "label": "joblib",
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "re",
         "kind": 6,
         "isExtraImport": true,
-        "importPath": "joblib",
-        "description": "joblib",
-        "detail": "joblib",
+        "importPath": "re",
+        "description": "re",
+        "detail": "re",
+        "documentation": {}
+    },
+    {
+        "label": "Tokenizer",
+        "importPath": "tokenizers",
+        "description": "tokenizers",
+        "isExtraImport": true,
+        "detail": "tokenizers",
+        "documentation": {}
+    },
+    {
+        "label": "classify_single_command",
+        "importPath": "infer",
+        "description": "infer",
+        "isExtraImport": true,
+        "detail": "infer",
+        "documentation": {}
+    },
+    {
+        "label": "classify_single_command",
+        "importPath": "infer",
+        "description": "infer",
+        "isExtraImport": true,
+        "detail": "infer",
+        "documentation": {}
+    },
+    {
+        "label": "pytest",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pytest",
+        "description": "pytest",
+        "detail": "pytest",
+        "documentation": {}
+    },
+    {
+        "label": "MLPClassifier",
+        "importPath": "sklearn.neural_network",
+        "description": "sklearn.neural_network",
+        "isExtraImport": true,
+        "detail": "sklearn.neural_network",
+        "documentation": {}
+    },
+    {
+        "label": "classification_report",
+        "importPath": "sklearn.metrics",
+        "description": "sklearn.metrics",
+        "isExtraImport": true,
+        "detail": "sklearn.metrics",
+        "documentation": {}
+    },
+    {
+        "label": "confusion_matrix",
+        "importPath": "sklearn.metrics",
+        "description": "sklearn.metrics",
+        "isExtraImport": true,
+        "detail": "sklearn.metrics",
+        "documentation": {}
+    },
+    {
+        "label": "SentenceTransformer",
+        "importPath": "sentence_transformers",
+        "description": "sentence_transformers",
+        "isExtraImport": true,
+        "detail": "sentence_transformers",
+        "documentation": {}
+    },
+    {
+        "label": "random",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "random",
+        "description": "random",
+        "detail": "random",
         "documentation": {}
     },
     {
@@ -587,6 +660,24 @@
         "importPath": "urllib.request.",
         "description": "urllib.request.",
         "detail": "urllib.request.",
+        "documentation": {}
+    },
+    {
+        "label": "urllib.request",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "urllib.request",
+        "description": "urllib.request",
+        "detail": "urllib.request",
+        "documentation": {}
+    },
+    {
+        "label": "csv",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "csv",
+        "description": "csv",
+        "detail": "csv",
         "documentation": {}
     },
     {
@@ -924,15 +1015,6 @@
         "importPath": "asyncio.",
         "description": "asyncio.",
         "detail": "asyncio.",
-        "documentation": {}
-    },
-    {
-        "label": "random",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "random",
-        "description": "random",
-        "detail": "random",
         "documentation": {}
     },
     {
@@ -3153,11 +3235,128 @@
         "documentation": {}
     },
     {
+        "label": "cmd_export",
+        "kind": 2,
+        "importPath": "intent_classifier.export_onnx",
+        "description": "intent_classifier.export_onnx",
+        "peekOfCode": "def cmd_export(_args):\n    \"\"\"Export embedder + head ONNX files + bundle tokenizer.\"\"\"\n    import torch\n    import torch.nn as nn\n    from transformers import AutoModel, AutoTokenizer\n    EMBEDDER_DIR.mkdir(exist_ok=True)\n    # --- Embedder export via torch ---\n    print(f\"Loading model for ONNX export: {MODEL_NAME}\")\n    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)\n    model = AutoModel.from_pretrained(MODEL_NAME)",
+        "detail": "intent_classifier.export_onnx",
+        "documentation": {}
+    },
+    {
+        "label": "cmd_test",
+        "kind": 2,
+        "importPath": "intent_classifier.export_onnx",
+        "description": "intent_classifier.export_onnx",
+        "peekOfCode": "def cmd_test(_args):\n    \"\"\"Verify ONNX embedding matches SentenceTransformer.encode().\"\"\"\n    from sentence_transformers import SentenceTransformer\n    print(\"Loading SentenceTransformer for reference...\")\n    st_model = SentenceTransformer(MODEL_NAME)\n    print(\"Loading ONNX embedder...\")\n    sess = ort.InferenceSession(str(EMBEDDER_PATH), providers=[\"CPUExecutionProvider\"])\n    input_names = [inp.name for inp in sess.get_inputs()]\n    # Load tokenizer from bundled files\n    try:",
+        "detail": "intent_classifier.export_onnx",
+        "documentation": {}
+    },
+    {
+        "label": "cmd_bench",
+        "kind": 2,
+        "importPath": "intent_classifier.export_onnx",
+        "description": "intent_classifier.export_onnx",
+        "peekOfCode": "def cmd_bench(_args):\n    \"\"\"Benchmark ONNX inference latency.\"\"\"\n    sess_embed = ort.InferenceSession(str(EMBEDDER_PATH), providers=[\"CPUExecutionProvider\"])\n    sess_head = ort.InferenceSession(str(HEAD_PATH), providers=[\"CPUExecutionProvider\"])\n    embed_input_names = [inp.name for inp in sess_embed.get_inputs()]\n    head_input_name = sess_head.get_inputs()[0].name\n    try:\n        from tokenizers import Tokenizer\n        tok = Tokenizer.from_file(str(EMBEDDER_DIR / \"tokenizer.json\"))\n        use_bundled = True",
+        "detail": "intent_classifier.export_onnx",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "intent_classifier.export_onnx",
+        "description": "intent_classifier.export_onnx",
+        "peekOfCode": "def main():\n    if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:\n        print(f\"Usage: {sys.argv[0]} <{'|'.join(COMMANDS.keys())}>\")\n        sys.exit(1)\n    COMMANDS[sys.argv[1]](sys.argv[2:])\nif __name__ == \"__main__\":\n    main()",
+        "detail": "intent_classifier.export_onnx",
+        "documentation": {}
+    },
+    {
+        "label": "_DIR",
+        "kind": 5,
+        "importPath": "intent_classifier.export_onnx",
+        "description": "intent_classifier.export_onnx",
+        "peekOfCode": "_DIR = Path(__file__).parent\nEMBEDDER_DIR = _DIR / \"embedder_onnx\"\nEMBEDDER_PATH = EMBEDDER_DIR / \"model_int8.onnx\"\nHEAD_PATH = _DIR / \"intent_head.onnx\"\nLABELS_PATH = _DIR / \"intent_labels.json\"\nJOBLIB_PATH = _DIR / \"intent_head.joblib\"\nMODEL_NAME = \"sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2\"\nINTENTS = [\n    \"FORWARD\", \"BACKWARD\", \"STRAFE_LEFT\", \"STRAFE_RIGHT\",\n    \"ROTATE_LEFT\", \"ROTATE_RIGHT\", \"STOP\", \"PULSE\", \"NOP\",",
+        "detail": "intent_classifier.export_onnx",
+        "documentation": {}
+    },
+    {
+        "label": "EMBEDDER_DIR",
+        "kind": 5,
+        "importPath": "intent_classifier.export_onnx",
+        "description": "intent_classifier.export_onnx",
+        "peekOfCode": "EMBEDDER_DIR = _DIR / \"embedder_onnx\"\nEMBEDDER_PATH = EMBEDDER_DIR / \"model_int8.onnx\"\nHEAD_PATH = _DIR / \"intent_head.onnx\"\nLABELS_PATH = _DIR / \"intent_labels.json\"\nJOBLIB_PATH = _DIR / \"intent_head.joblib\"\nMODEL_NAME = \"sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2\"\nINTENTS = [\n    \"FORWARD\", \"BACKWARD\", \"STRAFE_LEFT\", \"STRAFE_RIGHT\",\n    \"ROTATE_LEFT\", \"ROTATE_RIGHT\", \"STOP\", \"PULSE\", \"NOP\",\n]",
+        "detail": "intent_classifier.export_onnx",
+        "documentation": {}
+    },
+    {
+        "label": "EMBEDDER_PATH",
+        "kind": 5,
+        "importPath": "intent_classifier.export_onnx",
+        "description": "intent_classifier.export_onnx",
+        "peekOfCode": "EMBEDDER_PATH = EMBEDDER_DIR / \"model_int8.onnx\"\nHEAD_PATH = _DIR / \"intent_head.onnx\"\nLABELS_PATH = _DIR / \"intent_labels.json\"\nJOBLIB_PATH = _DIR / \"intent_head.joblib\"\nMODEL_NAME = \"sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2\"\nINTENTS = [\n    \"FORWARD\", \"BACKWARD\", \"STRAFE_LEFT\", \"STRAFE_RIGHT\",\n    \"ROTATE_LEFT\", \"ROTATE_RIGHT\", \"STOP\", \"PULSE\", \"NOP\",\n]\n# ---------------------------------------------------------------------------",
+        "detail": "intent_classifier.export_onnx",
+        "documentation": {}
+    },
+    {
+        "label": "HEAD_PATH",
+        "kind": 5,
+        "importPath": "intent_classifier.export_onnx",
+        "description": "intent_classifier.export_onnx",
+        "peekOfCode": "HEAD_PATH = _DIR / \"intent_head.onnx\"\nLABELS_PATH = _DIR / \"intent_labels.json\"\nJOBLIB_PATH = _DIR / \"intent_head.joblib\"\nMODEL_NAME = \"sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2\"\nINTENTS = [\n    \"FORWARD\", \"BACKWARD\", \"STRAFE_LEFT\", \"STRAFE_RIGHT\",\n    \"ROTATE_LEFT\", \"ROTATE_RIGHT\", \"STOP\", \"PULSE\", \"NOP\",\n]\n# ---------------------------------------------------------------------------\n# Step 1: Export embedder ONNX with pooling",
+        "detail": "intent_classifier.export_onnx",
+        "documentation": {}
+    },
+    {
+        "label": "LABELS_PATH",
+        "kind": 5,
+        "importPath": "intent_classifier.export_onnx",
+        "description": "intent_classifier.export_onnx",
+        "peekOfCode": "LABELS_PATH = _DIR / \"intent_labels.json\"\nJOBLIB_PATH = _DIR / \"intent_head.joblib\"\nMODEL_NAME = \"sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2\"\nINTENTS = [\n    \"FORWARD\", \"BACKWARD\", \"STRAFE_LEFT\", \"STRAFE_RIGHT\",\n    \"ROTATE_LEFT\", \"ROTATE_RIGHT\", \"STOP\", \"PULSE\", \"NOP\",\n]\n# ---------------------------------------------------------------------------\n# Step 1: Export embedder ONNX with pooling\n# ---------------------------------------------------------------------------",
+        "detail": "intent_classifier.export_onnx",
+        "documentation": {}
+    },
+    {
+        "label": "JOBLIB_PATH",
+        "kind": 5,
+        "importPath": "intent_classifier.export_onnx",
+        "description": "intent_classifier.export_onnx",
+        "peekOfCode": "JOBLIB_PATH = _DIR / \"intent_head.joblib\"\nMODEL_NAME = \"sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2\"\nINTENTS = [\n    \"FORWARD\", \"BACKWARD\", \"STRAFE_LEFT\", \"STRAFE_RIGHT\",\n    \"ROTATE_LEFT\", \"ROTATE_RIGHT\", \"STOP\", \"PULSE\", \"NOP\",\n]\n# ---------------------------------------------------------------------------\n# Step 1: Export embedder ONNX with pooling\n# ---------------------------------------------------------------------------\ndef cmd_export(_args):",
+        "detail": "intent_classifier.export_onnx",
+        "documentation": {}
+    },
+    {
+        "label": "MODEL_NAME",
+        "kind": 5,
+        "importPath": "intent_classifier.export_onnx",
+        "description": "intent_classifier.export_onnx",
+        "peekOfCode": "MODEL_NAME = \"sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2\"\nINTENTS = [\n    \"FORWARD\", \"BACKWARD\", \"STRAFE_LEFT\", \"STRAFE_RIGHT\",\n    \"ROTATE_LEFT\", \"ROTATE_RIGHT\", \"STOP\", \"PULSE\", \"NOP\",\n]\n# ---------------------------------------------------------------------------\n# Step 1: Export embedder ONNX with pooling\n# ---------------------------------------------------------------------------\ndef cmd_export(_args):\n    \"\"\"Export embedder + head ONNX files + bundle tokenizer.\"\"\"",
+        "detail": "intent_classifier.export_onnx",
+        "documentation": {}
+    },
+    {
+        "label": "INTENTS",
+        "kind": 5,
+        "importPath": "intent_classifier.export_onnx",
+        "description": "intent_classifier.export_onnx",
+        "peekOfCode": "INTENTS = [\n    \"FORWARD\", \"BACKWARD\", \"STRAFE_LEFT\", \"STRAFE_RIGHT\",\n    \"ROTATE_LEFT\", \"ROTATE_RIGHT\", \"STOP\", \"PULSE\", \"NOP\",\n]\n# ---------------------------------------------------------------------------\n# Step 1: Export embedder ONNX with pooling\n# ---------------------------------------------------------------------------\ndef cmd_export(_args):\n    \"\"\"Export embedder + head ONNX files + bundle tokenizer.\"\"\"\n    import torch",
+        "detail": "intent_classifier.export_onnx",
+        "documentation": {}
+    },
+    {
+        "label": "COMMANDS",
+        "kind": 5,
+        "importPath": "intent_classifier.export_onnx",
+        "description": "intent_classifier.export_onnx",
+        "peekOfCode": "COMMANDS = {\n    \"export\": cmd_export,\n    \"test\": cmd_test,\n    \"bench\": cmd_bench,\n    \"all\": lambda args: (cmd_export(args), cmd_test(args), cmd_bench(args)),\n}\ndef main():\n    if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:\n        print(f\"Usage: {sys.argv[0]} <{'|'.join(COMMANDS.keys())}>\")\n        sys.exit(1)",
+        "detail": "intent_classifier.export_onnx",
+        "documentation": {}
+    },
+    {
         "label": "extract_value",
         "kind": 2,
         "importPath": "intent_classifier.infer",
         "description": "intent_classifier.infer",
-        "peekOfCode": "def extract_value(command: str) -> int:\n    \"\"\"Pull a numeric magnitude (digits or spelled-out) out of a command.\"\"\"\n    match = re.search(r\"\\d+\", command)\n    if match:\n        return int(match.group())\n    for word in command.lower().split():\n        if word in NUMBER_WORDS:\n            return NUMBER_WORDS[word]\n    return 0\ndef classify_single_command(command: str) -> dict:",
+        "peekOfCode": "def extract_value(command: str) -> int:\n    \"\"\"Pull a numeric magnitude (digits or spelled-out) out of a command.\"\"\"\n    match = re.search(r\"\\d+\", command)\n    if match:\n        return int(match.group())\n    for word in command.lower().split():\n        if word in NUMBER_WORDS:\n            return NUMBER_WORDS[word]\n    return 0\n# ---------------------------------------------------------------------------",
         "detail": "intent_classifier.infer",
         "documentation": {}
     },
@@ -3166,34 +3365,79 @@
         "kind": 2,
         "importPath": "intent_classifier.infer",
         "description": "intent_classifier.infer",
-        "peekOfCode": "def classify_single_command(command: str) -> dict:\n    \"\"\"Classify one command string -> {\"intent\": str, \"value\": int}.\"\"\"\n    value = extract_value(command)\n    normalized = re.sub(r\"\\d+\", \"NUM\", command.lower())\n    normalized = _apply_word_variants(normalized)\n    for word in NUMBER_WORDS:\n        normalized = normalized.replace(word, \"NUM\")\n    X = np.array([[normalized]], dtype=object)\n    label = _session.run(None, {_input_name: X})[0][0]\n    return {\"intent\": str(label), \"value\": value}",
+        "peekOfCode": "def classify_single_command(text: str) -> dict:\n    \"\"\"Classify one command string.\n    Returns:\n        {\"intent\": str, \"value\": int, \"confidence\": float}\n    Confidence threshold: if max softmax prob < CONFIDENCE_THRESHOLD and\n    intent is not NOP, return NOP with that confidence.\n    \"\"\"\n    value = extract_value(text)\n    preprocessed = _preprocess(text)\n    # Embed",
         "detail": "intent_classifier.infer",
         "documentation": {}
     },
     {
-        "label": "MODEL_PATH",
+        "label": "_DIR",
         "kind": 5,
         "importPath": "intent_classifier.infer",
         "description": "intent_classifier.infer",
-        "peekOfCode": "MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), \"robot_intent_5.onnx\")\n_session = ort.InferenceSession(MODEL_PATH, providers=[\"CPUExecutionProvider\"])\n_input_name = _session.get_inputs()[0].name\nNUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,\n    \"sixty\": 60, \"seventy\": 70, \"eighty\": 80, \"ninety\": 90, \"hundred\": 100,\n}\n# The model's TF-IDF vocab was built from exact training tokens (forward,",
+        "peekOfCode": "_DIR = os.path.dirname(os.path.abspath(__file__))\n# --- Load models at import time ---\n_embed_session = ort.InferenceSession(\n    os.path.join(_DIR, \"embedder_onnx\", \"model_int8.onnx\"),\n    providers=[\"CPUExecutionProvider\"],\n)\n_embed_input_names = [inp.name for inp in _embed_session.get_inputs()]\n_head_session = ort.InferenceSession(\n    os.path.join(_DIR, \"intent_head.onnx\"),\n    providers=[\"CPUExecutionProvider\"],",
         "detail": "intent_classifier.infer",
         "documentation": {}
     },
     {
-        "label": "_session",
+        "label": "_embed_session",
         "kind": 5,
         "importPath": "intent_classifier.infer",
         "description": "intent_classifier.infer",
-        "peekOfCode": "_session = ort.InferenceSession(MODEL_PATH, providers=[\"CPUExecutionProvider\"])\n_input_name = _session.get_inputs()[0].name\nNUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,\n    \"sixty\": 60, \"seventy\": 70, \"eighty\": 80, \"ninety\": 90, \"hundred\": 100,\n}\n# The model's TF-IDF vocab was built from exact training tokens (forward,\n# backward, left, right, ...). Web Speech API commonly transcribes these with",
+        "peekOfCode": "_embed_session = ort.InferenceSession(\n    os.path.join(_DIR, \"embedder_onnx\", \"model_int8.onnx\"),\n    providers=[\"CPUExecutionProvider\"],\n)\n_embed_input_names = [inp.name for inp in _embed_session.get_inputs()]\n_head_session = ort.InferenceSession(\n    os.path.join(_DIR, \"intent_head.onnx\"),\n    providers=[\"CPUExecutionProvider\"],\n)\n_head_input_name = _head_session.get_inputs()[0].name",
         "detail": "intent_classifier.infer",
         "documentation": {}
     },
     {
-        "label": "_input_name",
+        "label": "_embed_input_names",
         "kind": 5,
         "importPath": "intent_classifier.infer",
         "description": "intent_classifier.infer",
-        "peekOfCode": "_input_name = _session.get_inputs()[0].name\nNUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,\n    \"sixty\": 60, \"seventy\": 70, \"eighty\": 80, \"ninety\": 90, \"hundred\": 100,\n}\n# The model's TF-IDF vocab was built from exact training tokens (forward,\n# backward, left, right, ...). Web Speech API commonly transcribes these with\n# a trailing \"s\" (forwards/backwards); unseen tokens get zero TF-IDF weight",
+        "peekOfCode": "_embed_input_names = [inp.name for inp in _embed_session.get_inputs()]\n_head_session = ort.InferenceSession(\n    os.path.join(_DIR, \"intent_head.onnx\"),\n    providers=[\"CPUExecutionProvider\"],\n)\n_head_input_name = _head_session.get_inputs()[0].name\nwith open(os.path.join(_DIR, \"intent_labels.json\")) as f:\n    LABELS = json.load(f)  # [\"BACKWARD\", \"FORWARD\", \"NOP\", ...]\n# --- Load bundled tokenizer (tokenizers lib, not transformers) ---\nfrom tokenizers import Tokenizer as _Tokenizer",
+        "detail": "intent_classifier.infer",
+        "documentation": {}
+    },
+    {
+        "label": "_head_session",
+        "kind": 5,
+        "importPath": "intent_classifier.infer",
+        "description": "intent_classifier.infer",
+        "peekOfCode": "_head_session = ort.InferenceSession(\n    os.path.join(_DIR, \"intent_head.onnx\"),\n    providers=[\"CPUExecutionProvider\"],\n)\n_head_input_name = _head_session.get_inputs()[0].name\nwith open(os.path.join(_DIR, \"intent_labels.json\")) as f:\n    LABELS = json.load(f)  # [\"BACKWARD\", \"FORWARD\", \"NOP\", ...]\n# --- Load bundled tokenizer (tokenizers lib, not transformers) ---\nfrom tokenizers import Tokenizer as _Tokenizer\n_tokenizer = _Tokenizer.from_file(os.path.join(_DIR, \"embedder_onnx\", \"tokenizer.json\"))",
+        "detail": "intent_classifier.infer",
+        "documentation": {}
+    },
+    {
+        "label": "_head_input_name",
+        "kind": 5,
+        "importPath": "intent_classifier.infer",
+        "description": "intent_classifier.infer",
+        "peekOfCode": "_head_input_name = _head_session.get_inputs()[0].name\nwith open(os.path.join(_DIR, \"intent_labels.json\")) as f:\n    LABELS = json.load(f)  # [\"BACKWARD\", \"FORWARD\", \"NOP\", ...]\n# --- Load bundled tokenizer (tokenizers lib, not transformers) ---\nfrom tokenizers import Tokenizer as _Tokenizer\n_tokenizer = _Tokenizer.from_file(os.path.join(_DIR, \"embedder_onnx\", \"tokenizer.json\"))\n# --- Constants ---\nCONFIDENCE_THRESHOLD = 0.6\nMAX_LENGTH = 128\nNUMBER_WORDS = {",
+        "detail": "intent_classifier.infer",
+        "documentation": {}
+    },
+    {
+        "label": "_tokenizer",
+        "kind": 5,
+        "importPath": "intent_classifier.infer",
+        "description": "intent_classifier.infer",
+        "peekOfCode": "_tokenizer = _Tokenizer.from_file(os.path.join(_DIR, \"embedder_onnx\", \"tokenizer.json\"))\n# --- Constants ---\nCONFIDENCE_THRESHOLD = 0.6\nMAX_LENGTH = 128\nNUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,\n    \"sixty\": 60, \"seventy\": 70, \"eighty\": 80, \"ninety\": 90, \"hundred\": 100,\n}",
+        "detail": "intent_classifier.infer",
+        "documentation": {}
+    },
+    {
+        "label": "CONFIDENCE_THRESHOLD",
+        "kind": 5,
+        "importPath": "intent_classifier.infer",
+        "description": "intent_classifier.infer",
+        "peekOfCode": "CONFIDENCE_THRESHOLD = 0.6\nMAX_LENGTH = 128\nNUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,\n    \"sixty\": 60, \"seventy\": 70, \"eighty\": 80, \"ninety\": 90, \"hundred\": 100,\n}\nDEVANAGARI_RE = re.compile(r\"[\\u0900-\\u097F]+\")\nDIGIT_RE = re.compile(r\"\\d+\")",
+        "detail": "intent_classifier.infer",
+        "documentation": {}
+    },
+    {
+        "label": "MAX_LENGTH",
+        "kind": 5,
+        "importPath": "intent_classifier.infer",
+        "description": "intent_classifier.infer",
+        "peekOfCode": "MAX_LENGTH = 128\nNUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,\n    \"sixty\": 60, \"seventy\": 70, \"eighty\": 80, \"ninety\": 90, \"hundred\": 100,\n}\nDEVANAGARI_RE = re.compile(r\"[\\u0900-\\u097F]+\")\nDIGIT_RE = re.compile(r\"\\d+\")\nWHITESPACE_RE = re.compile(r\"\\s+\")",
         "detail": "intent_classifier.infer",
         "documentation": {}
     },
@@ -3202,35 +3446,44 @@
         "kind": 5,
         "importPath": "intent_classifier.infer",
         "description": "intent_classifier.infer",
-        "peekOfCode": "NUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,\n    \"sixty\": 60, \"seventy\": 70, \"eighty\": 80, \"ninety\": 90, \"hundred\": 100,\n}\n# The model's TF-IDF vocab was built from exact training tokens (forward,\n# backward, left, right, ...). Web Speech API commonly transcribes these with\n# a trailing \"s\" (forwards/backwards); unseen tokens get zero TF-IDF weight\n# and the classifier falls back to its bias term, misfiring as BACKWARD/RIGHT.",
+        "peekOfCode": "NUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,\n    \"sixty\": 60, \"seventy\": 70, \"eighty\": 80, \"ninety\": 90, \"hundred\": 100,\n}\nDEVANAGARI_RE = re.compile(r\"[\\u0900-\\u097F]+\")\nDIGIT_RE = re.compile(r\"\\d+\")\nWHITESPACE_RE = re.compile(r\"\\s+\")\n# Units to strip from value extraction",
         "detail": "intent_classifier.infer",
         "documentation": {}
     },
     {
-        "label": "WORD_VARIANTS",
+        "label": "DEVANAGARI_RE",
         "kind": 5,
         "importPath": "intent_classifier.infer",
         "description": "intent_classifier.infer",
-        "peekOfCode": "WORD_VARIANTS = {\n    \"forwards\": \"forward\",\n    \"backwards\": \"backward\",\n    \"lefts\": \"left\",\n    \"rights\": \"right\",\n}\ndef _apply_word_variants(text: str) -> str:\n    return re.sub(\n        r\"\\b(\" + \"|\".join(WORD_VARIANTS) + r\")\\b\",\n        lambda m: WORD_VARIANTS[m.group(1)],",
+        "peekOfCode": "DEVANAGARI_RE = re.compile(r\"[\\u0900-\\u097F]+\")\nDIGIT_RE = re.compile(r\"\\d+\")\nWHITESPACE_RE = re.compile(r\"\\s+\")\n# Units to strip from value extraction\nUNITS_RE = re.compile(\n    r\"\\b(cm|mm|m|km|inch|inches|ft|feet|degree|degrees|deg|steps?|step)\\b\",\n    re.IGNORECASE,\n)\n# ---------------------------------------------------------------------------\n# Preprocessing",
         "detail": "intent_classifier.infer",
         "documentation": {}
     },
     {
-        "label": "extract_value",
-        "kind": 2,
-        "importPath": "intent_classifier.mobile_code",
-        "description": "intent_classifier.mobile_code",
-        "peekOfCode": "def extract_value(command):\n    match = re.search(r\"\\d+\", command)\n    if match:\n        return int(match.group())\n    words = command.lower().split()\n    for word in words:\n        if word in NUMBER_WORDS:\n            return NUMBER_WORDS[word]\n    return 0\n# SINGLE COMMAND CLASSIFIER",
-        "detail": "intent_classifier.mobile_code",
+        "label": "DIGIT_RE",
+        "kind": 5,
+        "importPath": "intent_classifier.infer",
+        "description": "intent_classifier.infer",
+        "peekOfCode": "DIGIT_RE = re.compile(r\"\\d+\")\nWHITESPACE_RE = re.compile(r\"\\s+\")\n# Units to strip from value extraction\nUNITS_RE = re.compile(\n    r\"\\b(cm|mm|m|km|inch|inches|ft|feet|degree|degrees|deg|steps?|step)\\b\",\n    re.IGNORECASE,\n)\n# ---------------------------------------------------------------------------\n# Preprocessing\n# ---------------------------------------------------------------------------",
+        "detail": "intent_classifier.infer",
         "documentation": {}
     },
     {
-        "label": "classify_single_command",
-        "kind": 2,
-        "importPath": "intent_classifier.mobile_code",
-        "description": "intent_classifier.mobile_code",
-        "peekOfCode": "def classify_single_command(command):\n    value = extract_value(command)\n    normalized_command = re.sub(\n        r\"\\d+\",\n        \"NUM\",\n        command.lower()\n    )\n    for word in NUMBER_WORDS:\n        normalized_command = normalized_command.replace(\n            word,",
-        "detail": "intent_classifier.mobile_code",
+        "label": "WHITESPACE_RE",
+        "kind": 5,
+        "importPath": "intent_classifier.infer",
+        "description": "intent_classifier.infer",
+        "peekOfCode": "WHITESPACE_RE = re.compile(r\"\\s+\")\n# Units to strip from value extraction\nUNITS_RE = re.compile(\n    r\"\\b(cm|mm|m|km|inch|inches|ft|feet|degree|degrees|deg|steps?|step)\\b\",\n    re.IGNORECASE,\n)\n# ---------------------------------------------------------------------------\n# Preprocessing\n# ---------------------------------------------------------------------------\ndef _preprocess(text: str) -> str:",
+        "detail": "intent_classifier.infer",
+        "documentation": {}
+    },
+    {
+        "label": "UNITS_RE",
+        "kind": 5,
+        "importPath": "intent_classifier.infer",
+        "description": "intent_classifier.infer",
+        "peekOfCode": "UNITS_RE = re.compile(\n    r\"\\b(cm|mm|m|km|inch|inches|ft|feet|degree|degrees|deg|steps?|step)\\b\",\n    re.IGNORECASE,\n)\n# ---------------------------------------------------------------------------\n# Preprocessing\n# ---------------------------------------------------------------------------\ndef _preprocess(text: str) -> str:\n    \"\"\"Normalize raw speech text for embedding model.\"\"\"\n    text = text.lower()",
+        "detail": "intent_classifier.infer",
         "documentation": {}
     },
     {
@@ -3247,35 +3500,521 @@
         "kind": 2,
         "importPath": "intent_classifier.mobile_code",
         "description": "intent_classifier.mobile_code",
-        "peekOfCode": "def classify_multiple_commands(text):\n    commands = split_commands(text)\n    sequence = []\n    step = 1\n    for cmd in commands:\n        result = classify_single_command(cmd)\n        sequence.append(\n            {\n                \"step\": step,\n                \"intent\": result[\"intent\"],",
+        "peekOfCode": "def classify_multiple_commands(text):\n    commands = split_commands(text)\n    sequence = []\n    for step, cmd in enumerate(commands, start=1):\n        result = classify_single_command(cmd)\n        sequence.append({\n            \"step\": step,\n            \"intent\": result[\"intent\"],\n            \"value\": result[\"value\"],\n            \"confidence\": result[\"confidence\"],",
         "detail": "intent_classifier.mobile_code",
         "documentation": {}
     },
     {
-        "label": "model",
-        "kind": 5,
-        "importPath": "intent_classifier.mobile_code",
-        "description": "intent_classifier.mobile_code",
-        "peekOfCode": "model = joblib.load(\n    r\"intent_model1.pkl\"\n)\nvectorizer = joblib.load(\n    r\"vectorizer_unique1.pkl\"\n)\n# SPOKEN NUMBERS\nNUMBER_WORDS = {\n    \"zero\": 0,\n    \"one\": 1,",
-        "detail": "intent_classifier.mobile_code",
+        "label": "TestSingleCommands",
+        "kind": 6,
+        "importPath": "intent_classifier.test_intent",
+        "description": "intent_classifier.test_intent",
+        "peekOfCode": "class TestSingleCommands:\n    @pytest.mark.parametrize(\"text,expected\", [\n        (\"forward\", \"FORWARD\"),\n        (\"go straight\", \"FORWARD\"),\n        (\"move ahead\", \"FORWARD\"),\n        (\"aage badho\", \"FORWARD\"),\n        (\"aage jao\", \"FORWARD\"),\n        (\"back\", \"BACKWARD\"),\n        (\"go back\", \"BACKWARD\"),\n        (\"peeche jao\", \"BACKWARD\"),",
+        "detail": "intent_classifier.test_intent",
         "documentation": {}
     },
     {
-        "label": "vectorizer",
+        "label": "TestValueExtraction",
+        "kind": 6,
+        "importPath": "intent_classifier.test_intent",
+        "description": "intent_classifier.test_intent",
+        "peekOfCode": "class TestValueExtraction:\n    \"\"\"Test that numeric values are extracted correctly from commands.\"\"\"\n    def test_forward_with_number(self):\n        result = classify_single_command(\"forward 5\")\n        assert result[\"value\"] == 5\n    def test_back_3(self):\n        result = classify_single_command(\"back 3\")\n        assert result[\"value\"] == 3\n    def test_no_number(self):\n        result = classify_single_command(\"forward\")",
+        "detail": "intent_classifier.test_intent",
+        "documentation": {}
+    },
+    {
+        "label": "TestPulse",
+        "kind": 6,
+        "importPath": "intent_classifier.test_intent",
+        "description": "intent_classifier.test_intent",
+        "peekOfCode": "class TestPulse:\n    \"\"\"PULSE should be directionless: 'jaldi aage' = FORWARD, not PULSE.\"\"\"\n    def test_jaldi_aage_is_forward(self):\n        result = classify_single_command(\"jaldi aage\")\n        assert result[\"intent\"] == \"FORWARD\"\n    def test_pulse_is_pulse(self):\n        result = classify_single_command(\"pulse\")\n        assert result[\"intent\"] == \"PULSE\"\n    def test_nudge_is_pulse(self):\n        result = classify_single_command(\"nudge\")",
+        "detail": "intent_classifier.test_intent",
+        "documentation": {}
+    },
+    {
+        "label": "TestSTTNoise",
+        "kind": 6,
+        "importPath": "intent_classifier.test_intent",
+        "description": "intent_classifier.test_intent",
+        "peekOfCode": "class TestSTTNoise:\n    \"\"\"Test that the classifier handles common Chrome STT misrecognitions.\"\"\"\n    def test_jaao_jao_gated(self):\n        result = classify_single_command(\"jaao jaao\")\n        assert result[\"intent\"] == \"NOP\" or result[\"confidence\"] < 0.6\n    def test_ruco_gated(self):\n        result = classify_single_command(\"ruco\")\n        assert result[\"intent\"] == \"NOP\" or result[\"confidence\"] < 0.6\n    def test_goback(self):\n        result = classify_single_command(\"goback\")",
+        "detail": "intent_classifier.test_intent",
+        "documentation": {}
+    },
+    {
+        "label": "TestNopGate",
+        "kind": 6,
+        "importPath": "intent_classifier.test_intent",
+        "description": "intent_classifier.test_intent",
+        "peekOfCode": "class TestNopGate:\n    \"\"\"Confidence < 0.6 should return NOP (handled in main.py, not infer.py).\n    But infer.py should still return NOP for clearly non-command text.\"\"\"\n    def test_random_text_returns_nop(self):\n        result = classify_single_command(\"what time is it\")\n        assert result[\"intent\"] == \"NOP\"\n    def test_empty_string(self):\n        result = classify_single_command(\"\")\n        assert result[\"intent\"] == \"NOP\"\n    def test_hello(self):",
+        "detail": "intent_classifier.test_intent",
+        "documentation": {}
+    },
+    {
+        "label": "TestMultiCommand",
+        "kind": 6,
+        "importPath": "intent_classifier.test_intent",
+        "description": "intent_classifier.test_intent",
+        "peekOfCode": "class TestMultiCommand:\n    \"\"\"Test split_commands + classify_multiple_commands from mobile_code.py.\"\"\"\n    def test_split_two_commands(self):\n        from mobile_code import split_commands\n        result = split_commands(\"forward and then stop\")\n        assert result == [\"forward\", \"stop\"]\n    def test_split_three_commands(self):\n        from mobile_code import split_commands\n        result = split_commands(\"forward 3 then turn left then stop\")\n        assert len(result) == 3",
+        "detail": "intent_classifier.test_intent",
+        "documentation": {}
+    },
+    {
+        "label": "preprocess",
+        "kind": 2,
+        "importPath": "intent_classifier.train_head",
+        "description": "intent_classifier.train_head",
+        "peekOfCode": "def preprocess(text: str) -> str:\n    text = text.lower().strip()\n    text = re.sub(r'[\\u0900-\\u097F]+', '', text)\n    text = re.sub(r'\\d+', ' NUM ', text)\n    for unit in ['cm', 'mm', 'm', 'meter', 'meters', 'steps', 'step', 'inch', 'inches']:\n        text = re.sub(rf'\\b{unit}\\b', '', text)\n    text = re.sub(r'\\s+', ' ', text).strip()\n    return text\ndef cmd_train(args):\n    \"\"\"Embed + train + validate. Usage: train_head.py train [--onnx]\"\"\"",
+        "detail": "intent_classifier.train_head",
+        "documentation": {}
+    },
+    {
+        "label": "cmd_train",
+        "kind": 2,
+        "importPath": "intent_classifier.train_head",
+        "description": "intent_classifier.train_head",
+        "peekOfCode": "def cmd_train(args):\n    \"\"\"Embed + train + validate. Usage: train_head.py train [--onnx]\"\"\"\n    use_onnx = \"--onnx\" in args\n    print(\"Loading training data...\")\n    with open(TRAIN_PATH) as f:\n        train_data = json.load(f)\n    with open(TEST_PATH) as f:\n        test_data = json.load(f)\n    print(f\"Train: {len(train_data)} examples, Test: {len(test_data)} examples\")\n    # Preprocess all texts",
+        "detail": "intent_classifier.train_head",
+        "documentation": {}
+    },
+    {
+        "label": "_DIR",
         "kind": 5,
-        "importPath": "intent_classifier.mobile_code",
-        "description": "intent_classifier.mobile_code",
-        "peekOfCode": "vectorizer = joblib.load(\n    r\"vectorizer_unique1.pkl\"\n)\n# SPOKEN NUMBERS\nNUMBER_WORDS = {\n    \"zero\": 0,\n    \"one\": 1,\n    \"two\": 2,\n    \"three\": 3,\n    \"four\": 4,",
-        "detail": "intent_classifier.mobile_code",
+        "importPath": "intent_classifier.train_head",
+        "description": "intent_classifier.train_head",
+        "peekOfCode": "_DIR = os.path.dirname(os.path.abspath(__file__))\nTRAIN_PATH = os.path.join(_DIR, \"train.json\")\nTEST_PATH = os.path.join(_DIR, \"test.json\")\nMODEL_NAME = \"paraphrase-multilingual-MiniLM-L12-v2\"\nINTENTS = [\n    \"FORWARD\", \"BACKWARD\", \"STRAFE_LEFT\", \"STRAFE_RIGHT\",\n    \"ROTATE_LEFT\", \"ROTATE_RIGHT\", \"STOP\", \"PULSE\", \"NOP\",\n]\ndef preprocess(text: str) -> str:\n    text = text.lower().strip()",
+        "detail": "intent_classifier.train_head",
+        "documentation": {}
+    },
+    {
+        "label": "TRAIN_PATH",
+        "kind": 5,
+        "importPath": "intent_classifier.train_head",
+        "description": "intent_classifier.train_head",
+        "peekOfCode": "TRAIN_PATH = os.path.join(_DIR, \"train.json\")\nTEST_PATH = os.path.join(_DIR, \"test.json\")\nMODEL_NAME = \"paraphrase-multilingual-MiniLM-L12-v2\"\nINTENTS = [\n    \"FORWARD\", \"BACKWARD\", \"STRAFE_LEFT\", \"STRAFE_RIGHT\",\n    \"ROTATE_LEFT\", \"ROTATE_RIGHT\", \"STOP\", \"PULSE\", \"NOP\",\n]\ndef preprocess(text: str) -> str:\n    text = text.lower().strip()\n    text = re.sub(r'[\\u0900-\\u097F]+', '', text)",
+        "detail": "intent_classifier.train_head",
+        "documentation": {}
+    },
+    {
+        "label": "TEST_PATH",
+        "kind": 5,
+        "importPath": "intent_classifier.train_head",
+        "description": "intent_classifier.train_head",
+        "peekOfCode": "TEST_PATH = os.path.join(_DIR, \"test.json\")\nMODEL_NAME = \"paraphrase-multilingual-MiniLM-L12-v2\"\nINTENTS = [\n    \"FORWARD\", \"BACKWARD\", \"STRAFE_LEFT\", \"STRAFE_RIGHT\",\n    \"ROTATE_LEFT\", \"ROTATE_RIGHT\", \"STOP\", \"PULSE\", \"NOP\",\n]\ndef preprocess(text: str) -> str:\n    text = text.lower().strip()\n    text = re.sub(r'[\\u0900-\\u097F]+', '', text)\n    text = re.sub(r'\\d+', ' NUM ', text)",
+        "detail": "intent_classifier.train_head",
+        "documentation": {}
+    },
+    {
+        "label": "MODEL_NAME",
+        "kind": 5,
+        "importPath": "intent_classifier.train_head",
+        "description": "intent_classifier.train_head",
+        "peekOfCode": "MODEL_NAME = \"paraphrase-multilingual-MiniLM-L12-v2\"\nINTENTS = [\n    \"FORWARD\", \"BACKWARD\", \"STRAFE_LEFT\", \"STRAFE_RIGHT\",\n    \"ROTATE_LEFT\", \"ROTATE_RIGHT\", \"STOP\", \"PULSE\", \"NOP\",\n]\ndef preprocess(text: str) -> str:\n    text = text.lower().strip()\n    text = re.sub(r'[\\u0900-\\u097F]+', '', text)\n    text = re.sub(r'\\d+', ' NUM ', text)\n    for unit in ['cm', 'mm', 'm', 'meter', 'meters', 'steps', 'step', 'inch', 'inches']:",
+        "detail": "intent_classifier.train_head",
+        "documentation": {}
+    },
+    {
+        "label": "INTENTS",
+        "kind": 5,
+        "importPath": "intent_classifier.train_head",
+        "description": "intent_classifier.train_head",
+        "peekOfCode": "INTENTS = [\n    \"FORWARD\", \"BACKWARD\", \"STRAFE_LEFT\", \"STRAFE_RIGHT\",\n    \"ROTATE_LEFT\", \"ROTATE_RIGHT\", \"STOP\", \"PULSE\", \"NOP\",\n]\ndef preprocess(text: str) -> str:\n    text = text.lower().strip()\n    text = re.sub(r'[\\u0900-\\u097F]+', '', text)\n    text = re.sub(r'\\d+', ' NUM ', text)\n    for unit in ['cm', 'mm', 'm', 'meter', 'meters', 'steps', 'step', 'inch', 'inches']:\n        text = re.sub(rf'\\b{unit}\\b', '', text)",
+        "detail": "intent_classifier.train_head",
+        "documentation": {}
+    },
+    {
+        "label": "preprocess",
+        "kind": 2,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "def preprocess(text: str) -> str:\n    text = text.lower().strip()\n    text = re.sub(r'[\\u0900-\\u097F]+', '', text)\n    text = re.sub(r'\\d+', ' NUM ', text)\n    for unit in ['cm', 'mm', 'm', 'meter', 'meters', 'steps', 'step', 'inch', 'inches']:\n        text = re.sub(rf'\\b{unit}\\b', '', text)\n    text = re.sub(r'\\s+', ' ', text).strip()\n    return text\n# ---------------------------------------------------------------------------\n# Generator",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "generate_examples",
+        "kind": 2,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "def generate_examples():\n    \"\"\"Generate training examples across all 9 intents.\n    Target distribution:\n      English: 55%, Hindi-roman: 25%, Hinglish: 10%, STT-noise: 10%\n      Per intent: ~500 examples (4500+ total)\n    \"\"\"\n    examples = []\n    intent_banks = {\n        \"FORWARD\":        (_FWD_EN, _FWD_HI, _FWD_HL),\n        \"BACKWARD\":       (_BWD_EN, _BWD_HI, _BWD_HL),",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "add_stt_noise",
+        "kind": 2,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "def add_stt_noise(examples):\n    \"\"\"Add STT-noise variants (10% of dataset).\"\"\"\n    noisy = list(examples)  # keep all originals\n    for ex in examples:\n        if random.random() < 0.10:\n            noisy_text = _apply_stt_noise(ex[\"text\"], p=0.30)\n            words = noisy_text.split()\n            new_intent = ex[\"intent\"]\n            for w in words:\n                if w in STT_HOMOPHONE_INTENTS:",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "cmd_generate",
+        "kind": 2,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "def cmd_generate(_args):\n    \"\"\"Generate train.json + test.json.\"\"\"\n    random.seed(42)  # reproducible\n    examples = generate_examples()\n    examples = add_stt_noise(examples)\n    # Final shuffle\n    random.shuffle(examples)\n    # Stratified split: 85% train, 15% test, preserving intent distribution\n    by_intent = {}\n    for ex in examples:",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "cmd_test",
+        "kind": 2,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "def cmd_test(_args):\n    \"\"\"Print test cases for manual inspection.\"\"\"\n    print(\"=== TEST_CASES ===\")\n    for text, expected in TEST_CASES:\n        print(f\"  {text:35s} -> {expected}\")\n    print(f\"\\nTotal: {len(TEST_CASES)} test cases\")\n    print(f\"\\n=== STT_NOISE_CASES ===\")\n    for text, expected in STT_NOISE_CASES:\n        print(f\"  {text:35s} -> {expected}\")\n    print(f\"\\nTotal: {len(STT_NOISE_CASES)} STT-noise cases\")",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "def main():\n    if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:\n        print(f\"Usage: {sys.argv[0]} <{'|'.join(COMMANDS.keys())}>\")\n        sys.exit(1)\n    COMMANDS[sys.argv[1]](sys.argv[2:])\nif __name__ == \"__main__\":\n    main()",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_DIR",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_DIR = os.path.dirname(os.path.abspath(__file__))\nTRAIN_PATH = os.path.join(_DIR, \"train.json\")\nTEST_PATH = os.path.join(_DIR, \"test.json\")\n# ---------------------------------------------------------------------------\n# Number words / variants\n# ---------------------------------------------------------------------------\nNUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "TRAIN_PATH",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "TRAIN_PATH = os.path.join(_DIR, \"train.json\")\nTEST_PATH = os.path.join(_DIR, \"test.json\")\n# ---------------------------------------------------------------------------\n# Number words / variants\n# ---------------------------------------------------------------------------\nNUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,\n    \"sixty\": 60, \"seventy\": 70, \"eighty\": 80, \"ninety\": 90, \"hundred\": 100,",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "TEST_PATH",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "TEST_PATH = os.path.join(_DIR, \"test.json\")\n# ---------------------------------------------------------------------------\n# Number words / variants\n# ---------------------------------------------------------------------------\nNUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,\n    \"sixty\": 60, \"seventy\": 70, \"eighty\": 80, \"ninety\": 90, \"hundred\": 100,\n}",
+        "detail": "intent_classifier.train_intent",
         "documentation": {}
     },
     {
         "label": "NUMBER_WORDS",
         "kind": 5,
-        "importPath": "intent_classifier.mobile_code",
-        "description": "intent_classifier.mobile_code",
-        "peekOfCode": "NUMBER_WORDS = {\n    \"zero\": 0,\n    \"one\": 1,\n    \"two\": 2,\n    \"three\": 3,\n    \"four\": 4,\n    \"five\": 5,\n    \"six\": 6,\n    \"seven\": 7,\n    \"eight\": 8,",
-        "detail": "intent_classifier.mobile_code",
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "NUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,\n    \"sixty\": 60, \"seventy\": 70, \"eighty\": 80, \"ninety\": 90, \"hundred\": 100,\n}\nWORD_VARIANTS = {\n    \"forwards\": \"forward\",\n    \"backwards\": \"backward\",\n    \"lefts\": \"left\",",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "WORD_VARIANTS",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "WORD_VARIANTS = {\n    \"forwards\": \"forward\",\n    \"backwards\": \"backward\",\n    \"lefts\": \"left\",\n    \"rights\": \"right\",\n}\n# ---------------------------------------------------------------------------\n# Intent keyword banks (English / Hindi-roman / Hinglish)\n# ---------------------------------------------------------------------------\n_FWD_EN = [\"forward\", \"go ahead\", \"move forward\", \"move ahead\", \"drive forward\",",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_FWD_EN",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_FWD_EN = [\"forward\", \"go ahead\", \"move forward\", \"move ahead\", \"drive forward\",\n           \"drive ahead\", \"straight\", \"go straight\", \"go straight ahead\"]\n_FWD_HI = [\"aage\", \"aagay\", \"aagye\", \"agey\", \"seedha\", \"seedhe\", \"sidha\", \"sidhe\",\n           \"samne\"]\n_FWD_HL = [\"aage jao\", \"aage chalo\", \"seedha chalo\", \"move karo aage\"]\n_BWD_EN = [\"backward\", \"go back\", \"move backward\", \"reverse\", \"back up\", \"go backwards\"]\n_BWD_HI = [\"peeche\", \"piche\", \"peechay\", \"peechay\", \"ulta\"]\n_BWD_HL = [\"peeche jao\", \"back karo\", \"reverse lo\"]\n_STRAFE_L_EN = [\"strafe left\", \"move left\", \"go left\", \"shift left\", \"slide left\",\n                \"left side\", \"go to the left\"]",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_FWD_HI",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_FWD_HI = [\"aage\", \"aagay\", \"aagye\", \"agey\", \"seedha\", \"seedhe\", \"sidha\", \"sidhe\",\n           \"samne\"]\n_FWD_HL = [\"aage jao\", \"aage chalo\", \"seedha chalo\", \"move karo aage\"]\n_BWD_EN = [\"backward\", \"go back\", \"move backward\", \"reverse\", \"back up\", \"go backwards\"]\n_BWD_HI = [\"peeche\", \"piche\", \"peechay\", \"peechay\", \"ulta\"]\n_BWD_HL = [\"peeche jao\", \"back karo\", \"reverse lo\"]\n_STRAFE_L_EN = [\"strafe left\", \"move left\", \"go left\", \"shift left\", \"slide left\",\n                \"left side\", \"go to the left\"]\n_STRAFE_L_HI = [\"baayein\", \"bayen\", \"bayan\", \"bayin\"]\n_STRAFE_L_HL = [\"left side jao\", \"left mein jao\"]",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_FWD_HL",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_FWD_HL = [\"aage jao\", \"aage chalo\", \"seedha chalo\", \"move karo aage\"]\n_BWD_EN = [\"backward\", \"go back\", \"move backward\", \"reverse\", \"back up\", \"go backwards\"]\n_BWD_HI = [\"peeche\", \"piche\", \"peechay\", \"peechay\", \"ulta\"]\n_BWD_HL = [\"peeche jao\", \"back karo\", \"reverse lo\"]\n_STRAFE_L_EN = [\"strafe left\", \"move left\", \"go left\", \"shift left\", \"slide left\",\n                \"left side\", \"go to the left\"]\n_STRAFE_L_HI = [\"baayein\", \"bayen\", \"bayan\", \"bayin\"]\n_STRAFE_L_HL = [\"left side jao\", \"left mein jao\"]\n_STRAFE_R_EN = [\"strafe right\", \"move right\", \"go right\", \"shift right\", \"slide right\",\n                \"right side\", \"go to the right\"]",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_BWD_EN",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_BWD_EN = [\"backward\", \"go back\", \"move backward\", \"reverse\", \"back up\", \"go backwards\"]\n_BWD_HI = [\"peeche\", \"piche\", \"peechay\", \"peechay\", \"ulta\"]\n_BWD_HL = [\"peeche jao\", \"back karo\", \"reverse lo\"]\n_STRAFE_L_EN = [\"strafe left\", \"move left\", \"go left\", \"shift left\", \"slide left\",\n                \"left side\", \"go to the left\"]\n_STRAFE_L_HI = [\"baayein\", \"bayen\", \"bayan\", \"bayin\"]\n_STRAFE_L_HL = [\"left side jao\", \"left mein jao\"]\n_STRAFE_R_EN = [\"strafe right\", \"move right\", \"go right\", \"shift right\", \"slide right\",\n                \"right side\", \"go to the right\"]\n_STRAFE_R_HI = [\"dayen\", \"dahine\", \"dayan\", \"dayin\"]",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_BWD_HI",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_BWD_HI = [\"peeche\", \"piche\", \"peechay\", \"peechay\", \"ulta\"]\n_BWD_HL = [\"peeche jao\", \"back karo\", \"reverse lo\"]\n_STRAFE_L_EN = [\"strafe left\", \"move left\", \"go left\", \"shift left\", \"slide left\",\n                \"left side\", \"go to the left\"]\n_STRAFE_L_HI = [\"baayein\", \"bayen\", \"bayan\", \"bayin\"]\n_STRAFE_L_HL = [\"left side jao\", \"left mein jao\"]\n_STRAFE_R_EN = [\"strafe right\", \"move right\", \"go right\", \"shift right\", \"slide right\",\n                \"right side\", \"go to the right\"]\n_STRAFE_R_HI = [\"dayen\", \"dahine\", \"dayan\", \"dayin\"]\n_STRAFE_R_HL = [\"right side jao\", \"right mein jao\"]",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_BWD_HL",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_BWD_HL = [\"peeche jao\", \"back karo\", \"reverse lo\"]\n_STRAFE_L_EN = [\"strafe left\", \"move left\", \"go left\", \"shift left\", \"slide left\",\n                \"left side\", \"go to the left\"]\n_STRAFE_L_HI = [\"baayein\", \"bayen\", \"bayan\", \"bayin\"]\n_STRAFE_L_HL = [\"left side jao\", \"left mein jao\"]\n_STRAFE_R_EN = [\"strafe right\", \"move right\", \"go right\", \"shift right\", \"slide right\",\n                \"right side\", \"go to the right\"]\n_STRAFE_R_HI = [\"dayen\", \"dahine\", \"dayan\", \"dayin\"]\n_STRAFE_R_HL = [\"right side jao\", \"right mein jao\"]\n_ROT_L_EN = [\"rotate left\", \"turn left\", \"spin left\", \"face left\", \"turn to the left\"]",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_STRAFE_L_EN",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_STRAFE_L_EN = [\"strafe left\", \"move left\", \"go left\", \"shift left\", \"slide left\",\n                \"left side\", \"go to the left\"]\n_STRAFE_L_HI = [\"baayein\", \"bayen\", \"bayan\", \"bayin\"]\n_STRAFE_L_HL = [\"left side jao\", \"left mein jao\"]\n_STRAFE_R_EN = [\"strafe right\", \"move right\", \"go right\", \"shift right\", \"slide right\",\n                \"right side\", \"go to the right\"]\n_STRAFE_R_HI = [\"dayen\", \"dahine\", \"dayan\", \"dayin\"]\n_STRAFE_R_HL = [\"right side jao\", \"right mein jao\"]\n_ROT_L_EN = [\"rotate left\", \"turn left\", \"spin left\", \"face left\", \"turn to the left\"]\n_ROT_L_HI = [\"ghuma left\", \"ghum left\", \"ghumaao left\", \"mud ja left\", \"bayen mud\"]",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_STRAFE_L_HI",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_STRAFE_L_HI = [\"baayein\", \"bayen\", \"bayan\", \"bayin\"]\n_STRAFE_L_HL = [\"left side jao\", \"left mein jao\"]\n_STRAFE_R_EN = [\"strafe right\", \"move right\", \"go right\", \"shift right\", \"slide right\",\n                \"right side\", \"go to the right\"]\n_STRAFE_R_HI = [\"dayen\", \"dahine\", \"dayan\", \"dayin\"]\n_STRAFE_R_HL = [\"right side jao\", \"right mein jao\"]\n_ROT_L_EN = [\"rotate left\", \"turn left\", \"spin left\", \"face left\", \"turn to the left\"]\n_ROT_L_HI = [\"ghuma left\", \"ghum left\", \"ghumaao left\", \"mud ja left\", \"bayen mud\"]\nROTATE_L_HL = [\"left ghumo\", \"left mein mud\"]\n_ROT_R_EN = [\"rotate right\", \"turn right\", \"spin right\", \"face right\", \"turn to the right\"]",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_STRAFE_L_HL",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_STRAFE_L_HL = [\"left side jao\", \"left mein jao\"]\n_STRAFE_R_EN = [\"strafe right\", \"move right\", \"go right\", \"shift right\", \"slide right\",\n                \"right side\", \"go to the right\"]\n_STRAFE_R_HI = [\"dayen\", \"dahine\", \"dayan\", \"dayin\"]\n_STRAFE_R_HL = [\"right side jao\", \"right mein jao\"]\n_ROT_L_EN = [\"rotate left\", \"turn left\", \"spin left\", \"face left\", \"turn to the left\"]\n_ROT_L_HI = [\"ghuma left\", \"ghum left\", \"ghumaao left\", \"mud ja left\", \"bayen mud\"]\nROTATE_L_HL = [\"left ghumo\", \"left mein mud\"]\n_ROT_R_EN = [\"rotate right\", \"turn right\", \"spin right\", \"face right\", \"turn to the right\"]\n_ROT_R_HI = [\"ghuma right\", \"ghum right\", \"ghumaao right\", \"mud ja right\", \"dayen mud\"]",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_STRAFE_R_EN",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_STRAFE_R_EN = [\"strafe right\", \"move right\", \"go right\", \"shift right\", \"slide right\",\n                \"right side\", \"go to the right\"]\n_STRAFE_R_HI = [\"dayen\", \"dahine\", \"dayan\", \"dayin\"]\n_STRAFE_R_HL = [\"right side jao\", \"right mein jao\"]\n_ROT_L_EN = [\"rotate left\", \"turn left\", \"spin left\", \"face left\", \"turn to the left\"]\n_ROT_L_HI = [\"ghuma left\", \"ghum left\", \"ghumaao left\", \"mud ja left\", \"bayen mud\"]\nROTATE_L_HL = [\"left ghumo\", \"left mein mud\"]\n_ROT_R_EN = [\"rotate right\", \"turn right\", \"spin right\", \"face right\", \"turn to the right\"]\n_ROT_R_HI = [\"ghuma right\", \"ghum right\", \"ghumaao right\", \"mud ja right\", \"dayen mud\"]\nROTATE_R_HL = [\"right ghumo\", \"right mein mud\"]",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_STRAFE_R_HI",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_STRAFE_R_HI = [\"dayen\", \"dahine\", \"dayan\", \"dayin\"]\n_STRAFE_R_HL = [\"right side jao\", \"right mein jao\"]\n_ROT_L_EN = [\"rotate left\", \"turn left\", \"spin left\", \"face left\", \"turn to the left\"]\n_ROT_L_HI = [\"ghuma left\", \"ghum left\", \"ghumaao left\", \"mud ja left\", \"bayen mud\"]\nROTATE_L_HL = [\"left ghumo\", \"left mein mud\"]\n_ROT_R_EN = [\"rotate right\", \"turn right\", \"spin right\", \"face right\", \"turn to the right\"]\n_ROT_R_HI = [\"ghuma right\", \"ghum right\", \"ghumaao right\", \"mud ja right\", \"dayen mud\"]\nROTATE_R_HL = [\"right ghumo\", \"right mein mud\"]\n_STOP_EN = [\"stop\", \"halt\", \"freeze\", \"stay\", \"stop moving\", \"don't move\",\n            \"do not move\", \"wait\", \"pause\", \"brake\"]",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_STRAFE_R_HL",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_STRAFE_R_HL = [\"right side jao\", \"right mein jao\"]\n_ROT_L_EN = [\"rotate left\", \"turn left\", \"spin left\", \"face left\", \"turn to the left\"]\n_ROT_L_HI = [\"ghuma left\", \"ghum left\", \"ghumaao left\", \"mud ja left\", \"bayen mud\"]\nROTATE_L_HL = [\"left ghumo\", \"left mein mud\"]\n_ROT_R_EN = [\"rotate right\", \"turn right\", \"spin right\", \"face right\", \"turn to the right\"]\n_ROT_R_HI = [\"ghuma right\", \"ghum right\", \"ghumaao right\", \"mud ja right\", \"dayen mud\"]\nROTATE_R_HL = [\"right ghumo\", \"right mein mud\"]\n_STOP_EN = [\"stop\", \"halt\", \"freeze\", \"stay\", \"stop moving\", \"don't move\",\n            \"do not move\", \"wait\", \"pause\", \"brake\"]\n_STOP_HI = [\"ruko\", \"ruku\", \"rukna\", \"rukoo\", \"thahar\", \"mat chal\", \"nahi chal\"]",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_ROT_L_EN",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_ROT_L_EN = [\"rotate left\", \"turn left\", \"spin left\", \"face left\", \"turn to the left\"]\n_ROT_L_HI = [\"ghuma left\", \"ghum left\", \"ghumaao left\", \"mud ja left\", \"bayen mud\"]\nROTATE_L_HL = [\"left ghumo\", \"left mein mud\"]\n_ROT_R_EN = [\"rotate right\", \"turn right\", \"spin right\", \"face right\", \"turn to the right\"]\n_ROT_R_HI = [\"ghuma right\", \"ghum right\", \"ghumaao right\", \"mud ja right\", \"dayen mud\"]\nROTATE_R_HL = [\"right ghumo\", \"right mein mud\"]\n_STOP_EN = [\"stop\", \"halt\", \"freeze\", \"stay\", \"stop moving\", \"don't move\",\n            \"do not move\", \"wait\", \"pause\", \"brake\"]\n_STOP_HI = [\"ruko\", \"ruku\", \"rukna\", \"rukoo\", \"thahar\", \"mat chal\", \"nahi chal\"]\n_STOP_HL = [\"stop karo\", \"ruk jao\", \"rukna hai\"]",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_ROT_L_HI",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_ROT_L_HI = [\"ghuma left\", \"ghum left\", \"ghumaao left\", \"mud ja left\", \"bayen mud\"]\nROTATE_L_HL = [\"left ghumo\", \"left mein mud\"]\n_ROT_R_EN = [\"rotate right\", \"turn right\", \"spin right\", \"face right\", \"turn to the right\"]\n_ROT_R_HI = [\"ghuma right\", \"ghum right\", \"ghumaao right\", \"mud ja right\", \"dayen mud\"]\nROTATE_R_HL = [\"right ghumo\", \"right mein mud\"]\n_STOP_EN = [\"stop\", \"halt\", \"freeze\", \"stay\", \"stop moving\", \"don't move\",\n            \"do not move\", \"wait\", \"pause\", \"brake\"]\n_STOP_HI = [\"ruko\", \"ruku\", \"rukna\", \"rukoo\", \"thahar\", \"mat chal\", \"nahi chal\"]\n_STOP_HL = [\"stop karo\", \"ruk jao\", \"rukna hai\"]\n_PULSE_EN = [\"pulse\", \"nudge\", \"quick move\", \"brief pulse\", \"quick pulse\"]",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "ROTATE_L_HL",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "ROTATE_L_HL = [\"left ghumo\", \"left mein mud\"]\n_ROT_R_EN = [\"rotate right\", \"turn right\", \"spin right\", \"face right\", \"turn to the right\"]\n_ROT_R_HI = [\"ghuma right\", \"ghum right\", \"ghumaao right\", \"mud ja right\", \"dayen mud\"]\nROTATE_R_HL = [\"right ghumo\", \"right mein mud\"]\n_STOP_EN = [\"stop\", \"halt\", \"freeze\", \"stay\", \"stop moving\", \"don't move\",\n            \"do not move\", \"wait\", \"pause\", \"brake\"]\n_STOP_HI = [\"ruko\", \"ruku\", \"rukna\", \"rukoo\", \"thahar\", \"mat chal\", \"nahi chal\"]\n_STOP_HL = [\"stop karo\", \"ruk jao\", \"rukna hai\"]\n_PULSE_EN = [\"pulse\", \"nudge\", \"quick move\", \"brief pulse\", \"quick pulse\"]\n_PULSE_HI = [\"jhatka\", \"ek jhatka\"]",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_ROT_R_EN",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_ROT_R_EN = [\"rotate right\", \"turn right\", \"spin right\", \"face right\", \"turn to the right\"]\n_ROT_R_HI = [\"ghuma right\", \"ghum right\", \"ghumaao right\", \"mud ja right\", \"dayen mud\"]\nROTATE_R_HL = [\"right ghumo\", \"right mein mud\"]\n_STOP_EN = [\"stop\", \"halt\", \"freeze\", \"stay\", \"stop moving\", \"don't move\",\n            \"do not move\", \"wait\", \"pause\", \"brake\"]\n_STOP_HI = [\"ruko\", \"ruku\", \"rukna\", \"rukoo\", \"thahar\", \"mat chal\", \"nahi chal\"]\n_STOP_HL = [\"stop karo\", \"ruk jao\", \"rukna hai\"]\n_PULSE_EN = [\"pulse\", \"nudge\", \"quick move\", \"brief pulse\", \"quick pulse\"]\n_PULSE_HI = [\"jhatka\", \"ek jhatka\"]\n_PULSE_HL = [\"pulse karo\", \"jhatka do\"]",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_ROT_R_HI",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_ROT_R_HI = [\"ghuma right\", \"ghum right\", \"ghumaao right\", \"mud ja right\", \"dayen mud\"]\nROTATE_R_HL = [\"right ghumo\", \"right mein mud\"]\n_STOP_EN = [\"stop\", \"halt\", \"freeze\", \"stay\", \"stop moving\", \"don't move\",\n            \"do not move\", \"wait\", \"pause\", \"brake\"]\n_STOP_HI = [\"ruko\", \"ruku\", \"rukna\", \"rukoo\", \"thahar\", \"mat chal\", \"nahi chal\"]\n_STOP_HL = [\"stop karo\", \"ruk jao\", \"rukna hai\"]\n_PULSE_EN = [\"pulse\", \"nudge\", \"quick move\", \"brief pulse\", \"quick pulse\"]\n_PULSE_HI = [\"jhatka\", \"ek jhatka\"]\n_PULSE_HL = [\"pulse karo\", \"jhatka do\"]\n_NOP_EN = [\"nothing\", \"never mind\", \"cancel\", \"nevermind\", \"scratch that\",",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "ROTATE_R_HL",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "ROTATE_R_HL = [\"right ghumo\", \"right mein mud\"]\n_STOP_EN = [\"stop\", \"halt\", \"freeze\", \"stay\", \"stop moving\", \"don't move\",\n            \"do not move\", \"wait\", \"pause\", \"brake\"]\n_STOP_HI = [\"ruko\", \"ruku\", \"rukna\", \"rukoo\", \"thahar\", \"mat chal\", \"nahi chal\"]\n_STOP_HL = [\"stop karo\", \"ruk jao\", \"rukna hai\"]\n_PULSE_EN = [\"pulse\", \"nudge\", \"quick move\", \"brief pulse\", \"quick pulse\"]\n_PULSE_HI = [\"jhatka\", \"ek jhatka\"]\n_PULSE_HL = [\"pulse karo\", \"jhatka do\"]\n_NOP_EN = [\"nothing\", \"never mind\", \"cancel\", \"nevermind\", \"scratch that\",\n           \"ignore\", \"skip\", \"do nothing\", \"disregard\"]",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_STOP_EN",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_STOP_EN = [\"stop\", \"halt\", \"freeze\", \"stay\", \"stop moving\", \"don't move\",\n            \"do not move\", \"wait\", \"pause\", \"brake\"]\n_STOP_HI = [\"ruko\", \"ruku\", \"rukna\", \"rukoo\", \"thahar\", \"mat chal\", \"nahi chal\"]\n_STOP_HL = [\"stop karo\", \"ruk jao\", \"rukna hai\"]\n_PULSE_EN = [\"pulse\", \"nudge\", \"quick move\", \"brief pulse\", \"quick pulse\"]\n_PULSE_HI = [\"jhatka\", \"ek jhatka\"]\n_PULSE_HL = [\"pulse karo\", \"jhatka do\"]\n_NOP_EN = [\"nothing\", \"never mind\", \"cancel\", \"nevermind\", \"scratch that\",\n           \"ignore\", \"skip\", \"do nothing\", \"disregard\"]\n_NOP_HI = [\"kuch nahi\", \"kuch mat kar\", \"chhod do\", \"reekh mat karo\"]",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_STOP_HI",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_STOP_HI = [\"ruko\", \"ruku\", \"rukna\", \"rukoo\", \"thahar\", \"mat chal\", \"nahi chal\"]\n_STOP_HL = [\"stop karo\", \"ruk jao\", \"rukna hai\"]\n_PULSE_EN = [\"pulse\", \"nudge\", \"quick move\", \"brief pulse\", \"quick pulse\"]\n_PULSE_HI = [\"jhatka\", \"ek jhatka\"]\n_PULSE_HL = [\"pulse karo\", \"jhatka do\"]\n_NOP_EN = [\"nothing\", \"never mind\", \"cancel\", \"nevermind\", \"scratch that\",\n           \"ignore\", \"skip\", \"do nothing\", \"disregard\"]\n_NOP_HI = [\"kuch nahi\", \"kuch mat kar\", \"chhod do\", \"reekh mat karo\"]\n_NOP_HL = [\"leave it\", \"leave karo\", \"skip karo\"]\n# ---------------------------------------------------------------------------",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_STOP_HL",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_STOP_HL = [\"stop karo\", \"ruk jao\", \"rukna hai\"]\n_PULSE_EN = [\"pulse\", \"nudge\", \"quick move\", \"brief pulse\", \"quick pulse\"]\n_PULSE_HI = [\"jhatka\", \"ek jhatka\"]\n_PULSE_HL = [\"pulse karo\", \"jhatka do\"]\n_NOP_EN = [\"nothing\", \"never mind\", \"cancel\", \"nevermind\", \"scratch that\",\n           \"ignore\", \"skip\", \"do nothing\", \"disregard\"]\n_NOP_HI = [\"kuch nahi\", \"kuch mat kar\", \"chhod do\", \"reekh mat karo\"]\n_NOP_HL = [\"leave it\", \"leave karo\", \"skip karo\"]\n# ---------------------------------------------------------------------------\n# Noise / augmentation",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_PULSE_EN",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_PULSE_EN = [\"pulse\", \"nudge\", \"quick move\", \"brief pulse\", \"quick pulse\"]\n_PULSE_HI = [\"jhatka\", \"ek jhatka\"]\n_PULSE_HL = [\"pulse karo\", \"jhatka do\"]\n_NOP_EN = [\"nothing\", \"never mind\", \"cancel\", \"nevermind\", \"scratch that\",\n           \"ignore\", \"skip\", \"do nothing\", \"disregard\"]\n_NOP_HI = [\"kuch nahi\", \"kuch mat kar\", \"chhod do\", \"reekh mat karo\"]\n_NOP_HL = [\"leave it\", \"leave karo\", \"skip karo\"]\n# ---------------------------------------------------------------------------\n# Noise / augmentation\n# ---------------------------------------------------------------------------",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_PULSE_HI",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_PULSE_HI = [\"jhatka\", \"ek jhatka\"]\n_PULSE_HL = [\"pulse karo\", \"jhatka do\"]\n_NOP_EN = [\"nothing\", \"never mind\", \"cancel\", \"nevermind\", \"scratch that\",\n           \"ignore\", \"skip\", \"do nothing\", \"disregard\"]\n_NOP_HI = [\"kuch nahi\", \"kuch mat kar\", \"chhod do\", \"reekh mat karo\"]\n_NOP_HL = [\"leave it\", \"leave karo\", \"skip karo\"]\n# ---------------------------------------------------------------------------\n# Noise / augmentation\n# ---------------------------------------------------------------------------\nSTT_HOMOPHONES = {",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_PULSE_HL",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_PULSE_HL = [\"pulse karo\", \"jhatka do\"]\n_NOP_EN = [\"nothing\", \"never mind\", \"cancel\", \"nevermind\", \"scratch that\",\n           \"ignore\", \"skip\", \"do nothing\", \"disregard\"]\n_NOP_HI = [\"kuch nahi\", \"kuch mat kar\", \"chhod do\", \"reekh mat karo\"]\n_NOP_HL = [\"leave it\", \"leave karo\", \"skip karo\"]\n# ---------------------------------------------------------------------------\n# Noise / augmentation\n# ---------------------------------------------------------------------------\nSTT_HOMOPHONES = {\n    \"stop\": [\"shop\", \"stap\", \"top\"],",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_NOP_EN",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_NOP_EN = [\"nothing\", \"never mind\", \"cancel\", \"nevermind\", \"scratch that\",\n           \"ignore\", \"skip\", \"do nothing\", \"disregard\"]\n_NOP_HI = [\"kuch nahi\", \"kuch mat kar\", \"chhod do\", \"reekh mat karo\"]\n_NOP_HL = [\"leave it\", \"leave karo\", \"skip karo\"]\n# ---------------------------------------------------------------------------\n# Noise / augmentation\n# ---------------------------------------------------------------------------\nSTT_HOMOPHONES = {\n    \"stop\": [\"shop\", \"stap\", \"top\"],\n    \"shop\": [\"stop\"],",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_NOP_HI",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_NOP_HI = [\"kuch nahi\", \"kuch mat kar\", \"chhod do\", \"reekh mat karo\"]\n_NOP_HL = [\"leave it\", \"leave karo\", \"skip karo\"]\n# ---------------------------------------------------------------------------\n# Noise / augmentation\n# ---------------------------------------------------------------------------\nSTT_HOMOPHONES = {\n    \"stop\": [\"shop\", \"stap\", \"top\"],\n    \"shop\": [\"stop\"],\n    \"left\": [\"lift\", \"lyft\", \"lif\"],\n    \"right\": [\"write\", \"rite\", \"wright\"],",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "_NOP_HL",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "_NOP_HL = [\"leave it\", \"leave karo\", \"skip karo\"]\n# ---------------------------------------------------------------------------\n# Noise / augmentation\n# ---------------------------------------------------------------------------\nSTT_HOMOPHONES = {\n    \"stop\": [\"shop\", \"stap\", \"top\"],\n    \"shop\": [\"stop\"],\n    \"left\": [\"lift\", \"lyft\", \"lif\"],\n    \"right\": [\"write\", \"rite\", \"wright\"],\n    \"forward\": [\"for ward\", \"four ward\", \"for word\"],",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "STT_HOMOPHONES",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "STT_HOMOPHONES = {\n    \"stop\": [\"shop\", \"stap\", \"top\"],\n    \"shop\": [\"stop\"],\n    \"left\": [\"lift\", \"lyft\", \"lif\"],\n    \"right\": [\"write\", \"rite\", \"wright\"],\n    \"forward\": [\"for ward\", \"four ward\", \"for word\"],\n    \"backward\": [\"back ward\", \"back word\", \"back word\"],\n    \"straight\": [\"straight\", \"strait\", \"streight\"],\n    \"pulse\": [\"pals\", \"puls\", \"pulse\"],\n    \"nothing\": [\"nutting\", \"nuffin\"],",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "STT_HOMOPHONE_INTENTS",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "STT_HOMOPHONE_INTENTS = {\n    \"stop\": \"STOP\",\n    \"shop\": \"STOP\",\n    \"left\": \"STRAFE_LEFT\",\n    \"lift\": \"NOP\",\n    \"lyft\": \"NOP\",\n    \"write\": \"NOP\",\n    \"rite\": \"NOP\",\n    \"forward\": \"FORWARD\",\n    \"backward\": \"BACKWARD\",",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "INTENTS",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "INTENTS = [\n    \"FORWARD\", \"BACKWARD\", \"STRAFE_LEFT\", \"STRAFE_RIGHT\",\n    \"ROTATE_LEFT\", \"ROTATE_RIGHT\", \"STOP\", \"PULSE\", \"NOP\",\n]\n# ---------------------------------------------------------------------------\n# Preprocessing (same as infer.py, used for canonical training examples)\n# ---------------------------------------------------------------------------\ndef preprocess(text: str) -> str:\n    text = text.lower().strip()\n    text = re.sub(r'[\\u0900-\\u097F]+', '', text)",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "TEST_CASES",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "TEST_CASES = [\n    # FORWARD\n    (\"forward\", \"FORWARD\"),\n    (\"go forward\", \"FORWARD\"),\n    (\"move forward\", \"FORWARD\"),\n    (\"go ahead\", \"FORWARD\"),\n    (\"move ahead\", \"FORWARD\"),\n    (\"drive forward\", \"FORWARD\"),\n    (\"drive ahead\", \"FORWARD\"),\n    (\"straight\", \"FORWARD\"),",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "STT_NOISE_CASES",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "STT_NOISE_CASES = [\n    # STT-noise test cases (these are already noisy inputs)\n    # Expected intent is based on STT_HOMOPHONE_INTENTS mapping\n    (\"shop\", \"STOP\"),\n    (\"stap\", \"STOP\"),\n    (\"top\", \"NOP\"),\n    (\"lift\", \"NOP\"),\n    (\"lyft\", \"NOP\"),\n    (\"lif\", \"NOP\"),\n    (\"write\", \"NOP\"),",
+        "detail": "intent_classifier.train_intent",
+        "documentation": {}
+    },
+    {
+        "label": "COMMANDS",
+        "kind": 5,
+        "importPath": "intent_classifier.train_intent",
+        "description": "intent_classifier.train_intent",
+        "peekOfCode": "COMMANDS = {\n    \"generate\": cmd_generate,\n    \"test\": cmd_test,\n}\ndef main():\n    if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:\n        print(f\"Usage: {sys.argv[0]} <{'|'.join(COMMANDS.keys())}>\")\n        sys.exit(1)\n    COMMANDS[sys.argv[1]](sys.argv[2:])\nif __name__ == \"__main__\":",
+        "detail": "intent_classifier.train_intent",
         "documentation": {}
     },
     {
@@ -3375,6 +4114,42 @@
         "description": "odometry_locomization.check_threads",
         "peekOfCode": "tasks = glob.glob(f\"/proc/{pid}/task/*\")\nprint(f\"Thread count: {len(tasks)}\")\nfor t in tasks:\n    tid = os.path.basename(t)\n    try:\n        with open(f\"{t}/comm\") as f:\n            name = f.read().strip()\n        with open(f\"{t}/status\") as f:\n            lines = f.readlines()\n        state = [l for l in lines if l.startswith(\"State:\")]",
         "detail": "odometry_locomization.check_threads",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "odometry_locomization.debug_yaw_drift",
+        "description": "odometry_locomization.debug_yaw_drift",
+        "peekOfCode": "def main():\n    print(f\"Logging yaw drift for {DURATION}s — keep robot still\")\n    print(f\"{'time':>7} {'yaw':>8} {'rec':>4}\")\n    print(\"-\" * 25)\n    t0 = time.time()\n    rows = []\n    with open(CSV, \"w\", newline=\"\") as f:\n        writer = csv.writer(f)\n        writer.writerow([\"elapsed_s\", \"yaw\", \"recording\"])\n        while time.time() - t0 < DURATION:",
+        "detail": "odometry_locomization.debug_yaw_drift",
+        "documentation": {}
+    },
+    {
+        "label": "URL",
+        "kind": 5,
+        "importPath": "odometry_locomization.debug_yaw_drift",
+        "description": "odometry_locomization.debug_yaw_drift",
+        "peekOfCode": "URL = \"http://127.0.0.1:5000/state\"\nCSV = \"/tmp/yaw_drift_debug.csv\"\nDURATION = 60  # seconds\ndef main():\n    print(f\"Logging yaw drift for {DURATION}s — keep robot still\")\n    print(f\"{'time':>7} {'yaw':>8} {'rec':>4}\")\n    print(\"-\" * 25)\n    t0 = time.time()\n    rows = []\n    with open(CSV, \"w\", newline=\"\") as f:",
+        "detail": "odometry_locomization.debug_yaw_drift",
+        "documentation": {}
+    },
+    {
+        "label": "CSV",
+        "kind": 5,
+        "importPath": "odometry_locomization.debug_yaw_drift",
+        "description": "odometry_locomization.debug_yaw_drift",
+        "peekOfCode": "CSV = \"/tmp/yaw_drift_debug.csv\"\nDURATION = 60  # seconds\ndef main():\n    print(f\"Logging yaw drift for {DURATION}s — keep robot still\")\n    print(f\"{'time':>7} {'yaw':>8} {'rec':>4}\")\n    print(\"-\" * 25)\n    t0 = time.time()\n    rows = []\n    with open(CSV, \"w\", newline=\"\") as f:\n        writer = csv.writer(f)",
+        "detail": "odometry_locomization.debug_yaw_drift",
+        "documentation": {}
+    },
+    {
+        "label": "DURATION",
+        "kind": 5,
+        "importPath": "odometry_locomization.debug_yaw_drift",
+        "description": "odometry_locomization.debug_yaw_drift",
+        "peekOfCode": "DURATION = 60  # seconds\ndef main():\n    print(f\"Logging yaw drift for {DURATION}s — keep robot still\")\n    print(f\"{'time':>7} {'yaw':>8} {'rec':>4}\")\n    print(\"-\" * 25)\n    t0 = time.time()\n    rows = []\n    with open(CSV, \"w\", newline=\"\") as f:\n        writer = csv.writer(f)\n        writer.writerow([\"elapsed_s\", \"yaw\", \"recording\"])",
+        "detail": "odometry_locomization.debug_yaw_drift",
         "documentation": {}
     },
     {
@@ -3756,11 +4531,20 @@
         "documentation": {}
     },
     {
+        "label": "_StreamDecoder",
+        "kind": 6,
+        "importPath": "odometry_locomization.imu_usb_mkbox",
+        "description": "odometry_locomization.imu_usb_mkbox",
+        "peekOfCode": "class _StreamDecoder:\n    \"\"\"Decodes one USB endpoint's sample stream (handles timestamp skip +\n    byte buffer alignment).\"\"\"\n    def __init__(self, samples_per_ts, sensitivity):\n        self.spts = samples_per_ts\n        self.sensitivity = sensitivity\n        self._buf = bytearray()\n        self._sample_count = 0\n    def feed_and_decode(self, raw: bytes):\n        \"\"\"Feed raw USB bytes, return list of decoded sample tuples (float).\"\"\"",
+        "detail": "odometry_locomization.imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
         "label": "MkBoxUsbGyro",
         "kind": 6,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "class MkBoxUsbGyro:\n    def __init__(self, ble_device_name=BLE_DEVICE_NAME):\n        self.ble_device_name = ble_device_name\n        self._usb_dev = None\n        self._buf = bytearray()\n        self._sample_count = 0\n    async def start(self, scan_timeout=10.0):\n        \"\"\"Connect over BLE just long enough to start USB streaming, then\n        disconnect BLE entirely and open the USB device -- once\n        log_controller*start_log has been accepted, the box keeps streaming",
+        "peekOfCode": "class MkBoxUsbGyro:\n    def __init__(self, ble_device_name=BLE_DEVICE_NAME):\n        self.ble_device_name = ble_device_name\n        self._usb_dev = None\n        self._gyro = _StreamDecoder(GYRO_SAMPLES_PER_TS, GYRO_MDPS_PER_LSB / 1000.0)\n        self._accel = _StreamDecoder(ACCEL_SAMPLES_PER_TS, ACCEL_MG_PER_LSB)\n    async def start(self, scan_timeout=10.0):\n        \"\"\"Connect over BLE just long enough to start USB streaming, then\n        disconnect BLE entirely and open the USB device.\"\"\"\n        from bleak import BleakScanner",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3769,7 +4553,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "BLE_DEVICE_NAME = \"HSD2v33\"  # update if the box's advertised name changes\nCMD_CHAR_UUID = \"0000001b-0002-11e1-ac36-0002a5d5c51b\"  # COPY_PNPLIKE_CHAR_UUID\nUSB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nGYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Per-sample time interval: live measurement showed samples arrive at ~7880 Hz",
+        "peekOfCode": "BLE_DEVICE_NAME = \"HSD2v33\"\nCMD_CHAR_UUID = \"0000001b-0002-11e1-ac36-0002a5d5c51b\"\nUSB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\n# Gyro endpoint (ep_id=0 → 0x81)\nGYRO_EP = 0x81\nGYRO_SAMPLES_PER_TS = 1000\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB\n# Accel endpoint (ep_id=1 → 0x82)\nACCEL_EP = 0x82",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3778,7 +4562,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "CMD_CHAR_UUID = \"0000001b-0002-11e1-ac36-0002a5d5c51b\"  # COPY_PNPLIKE_CHAR_UUID\nUSB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nGYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Per-sample time interval: live measurement showed samples arrive at ~7880 Hz\n# (not the ~384 Hz that get_status's \"usb_dps\" field implied). Used only as",
+        "peekOfCode": "CMD_CHAR_UUID = \"0000001b-0002-11e1-ac36-0002a5d5c51b\"\nUSB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\n# Gyro endpoint (ep_id=0 → 0x81)\nGYRO_EP = 0x81\nGYRO_SAMPLES_PER_TS = 1000\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB\n# Accel endpoint (ep_id=1 → 0x82)\nACCEL_EP = 0x82\nACCEL_SAMPLES_PER_TS = 1000",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3787,7 +4571,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "USB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\nGYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Per-sample time interval: live measurement showed samples arrive at ~7880 Hz\n# (not the ~384 Hz that get_status's \"usb_dps\" field implied). Used only as\n# a fallback if the caller doesn't measure dt from wall-clock time (the fusion",
+        "peekOfCode": "USB_VENDOR_ID = 0x0483\nUSB_PRODUCT_ID = 0x5744\n# Gyro endpoint (ep_id=0 → 0x81)\nGYRO_EP = 0x81\nGYRO_SAMPLES_PER_TS = 1000\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB\n# Accel endpoint (ep_id=1 → 0x82)\nACCEL_EP = 0x82\nACCEL_SAMPLES_PER_TS = 1000\nACCEL_MG_PER_LSB = 0.061   # mg/LSB at ±2g range",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3796,16 +4580,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "USB_PRODUCT_ID = 0x5744\nGYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Per-sample time interval: live measurement showed samples arrive at ~7880 Hz\n# (not the ~384 Hz that get_status's \"usb_dps\" field implied). Used only as\n# a fallback if the caller doesn't measure dt from wall-clock time (the fusion\n# thread in run_linux.py does measure dt live, so this constant isn't critical).",
-        "detail": "odometry_locomization.imu_usb_mkbox",
-        "documentation": {}
-    },
-    {
-        "label": "GYRO_EP_ID",
-        "kind": 5,
-        "importPath": "odometry_locomization.imu_usb_mkbox",
-        "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "GYRO_EP_ID = 0  # from get_status:lsm6dsv16x_gyro -- USB endpoint is 0x81 + ep_id\nGYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Per-sample time interval: live measurement showed samples arrive at ~7880 Hz\n# (not the ~384 Hz that get_status's \"usb_dps\" field implied). Used only as\n# a fallback if the caller doesn't measure dt from wall-clock time (the fusion\n# thread in run_linux.py does measure dt live, so this constant isn't critical).\nGYRO_SAMPLE_INTERVAL_S = 1.0 / 7880.0",
+        "peekOfCode": "USB_PRODUCT_ID = 0x5744\n# Gyro endpoint (ep_id=0 → 0x81)\nGYRO_EP = 0x81\nGYRO_SAMPLES_PER_TS = 1000\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB\n# Accel endpoint (ep_id=1 → 0x82)\nACCEL_EP = 0x82\nACCEL_SAMPLES_PER_TS = 1000\nACCEL_MG_PER_LSB = 0.061   # mg/LSB at ±2g range\n_USB_HEADER_SIZE = 5",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3814,7 +4589,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "GYRO_EP = 0x81 + GYRO_EP_ID\nGYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Per-sample time interval: live measurement showed samples arrive at ~7880 Hz\n# (not the ~384 Hz that get_status's \"usb_dps\" field implied). Used only as\n# a fallback if the caller doesn't measure dt from wall-clock time (the fusion\n# thread in run_linux.py does measure dt live, so this constant isn't critical).\nGYRO_SAMPLE_INTERVAL_S = 1.0 / 7880.0\n# Each USB bulk read from the device starts with a 5-byte header:",
+        "peekOfCode": "GYRO_EP = 0x81\nGYRO_SAMPLES_PER_TS = 1000\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB\n# Accel endpoint (ep_id=1 → 0x82)\nACCEL_EP = 0x82\nACCEL_SAMPLES_PER_TS = 1000\nACCEL_MG_PER_LSB = 0.061   # mg/LSB at ±2g range\n_USB_HEADER_SIZE = 5\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3823,7 +4598,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "GYRO_SAMPLES_PER_TS = 1000  # from get_status:lsm6dsv16x_gyro -- how the 8-byte\n                            # timestamp is interleaved into the sample stream\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Per-sample time interval: live measurement showed samples arrive at ~7880 Hz\n# (not the ~384 Hz that get_status's \"usb_dps\" field implied). Used only as\n# a fallback if the caller doesn't measure dt from wall-clock time (the fusion\n# thread in run_linux.py does measure dt live, so this constant isn't critical).\nGYRO_SAMPLE_INTERVAL_S = 1.0 / 7880.0\n# Each USB bulk read from the device starts with a 5-byte header:\n#   byte 0: stream ID (always 0x00)",
+        "peekOfCode": "GYRO_SAMPLES_PER_TS = 1000\nGYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB\n# Accel endpoint (ep_id=1 → 0x82)\nACCEL_EP = 0x82\nACCEL_SAMPLES_PER_TS = 1000\nACCEL_MG_PER_LSB = 0.061   # mg/LSB at ±2g range\n_USB_HEADER_SIZE = 5\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3832,16 +4607,34 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "GYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB, per the box's own reported multiply_factor\n# Per-sample time interval: live measurement showed samples arrive at ~7880 Hz\n# (not the ~384 Hz that get_status's \"usb_dps\" field implied). Used only as\n# a fallback if the caller doesn't measure dt from wall-clock time (the fusion\n# thread in run_linux.py does measure dt live, so this constant isn't critical).\nGYRO_SAMPLE_INTERVAL_S = 1.0 / 7880.0\n# Each USB bulk read from the device starts with a 5-byte header:\n#   byte 0: stream ID (always 0x00)\n#   bytes 1-4: LE uint32 packet counter (increments by data-payload-size)\n# This header must be stripped before sample decoding. Reading only 64 bytes",
+        "peekOfCode": "GYRO_MDPS_PER_LSB = 140.0  # 0.14 dps/LSB\n# Accel endpoint (ep_id=1 → 0x82)\nACCEL_EP = 0x82\nACCEL_SAMPLES_PER_TS = 1000\nACCEL_MG_PER_LSB = 0.061   # mg/LSB at ±2g range\n_USB_HEADER_SIZE = 5\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([_TP_START_END]) + struct.pack(\">H\", len(payload)) + payload]",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
     {
-        "label": "GYRO_SAMPLE_INTERVAL_S",
+        "label": "ACCEL_EP",
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "GYRO_SAMPLE_INTERVAL_S = 1.0 / 7880.0\n# Each USB bulk read from the device starts with a 5-byte header:\n#   byte 0: stream ID (always 0x00)\n#   bytes 1-4: LE uint32 packet counter (increments by data-payload-size)\n# This header must be stripped before sample decoding. Reading only 64 bytes\n# at a time mixes header bytes into the sample stream, causing byte\n# misalignment and ~35 dps corruption at rest. Reading full packets (≥4096)\n# and stripping the header fixes this.\n_USB_HEADER_SIZE = 5\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command",
+        "peekOfCode": "ACCEL_EP = 0x82\nACCEL_SAMPLES_PER_TS = 1000\nACCEL_MG_PER_LSB = 0.061   # mg/LSB at ±2g range\n_USB_HEADER_SIZE = 5\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([_TP_START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([_TP_START]) + struct.pack(\">H\",\n                                               len(payload)) + payload[:mtu_payload]]",
+        "detail": "odometry_locomization.imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "ACCEL_SAMPLES_PER_TS",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_usb_mkbox",
+        "description": "odometry_locomization.imu_usb_mkbox",
+        "peekOfCode": "ACCEL_SAMPLES_PER_TS = 1000\nACCEL_MG_PER_LSB = 0.061   # mg/LSB at ±2g range\n_USB_HEADER_SIZE = 5\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([_TP_START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([_TP_START]) + struct.pack(\">H\",\n                                               len(payload)) + payload[:mtu_payload]]\n    rest = payload[mtu_payload:]",
+        "detail": "odometry_locomization.imu_usb_mkbox",
+        "documentation": {}
+    },
+    {
+        "label": "ACCEL_MG_PER_LSB",
+        "kind": 5,
+        "importPath": "odometry_locomization.imu_usb_mkbox",
+        "description": "odometry_locomization.imu_usb_mkbox",
+        "peekOfCode": "ACCEL_MG_PER_LSB = 0.061   # mg/LSB at ±2g range\n_USB_HEADER_SIZE = 5\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([_TP_START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([_TP_START]) + struct.pack(\">H\",\n                                               len(payload)) + payload[:mtu_payload]]\n    rest = payload[mtu_payload:]\n    while len(rest) > mtu_payload:",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -3850,7 +4643,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.imu_usb_mkbox",
         "description": "odometry_locomization.imu_usb_mkbox",
-        "peekOfCode": "_USB_HEADER_SIZE = 5\n# BLE_COMM_TP framing (ST's chunked-write protocol for the PnPL command\n# characteristic -- see imu_ble_mkbox.py's header note / prior probing).\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([_TP_START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([_TP_START]) + struct.pack(\">H\",\n                                               len(payload)) + payload[:mtu_payload]]\n    rest = payload[mtu_payload:]",
+        "peekOfCode": "_USB_HEADER_SIZE = 5\n_TP_START, _TP_START_END, _TP_MIDDLE, _TP_END = 0x00, 0x20, 0x40, 0x80\ndef _encode_tp(payload: bytes, mtu_payload=17):\n    if len(payload) <= mtu_payload:\n        return [bytes([_TP_START_END]) + struct.pack(\">H\", len(payload)) + payload]\n    chunks = [bytes([_TP_START]) + struct.pack(\">H\",\n                                               len(payload)) + payload[:mtu_payload]]\n    rest = payload[mtu_payload:]\n    while len(rest) > mtu_payload:\n        chunks.append(bytes([_TP_MIDDLE]) + rest[:mtu_payload])",
         "detail": "odometry_locomization.imu_usb_mkbox",
         "documentation": {}
     },
@@ -4089,6 +4882,15 @@
         "documentation": {}
     },
     {
+        "label": "_MadgwickAHRS",
+        "kind": 6,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "class _MadgwickAHRS:\n    \"\"\"Madgwick AHRS filter (gradient-descent, 9-DOF).\n    Quaternion order: [w, x, y, z].\"\"\"\n    def __init__(self, beta=0.1):\n        self.q = [1.0, 0.0, 0.0, 0.0]\n        self.beta = beta  # filter gain (0.01–0.5; higher = more trust in accel/mag)\n    def _inv_sqrt(self, x):\n        return x ** -0.5 if x > 0 else 1.0\n    def update(self, gx, gy, gz, ax, ay, az, mx, my, mz, dt):\n        \"\"\"Update with gyro (dps), accel (mg), mag (mgauss), dt (s).",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
         "label": "quaternion_to_yaw",
         "kind": 2,
         "importPath": "odometry_locomization.run_linux",
@@ -4138,7 +4940,7 @@
         "kind": 2,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "def imu_fusion_yaw_thread():\n    global _raw_smoothed_yaw\n    import imu_usb_mkbox\n    threading.Thread(target=_mag_heading_reader_thread, daemon=True).start()\n    async def run():\n        global _raw_smoothed_yaw\n        box = imu_usb_mkbox.MkBoxUsbGyro()\n        print(\"[FUSION] connecting over BLE to start USB gyro streaming...\")\n        await box.start()\n        print(\"[FUSION] gyro streaming started, waiting for first mag reading...\")",
+        "peekOfCode": "def imu_fusion_yaw_thread():\n    global _raw_smoothed_yaw\n    import imu_usb_mkbox\n    threading.Thread(target=_mag_reader_thread, daemon=True).start()\n    async def run():\n        global _raw_smoothed_yaw\n        box = imu_usb_mkbox.MkBoxUsbGyro()\n        print(\"[FUSION] connecting over BLE to start USB streaming (gyro+accel)...\")\n        await box.start()\n        print(\"[FUSION] streaming started, waiting for first mag reading...\")",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -4453,25 +5255,16 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "USB_GYRO_POLL_HZ = 200\n# ── Fusion: RBT01 onboard magnetometer (anchor) + MKBOXPRO gyro (smoother) ──\n# Per your sir's guidance: combine gyro + accel + mag for heading. RBT01's own\n# gyro/accel chip doesn't ACK on i2c-1 (see imu_lsm6dsv16x.py), so a true\n# onboard 9-DOF fusion isn't possible -- this instead fuses the two sources\n# that DO work: RBT01's own magnetometer (absolute heading, correct on\n# average but noisy/motor-magnet-distorted) with the MKBOXPRO's external\n# gyro (smooth short-term rate, but its USB decode still shows occasional\n# residual corruption -- see imu_usb_mkbox.py's notes, still being chased).\n# A complementary filter integrates gyro for smoothness between mag updates",
+        "peekOfCode": "USB_GYRO_POLL_HZ = 200\n# ── Fusion: Madgwick AHRS — gyro + accel + mag 9-DOF fusion ─────────────────\n# Replaces the old hand-rolled complementary filter with a proper Madgwick\n# gradient-descent AHRS filter.  The filter fuses:\n#   - Gyro (MKBOXPRO USB): smooth short-term angular rate\n#   - Accel (MKBOXPRO USB): gravity reference for tilt compensation\n#   - Mag  (IIS2MDC I2C):  absolute heading reference\n# The Madgwick filter outputs a quaternion; yaw is extracted from it with\n# proper tilt compensation — no more raw atan2(mx,my) that assumes a\n# perfectly level sensor.",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
     {
-        "label": "_latest_mag_heading",
+        "label": "_latest_mag",
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_latest_mag_heading = None\nFUSION_MAG_GAIN = 0.001  # 2026-07-14: reduced from 0.05 -- at 200 Hz poll,\n                         # the old gain caused yaw to fully snap to (often\n                         # motor-distorted) mag within ~1 s. 0.001 lets gyro\n                         # dominate during rotation; mag only slowly corrects\n                         # drift at rest (~5 % per second instead of ~95 %).\ndef _mag_heading_reader_thread():\n    global _latest_mag_heading\n    from imu_iis2mdc import IIS2MDC\n    try:",
-        "detail": "odometry_locomization.run_linux",
-        "documentation": {}
-    },
-    {
-        "label": "FUSION_MAG_GAIN",
-        "kind": 5,
-        "importPath": "odometry_locomization.run_linux",
-        "description": "odometry_locomization.run_linux",
-        "peekOfCode": "FUSION_MAG_GAIN = 0.001  # 2026-07-14: reduced from 0.05 -- at 200 Hz poll,\n                         # the old gain caused yaw to fully snap to (often\n                         # motor-distorted) mag within ~1 s. 0.001 lets gyro\n                         # dominate during rotation; mag only slowly corrects\n                         # drift at rest (~5 % per second instead of ~95 %).\ndef _mag_heading_reader_thread():\n    global _latest_mag_heading\n    from imu_iis2mdc import IIS2MDC\n    try:\n        mag = IIS2MDC()",
+        "peekOfCode": "_latest_mag = None  # (mx, my, mz) in milligauss, set by _mag_reader_thread\nclass _MadgwickAHRS:\n    \"\"\"Madgwick AHRS filter (gradient-descent, 9-DOF).\n    Quaternion order: [w, x, y, z].\"\"\"\n    def __init__(self, beta=0.1):\n        self.q = [1.0, 0.0, 0.0, 0.0]\n        self.beta = beta  # filter gain (0.01–0.5; higher = more trust in accel/mag)\n    def _inv_sqrt(self, x):\n        return x ** -0.5 if x > 0 else 1.0\n    def update(self, gx, gy, gz, ax, ay, az, mx, my, mz, dt):",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
