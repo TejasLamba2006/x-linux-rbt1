@@ -70,14 +70,21 @@ if _tokenizer is None:
     import unicodedata
     _VOCAB_PATH = os.path.join(_DIR, "embedder_onnx", "tokenizer.json")
     with open(_VOCAB_PATH) as _f:
-        _vocab = {w: i for i, w in enumerate(json.load(_f).get("model", {}).get("vocab", []))}
+        _model = json.load(_f).get("model", {})
+        _raw_vocab = _model.get("vocab", {})
+        # vocab may be a {word: id} dict or a [word, ...] list
+        if isinstance(_raw_vocab, dict):
+            _vocab = _raw_vocab  # already {word: id}
+        else:
+            _vocab = {w: i for i, w in enumerate(_raw_vocab)}
+        _unk_id = _vocab.get("[UNK]", 1)
 
     class _RegexTokenizer:
         """Minimal regex tokenizer that maps words to vocab IDs."""
         def encode(self, text):
             text = unicodedata.normalize("NFKC", text.lower())
             tokens = re.findall(r"\w+|[^\w\s]", text)
-            ids = [_vocab.get(t, _vocab.get("[UNK]", 1)) for t in tokens]
+            ids = [_vocab.get(t, _unk_id) for t in tokens]
             return _EncResult(ids)
     class _EncResult:
         def __init__(self, ids):
