@@ -51,8 +51,9 @@ with open(os.path.join(_DIR, "intent_labels.json")) as f:
 
 # --- Load bundled tokenizer (tokenizers lib, not transformers) ---
 # The tokenizers package may not export Tokenizer at the top level on older
-# Yocto builds.  Try multiple import paths, then fall back to a simple
-# regex-based tokenizer that's good enough for short voice commands.
+# Yocto builds (and some images ship a 0-byte stub that never imports). Try
+# multiple import paths, then fall back to a pure-Python SentencePiece Unigram
+# tokenizer that reproduces the same token IDs the ONNX embedder expects.
 _tokenizer = None
 try:
     from tokenizers import Tokenizer as _TkCls
