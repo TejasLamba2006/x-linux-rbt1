@@ -6,12 +6,19 @@ import os
 import struct
 import threading
 import time
-from collections import deque
 from flask import Flask, jsonify, request, send_from_directory
 
 # ── Constants ─────────────────────────────────────────────────────────────────
-COUNTS_PER_CM = 25
-SMOOTHING_WIN = 5
+COUNTS_PER_CM = 25   # default only -- overridden by odometry_config.json (see
+                     # _load_odom_config; calibrate with calibrate_linux.py)
+
+# Trail limits: the server appends a path point every 0.5 cm of travel; /state
+# used to send just the last 500 (2.5 m!) so long drives visibly lost their
+# tail. Now the full trail is kept (thinned 2:1 above PATH_MAX_POINTS to bound
+# memory) and /state decimates evenly to PATH_SEND_MAX points, always keeping
+# the newest point -- the trail never disappears, the payload stays bounded.
+PATH_MAX_POINTS = 20000
+PATH_SEND_MAX = 1000
 
 # Linux input_event layout (64-bit kernel, ARM64)
 # struct input_event { timeval(8+8), type(2), code(2), value(4) } = 24 bytes
@@ -43,11 +50,33 @@ state = {
     "counts_per_cm": COUNTS_PER_CM,
 }
 
-_raw_dx_buf = deque(maxlen=SMOOTHING_WIN)
-_ema_distance = 0.0
 _click_count = 0
 _last_click = 0.0
-_last_mouse_move_time = 0.0  # monotonic time of last REL_X/REL_Y event
+
+# Runtime settings persisted across restarts (currently just counts_per_cm --
+# fixes "Set" appearing to work then snapping back to 25 on the next launch).
+_ODOM_CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                 "odometry_config.json")
+
+
+def _load_odom_config():
+    try:
+        with open(_ODOM_CONFIG_PATH) as f:
+            cfg = json.load(f)
+        cpc = float(cfg["counts_per_cm"])
+        if cpc > 0:
+            state["counts_per_cm"] = cpc
+            print(f"[CONFIG] counts_per_cm = {cpc}")
+    except (FileNotFoundError, KeyError, ValueError, json.JSONDecodeError):
+        pass
+
+
+def _save_odom_config():
+    try:
+        with open(_ODOM_CONFIG_PATH, "w") as f:
+            json.dump({"counts_per_cm": state["counts_per_cm"]}, f)
+    except OSError as e:
+        print(f"[CONFIG] save failed: {e}")
 
 # Fused raw (un-zeroed) yaw from the gyro+mag complementary filter, and the
 # offset subtracted from it to produce state["yaw"]. The mag heading is
@@ -408,6 +437,10 @@ def _raw_input_delta_callback(raw_dx: int, raw_dy: int):
                 round(state["x"], 2),
                 round(state["y"], 2)
             ])
+            # Bound memory on very long runs by halving resolution, never by
+            # dropping the tail (that's what made the trail disappear before).
+            if len(path) > PATH_MAX_POINTS:
+                state["path"] = path[::2]
 
 
 def _evdev_thread(device_path: str):
@@ -446,7 +479,6 @@ def _evdev_thread(device_path: str):
                 INPUT_EVENT_FMT, raw)
 
             if ev_type == EV_REL:
-                _last_mouse_move_time = time.time()
                 if ev_code == REL_X:
                     pending_dx += ev_value
                 elif ev_code == REL_Y:
@@ -501,13 +533,20 @@ def index():
 @app.route("/state")
 def get_state():
     with lock:
+        path = state["path"]
+        if len(path) > PATH_SEND_MAX:
+            # Decimate evenly across the WHOLE trail (never truncate the old
+            # end -- that's what made long trails vanish), keeping the newest
+            # point exact so the line always reaches the car.
+            step = len(path) / (PATH_SEND_MAX - 1)
+            path = [path[int(i * step)] for i in range(PATH_SEND_MAX - 1)] + [path[-1]]
         return jsonify({
             "x":              round(state["x"], 2),
             "y":              round(state["y"], 2),
             "yaw":            state["yaw"],
             "distance":       round(state["distance"], 2),
             "recording":      state["recording"],
-            "path":           state["path"][-500:],
+            "path":           path,
             "counts_per_cm":  state["counts_per_cm"],
         })
 
@@ -515,7 +554,8 @@ def get_state():
 @app.route("/set_counts_per_cm", methods=["POST"])
 def set_counts_per_cm():
     """Update the mouse-counts-to-cm calibration factor at runtime (see
-    calibrate_linux.py for how to derive an accurate value)."""
+    calibrate_linux.py for how to derive an accurate value). Persisted to
+    odometry_config.json so it survives restarts."""
     try:
         value = float(request.get_json(force=True)["value"])
         if value <= 0:
@@ -524,7 +564,20 @@ def set_counts_per_cm():
         return jsonify({"ok": False}), 400
     with lock:
         state["counts_per_cm"] = value
+    _save_odom_config()
     return jsonify({"ok": True, "counts_per_cm": value})
+
+
+@app.route("/reset_map", methods=["POST"])
+def reset_map():
+    """Clear position, distance, and trail (same as double-clicking the mouse
+    button, but reachable from the web UI)."""
+    with lock:
+        state["x"] = 0.0
+        state["y"] = 0.0
+        state["distance"] = 0.0
+        state["path"] = [[0.0, 0.0]]
+    return jsonify({"ok": True})
 
 
 @app.route("/set_recording", methods=["POST"])
@@ -580,6 +633,8 @@ def recalibrate_mag():
 
 # ── Entry Point ───────────────────────────────────────────────────────────────
 if __name__ == "__main__":
+    _load_odom_config()
+
     t_yaw = threading.Thread(
         target=imu_fusion_yaw_thread,
         daemon=True

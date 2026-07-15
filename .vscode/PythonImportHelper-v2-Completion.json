@@ -902,22 +902,6 @@
         "documentation": {}
     },
     {
-        "label": "deque",
-        "importPath": "collections",
-        "description": "collections",
-        "isExtraImport": true,
-        "detail": "collections",
-        "documentation": {}
-    },
-    {
-        "label": "deque",
-        "importPath": "collections",
-        "description": "collections",
-        "isExtraImport": true,
-        "detail": "collections",
-        "documentation": {}
-    },
-    {
         "label": "Flask",
         "importPath": "flask",
         "description": "flask",
@@ -980,6 +964,14 @@
         "importPath": "socket",
         "description": "socket",
         "detail": "socket",
+        "documentation": {}
+    },
+    {
+        "label": "deque",
+        "importPath": "collections",
+        "description": "collections",
+        "isExtraImport": true,
+        "detail": "collections",
         "documentation": {}
     },
     {
@@ -2457,7 +2449,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "ODOMETRY_HTML_FILE = os.path.join(REPO_ROOT, \"odometry_locomization\", \"index.html\")\nODOMETRY_STATE_URL = \"http://127.0.0.1:5000/state\"\nODOMETRY_ZERO_YAW_URL = \"http://127.0.0.1:5000/zero_yaw\"\nODOMETRY_SET_CPC_URL = \"http://127.0.0.1:5000/set_counts_per_cm\"\nODOMETRY_SET_RECORDING_URL = \"http://127.0.0.1:5000/set_recording\"\n_motor_moving = False\ndef set_odometry_recording(active: bool) -> None:\n    \"\"\"Tell the odometry subprocess whether to accumulate distance/position.\n    The mouse sensor is mounted on the robot itself (nothing to click), so\n    recording tracks whether the motors are actually being driven instead.\"\"\"",
+        "peekOfCode": "ODOMETRY_HTML_FILE = os.path.join(REPO_ROOT, \"odometry_locomization\", \"index.html\")\nODOMETRY_STATE_URL = \"http://127.0.0.1:5000/state\"\nODOMETRY_ZERO_YAW_URL = \"http://127.0.0.1:5000/zero_yaw\"\nODOMETRY_SET_CPC_URL = \"http://127.0.0.1:5000/set_counts_per_cm\"\nODOMETRY_SET_RECORDING_URL = \"http://127.0.0.1:5000/set_recording\"\nODOMETRY_RESET_MAP_URL = \"http://127.0.0.1:5000/reset_map\"\n_motor_moving = False\ndef set_odometry_recording(active: bool) -> None:\n    \"\"\"Tell the odometry subprocess whether to accumulate distance/position.\n    The mouse sensor is mounted on the robot itself (nothing to click), so",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -2466,7 +2458,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "ODOMETRY_STATE_URL = \"http://127.0.0.1:5000/state\"\nODOMETRY_ZERO_YAW_URL = \"http://127.0.0.1:5000/zero_yaw\"\nODOMETRY_SET_CPC_URL = \"http://127.0.0.1:5000/set_counts_per_cm\"\nODOMETRY_SET_RECORDING_URL = \"http://127.0.0.1:5000/set_recording\"\n_motor_moving = False\ndef set_odometry_recording(active: bool) -> None:\n    \"\"\"Tell the odometry subprocess whether to accumulate distance/position.\n    The mouse sensor is mounted on the robot itself (nothing to click), so\n    recording tracks whether the motors are actually being driven instead.\"\"\"\n    import urllib.request",
+        "peekOfCode": "ODOMETRY_STATE_URL = \"http://127.0.0.1:5000/state\"\nODOMETRY_ZERO_YAW_URL = \"http://127.0.0.1:5000/zero_yaw\"\nODOMETRY_SET_CPC_URL = \"http://127.0.0.1:5000/set_counts_per_cm\"\nODOMETRY_SET_RECORDING_URL = \"http://127.0.0.1:5000/set_recording\"\nODOMETRY_RESET_MAP_URL = \"http://127.0.0.1:5000/reset_map\"\n_motor_moving = False\ndef set_odometry_recording(active: bool) -> None:\n    \"\"\"Tell the odometry subprocess whether to accumulate distance/position.\n    The mouse sensor is mounted on the robot itself (nothing to click), so\n    recording tracks whether the motors are actually being driven instead.\"\"\"",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -2475,7 +2467,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "ODOMETRY_ZERO_YAW_URL = \"http://127.0.0.1:5000/zero_yaw\"\nODOMETRY_SET_CPC_URL = \"http://127.0.0.1:5000/set_counts_per_cm\"\nODOMETRY_SET_RECORDING_URL = \"http://127.0.0.1:5000/set_recording\"\n_motor_moving = False\ndef set_odometry_recording(active: bool) -> None:\n    \"\"\"Tell the odometry subprocess whether to accumulate distance/position.\n    The mouse sensor is mounted on the robot itself (nothing to click), so\n    recording tracks whether the motors are actually being driven instead.\"\"\"\n    import urllib.request\n    import urllib.error",
+        "peekOfCode": "ODOMETRY_ZERO_YAW_URL = \"http://127.0.0.1:5000/zero_yaw\"\nODOMETRY_SET_CPC_URL = \"http://127.0.0.1:5000/set_counts_per_cm\"\nODOMETRY_SET_RECORDING_URL = \"http://127.0.0.1:5000/set_recording\"\nODOMETRY_RESET_MAP_URL = \"http://127.0.0.1:5000/reset_map\"\n_motor_moving = False\ndef set_odometry_recording(active: bool) -> None:\n    \"\"\"Tell the odometry subprocess whether to accumulate distance/position.\n    The mouse sensor is mounted on the robot itself (nothing to click), so\n    recording tracks whether the motors are actually being driven instead.\"\"\"\n    import urllib.request",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -2484,7 +2476,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "ODOMETRY_SET_CPC_URL = \"http://127.0.0.1:5000/set_counts_per_cm\"\nODOMETRY_SET_RECORDING_URL = \"http://127.0.0.1:5000/set_recording\"\n_motor_moving = False\ndef set_odometry_recording(active: bool) -> None:\n    \"\"\"Tell the odometry subprocess whether to accumulate distance/position.\n    The mouse sensor is mounted on the robot itself (nothing to click), so\n    recording tracks whether the motors are actually being driven instead.\"\"\"\n    import urllib.request\n    import urllib.error\n    if odometry_process is None or odometry_process.poll() is not None:",
+        "peekOfCode": "ODOMETRY_SET_CPC_URL = \"http://127.0.0.1:5000/set_counts_per_cm\"\nODOMETRY_SET_RECORDING_URL = \"http://127.0.0.1:5000/set_recording\"\nODOMETRY_RESET_MAP_URL = \"http://127.0.0.1:5000/reset_map\"\n_motor_moving = False\ndef set_odometry_recording(active: bool) -> None:\n    \"\"\"Tell the odometry subprocess whether to accumulate distance/position.\n    The mouse sensor is mounted on the robot itself (nothing to click), so\n    recording tracks whether the motors are actually being driven instead.\"\"\"\n    import urllib.request\n    import urllib.error",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -2493,7 +2485,16 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "ODOMETRY_SET_RECORDING_URL = \"http://127.0.0.1:5000/set_recording\"\n_motor_moving = False\ndef set_odometry_recording(active: bool) -> None:\n    \"\"\"Tell the odometry subprocess whether to accumulate distance/position.\n    The mouse sensor is mounted on the robot itself (nothing to click), so\n    recording tracks whether the motors are actually being driven instead.\"\"\"\n    import urllib.request\n    import urllib.error\n    if odometry_process is None or odometry_process.poll() is not None:\n        return",
+        "peekOfCode": "ODOMETRY_SET_RECORDING_URL = \"http://127.0.0.1:5000/set_recording\"\nODOMETRY_RESET_MAP_URL = \"http://127.0.0.1:5000/reset_map\"\n_motor_moving = False\ndef set_odometry_recording(active: bool) -> None:\n    \"\"\"Tell the odometry subprocess whether to accumulate distance/position.\n    The mouse sensor is mounted on the robot itself (nothing to click), so\n    recording tracks whether the motors are actually being driven instead.\"\"\"\n    import urllib.request\n    import urllib.error\n    if odometry_process is None or odometry_process.poll() is not None:",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "ODOMETRY_RESET_MAP_URL",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "ODOMETRY_RESET_MAP_URL = \"http://127.0.0.1:5000/reset_map\"\n_motor_moving = False\ndef set_odometry_recording(active: bool) -> None:\n    \"\"\"Tell the odometry subprocess whether to accumulate distance/position.\n    The mouse sensor is mounted on the robot itself (nothing to click), so\n    recording tracks whether the motors are actually being driven instead.\"\"\"\n    import urllib.request\n    import urllib.error\n    if odometry_process is None or odometry_process.poll() is not None:\n        return",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -4896,7 +4897,7 @@
         "kind": 2,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "def index():\n    return send_from_directory(\".\", \"index.html\")\n@app.route(\"/state\")\ndef get_state():\n    with lock:\n        return jsonify({\n            \"x\":              round(state[\"x\"], 2),\n            \"y\":              round(state[\"y\"], 2),\n            \"yaw\":            state[\"yaw\"],\n            \"distance\":       round(state[\"distance\"], 2),",
+        "peekOfCode": "def index():\n    return send_from_directory(\".\", \"index.html\")\n@app.route(\"/state\")\ndef get_state():\n    with lock:\n        path = state[\"path\"]\n        if len(path) > PATH_SEND_MAX:\n            # Decimate evenly across the WHOLE trail (never truncate the old\n            # end -- that's what made long trails vanish), keeping the newest\n            # point exact so the line always reaches the car.",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -4905,7 +4906,7 @@
         "kind": 2,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "def get_state():\n    with lock:\n        return jsonify({\n            \"x\":              round(state[\"x\"], 2),\n            \"y\":              round(state[\"y\"], 2),\n            \"yaw\":            state[\"yaw\"],\n            \"distance\":       round(state[\"distance\"], 2),\n            \"recording\":      state[\"recording\"],\n            \"path\":           state[\"path\"][-500:],\n            \"counts_per_cm\":  state[\"counts_per_cm\"],",
+        "peekOfCode": "def get_state():\n    with lock:\n        path = state[\"path\"]\n        if len(path) > PATH_SEND_MAX:\n            # Decimate evenly across the WHOLE trail (never truncate the old\n            # end -- that's what made long trails vanish), keeping the newest\n            # point exact so the line always reaches the car.\n            step = len(path) / (PATH_SEND_MAX - 1)\n            path = [path[int(i * step)] for i in range(PATH_SEND_MAX - 1)] + [path[-1]]\n        return jsonify({",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -4914,7 +4915,16 @@
         "kind": 2,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "def set_counts_per_cm():\n    \"\"\"Update the mouse-counts-to-cm calibration factor at runtime (see\n    calibrate_linux.py for how to derive an accurate value).\"\"\"\n    try:\n        value = float(request.get_json(force=True)[\"value\"])\n        if value <= 0:\n            raise ValueError\n    except Exception:\n        return jsonify({\"ok\": False}), 400\n    with lock:",
+        "peekOfCode": "def set_counts_per_cm():\n    \"\"\"Update the mouse-counts-to-cm calibration factor at runtime (see\n    calibrate_linux.py for how to derive an accurate value). Persisted to\n    odometry_config.json so it survives restarts.\"\"\"\n    try:\n        value = float(request.get_json(force=True)[\"value\"])\n        if value <= 0:\n            raise ValueError\n    except Exception:\n        return jsonify({\"ok\": False}), 400",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "reset_map",
+        "kind": 2,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "def reset_map():\n    \"\"\"Clear position, distance, and trail (same as double-clicking the mouse\n    button, but reachable from the web UI).\"\"\"\n    with lock:\n        state[\"x\"] = 0.0\n        state[\"y\"] = 0.0\n        state[\"distance\"] = 0.0\n        state[\"path\"] = [[0.0, 0.0]]\n    return jsonify({\"ok\": True})\n@app.route(\"/set_recording\", methods=[\"POST\"])",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -4950,16 +4960,25 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "COUNTS_PER_CM = 25\nSMOOTHING_WIN = 5\n# Linux input_event layout (64-bit kernel, ARM64)\n# struct input_event { timeval(8+8), type(2), code(2), value(4) } = 24 bytes\nINPUT_EVENT_FMT = \"llHHi\"\nINPUT_EVENT_SIZE = struct.calcsize(INPUT_EVENT_FMT)\n# /linux/input-event-codes.h\nEV_SYN = 0x00\nEV_KEY = 0x01\nEV_REL = 0x02",
+        "peekOfCode": "COUNTS_PER_CM = 25   # default only -- overridden by odometry_config.json (see\n                     # _load_odom_config; calibrate with calibrate_linux.py)\n# Trail limits: the server appends a path point every 0.5 cm of travel; /state\n# used to send just the last 500 (2.5 m!) so long drives visibly lost their\n# tail. Now the full trail is kept (thinned 2:1 above PATH_MAX_POINTS to bound\n# memory) and /state decimates evenly to PATH_SEND_MAX points, always keeping\n# the newest point -- the trail never disappears, the payload stays bounded.\nPATH_MAX_POINTS = 20000\nPATH_SEND_MAX = 1000\n# Linux input_event layout (64-bit kernel, ARM64)",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
     {
-        "label": "SMOOTHING_WIN",
+        "label": "PATH_MAX_POINTS",
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "SMOOTHING_WIN = 5\n# Linux input_event layout (64-bit kernel, ARM64)\n# struct input_event { timeval(8+8), type(2), code(2), value(4) } = 24 bytes\nINPUT_EVENT_FMT = \"llHHi\"\nINPUT_EVENT_SIZE = struct.calcsize(INPUT_EVENT_FMT)\n# /linux/input-event-codes.h\nEV_SYN = 0x00\nEV_KEY = 0x01\nEV_REL = 0x02\nREL_X = 0x00",
+        "peekOfCode": "PATH_MAX_POINTS = 20000\nPATH_SEND_MAX = 1000\n# Linux input_event layout (64-bit kernel, ARM64)\n# struct input_event { timeval(8+8), type(2), code(2), value(4) } = 24 bytes\nINPUT_EVENT_FMT = \"llHHi\"\nINPUT_EVENT_SIZE = struct.calcsize(INPUT_EVENT_FMT)\n# /linux/input-event-codes.h\nEV_SYN = 0x00\nEV_KEY = 0x01\nEV_REL = 0x02",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "PATH_SEND_MAX",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "PATH_SEND_MAX = 1000\n# Linux input_event layout (64-bit kernel, ARM64)\n# struct input_event { timeval(8+8), type(2), code(2), value(4) } = 24 bytes\nINPUT_EVENT_FMT = \"llHHi\"\nINPUT_EVENT_SIZE = struct.calcsize(INPUT_EVENT_FMT)\n# /linux/input-event-codes.h\nEV_SYN = 0x00\nEV_KEY = 0x01\nEV_REL = 0x02\nREL_X = 0x00",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -5067,25 +5086,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "state = {\n    \"x\":         0.0,\n    \"y\":         0.0,\n    \"yaw\":       0.0,\n    \"distance\":  0.0,\n    \"recording\": False,\n    \"path\":      [[0.0, 0.0]],\n    \"counts_per_cm\": COUNTS_PER_CM,\n}\n_raw_dx_buf = deque(maxlen=SMOOTHING_WIN)",
-        "detail": "odometry_locomization.run_linux",
-        "documentation": {}
-    },
-    {
-        "label": "_raw_dx_buf",
-        "kind": 5,
-        "importPath": "odometry_locomization.run_linux",
-        "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_raw_dx_buf = deque(maxlen=SMOOTHING_WIN)\n_ema_distance = 0.0\n_click_count = 0\n_last_click = 0.0\n_last_mouse_move_time = 0.0  # monotonic time of last REL_X/REL_Y event\n# Fused raw (un-zeroed) yaw from the gyro+mag complementary filter, and the\n# offset subtracted from it to produce state[\"yaw\"]. The mag heading is\n# referenced to magnetic north, not the robot's facing direction, so a zero\n# point is captured at run start / on demand (see /zero_yaw).\n_raw_smoothed_yaw = None",
-        "detail": "odometry_locomization.run_linux",
-        "documentation": {}
-    },
-    {
-        "label": "_ema_distance",
-        "kind": 5,
-        "importPath": "odometry_locomization.run_linux",
-        "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_ema_distance = 0.0\n_click_count = 0\n_last_click = 0.0\n_last_mouse_move_time = 0.0  # monotonic time of last REL_X/REL_Y event\n# Fused raw (un-zeroed) yaw from the gyro+mag complementary filter, and the\n# offset subtracted from it to produce state[\"yaw\"]. The mag heading is\n# referenced to magnetic north, not the robot's facing direction, so a zero\n# point is captured at run start / on demand (see /zero_yaw).\n_raw_smoothed_yaw = None\n_yaw_offset = 0.0",
+        "peekOfCode": "state = {\n    \"x\":         0.0,\n    \"y\":         0.0,\n    \"yaw\":       0.0,\n    \"distance\":  0.0,\n    \"recording\": False,\n    \"path\":      [[0.0, 0.0]],\n    \"counts_per_cm\": COUNTS_PER_CM,\n}\n_click_count = 0",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -5094,7 +5095,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_click_count = 0\n_last_click = 0.0\n_last_mouse_move_time = 0.0  # monotonic time of last REL_X/REL_Y event\n# Fused raw (un-zeroed) yaw from the gyro+mag complementary filter, and the\n# offset subtracted from it to produce state[\"yaw\"]. The mag heading is\n# referenced to magnetic north, not the robot's facing direction, so a zero\n# point is captured at run start / on demand (see /zero_yaw).\n_raw_smoothed_yaw = None\n_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────",
+        "peekOfCode": "_click_count = 0\n_last_click = 0.0\n# Runtime settings persisted across restarts (currently just counts_per_cm --\n# fixes \"Set\" appearing to work then snapping back to 25 on the next launch).\n_ODOM_CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),\n                                 \"odometry_config.json\")\ndef _load_odom_config():\n    try:\n        with open(_ODOM_CONFIG_PATH) as f:\n            cfg = json.load(f)",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -5103,16 +5104,16 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_last_click = 0.0\n_last_mouse_move_time = 0.0  # monotonic time of last REL_X/REL_Y event\n# Fused raw (un-zeroed) yaw from the gyro+mag complementary filter, and the\n# offset subtracted from it to produce state[\"yaw\"]. The mag heading is\n# referenced to magnetic north, not the robot's facing direction, so a zero\n# point is captured at run start / on demand (see /zero_yaw).\n_raw_smoothed_yaw = None\n_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef angle_diff(a, b):",
+        "peekOfCode": "_last_click = 0.0\n# Runtime settings persisted across restarts (currently just counts_per_cm --\n# fixes \"Set\" appearing to work then snapping back to 25 on the next launch).\n_ODOM_CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),\n                                 \"odometry_config.json\")\ndef _load_odom_config():\n    try:\n        with open(_ODOM_CONFIG_PATH) as f:\n            cfg = json.load(f)\n        cpc = float(cfg[\"counts_per_cm\"])",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
     {
-        "label": "_last_mouse_move_time",
+        "label": "_ODOM_CONFIG_PATH",
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_last_mouse_move_time = 0.0  # monotonic time of last REL_X/REL_Y event\n# Fused raw (un-zeroed) yaw from the gyro+mag complementary filter, and the\n# offset subtracted from it to produce state[\"yaw\"]. The mag heading is\n# referenced to magnetic north, not the robot's facing direction, so a zero\n# point is captured at run start / on demand (see /zero_yaw).\n_raw_smoothed_yaw = None\n_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef angle_diff(a, b):\n    return (a - b + 180) % 360 - 180",
+        "peekOfCode": "_ODOM_CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),\n                                 \"odometry_config.json\")\ndef _load_odom_config():\n    try:\n        with open(_ODOM_CONFIG_PATH) as f:\n            cfg = json.load(f)\n        cpc = float(cfg[\"counts_per_cm\"])\n        if cpc > 0:\n            state[\"counts_per_cm\"] = cpc\n            print(f\"[CONFIG] counts_per_cm = {cpc}\")",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },

@@ -80,6 +80,24 @@
         color: #000;
       }
 
+      #reset-map-btn {
+        position: fixed;
+        top: 104px;
+        right: 16px;
+        background: rgba(0, 0, 0, 0.65);
+        border: 1px solid #ff8844;
+        border-radius: 8px;
+        color: #ff8844;
+        font-family: inherit;
+        font-size: 12px;
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+      #reset-map-btn:active {
+        background: #ff8844;
+        color: #000;
+      }
+
       #cpc-panel {
         position: fixed;
         top: 60px;
@@ -141,9 +159,13 @@
 
     <button
       id="zero-yaw-btn"
-      title="Set the phone's current heading as forward (0°)"
+      title="Set the robot's current heading as forward (0°)"
     >
       Zero Heading
+    </button>
+
+    <button id="reset-map-btn" title="Clear position, distance and trail">
+      Reset Map
     </button>
 
     <div id="cpc-panel" title="Mouse counts per cm (see calibrate_linux.py)">
@@ -173,19 +195,37 @@
       let recording = false;
 
       const cpcInput = document.getElementById("cpc-input");
+      // Suppress /state polls overwriting the input while the user edits or a
+      // Set is in flight -- the 80ms poll raced the POST and snapped the field
+      // back to the old server value the instant the button took focus.
+      let cpcHoldUntil = 0;
+      cpcInput.addEventListener("input", () => {
+        cpcHoldUntil = Date.now() + 5000;
+      });
 
-      document.getElementById("cpc-set-btn").addEventListener("click", () => {
+      document.getElementById("cpc-set-btn").addEventListener("click", async () => {
         const value = parseFloat(cpcInput.value);
         if (!value || value <= 0) return;
-        fetch("/set_counts_per_cm", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ value }),
-        });
+        cpcHoldUntil = Date.now() + 5000;
+        try {
+          const res = await fetch("/set_counts_per_cm", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ value }),
+          });
+          const d = await res.json();
+          if (d.ok) cpcHoldUntil = 0; // server confirmed; polls may sync again
+        } catch (e) {
+          /* keep hold; user can retry */
+        }
       });
 
       document.getElementById("zero-yaw-btn").addEventListener("click", () => {
         fetch("/zero_yaw", { method: "POST" });
+      });
+
+      document.getElementById("reset-map-btn").addEventListener("click", () => {
+        fetch("/reset_map", { method: "POST" });
       });
 
       const SCALE = 4; // pixels per cm
@@ -195,13 +235,21 @@
         try {
           const res = await fetch("/state");
           const d = await res.json();
+          // The :8000 proxy answers {"available": false} when the odometry
+          // process is down -- ignore it (an undefined path/yaw here would
+          // throw in the render loop and kill requestAnimationFrame for good).
+          if (!Array.isArray(d.path)) return;
           robotX = d.x;
           robotY = d.y;
           robotYaw = d.yaw;
           dist = d.distance;
           recording = d.recording;
           path = d.path;
-          if (document.activeElement !== cpcInput && d.counts_per_cm) {
+          if (
+            document.activeElement !== cpcInput &&
+            Date.now() > cpcHoldUntil &&
+            d.counts_per_cm
+          ) {
             cpcInput.value = d.counts_per_cm;
           }
         } catch (e) {

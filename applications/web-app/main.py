@@ -1029,6 +1029,7 @@ ODOMETRY_STATE_URL = "http://127.0.0.1:5000/state"
 ODOMETRY_ZERO_YAW_URL = "http://127.0.0.1:5000/zero_yaw"
 ODOMETRY_SET_CPC_URL = "http://127.0.0.1:5000/set_counts_per_cm"
 ODOMETRY_SET_RECORDING_URL = "http://127.0.0.1:5000/set_recording"
+ODOMETRY_RESET_MAP_URL = "http://127.0.0.1:5000/reset_map"
 
 _motor_moving = False
 
@@ -1105,6 +1106,24 @@ async def map_zero_yaw():
             return JSONResponse(json.loads(resp.read()))
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
         logger.warning(f"Odometry zero-yaw proxy failed: {e}")
+        return JSONResponse({"ok": False}, status_code=200)
+
+
+@app.post("/reset_map")
+async def map_reset():
+    """Proxy the map's 'Reset Map' button to the odometry subprocess."""
+    import urllib.request
+    import urllib.error
+
+    if odometry_process is None or odometry_process.poll() is not None:
+        return JSONResponse({"ok": False}, status_code=200)
+
+    try:
+        req = urllib.request.Request(ODOMETRY_RESET_MAP_URL, method="POST")
+        with urllib.request.urlopen(req, timeout=1) as resp:
+            return JSONResponse(json.loads(resp.read()))
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
+        logger.warning(f"Odometry reset-map proxy failed: {e}")
         return JSONResponse({"ok": False}, status_code=200)
 
 
