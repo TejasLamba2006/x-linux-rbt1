@@ -3,7 +3,6 @@ import asyncio
 import json
 import math
 import os
-import socket
 import struct
 import threading
 import time
@@ -12,8 +11,6 @@ from flask import Flask, jsonify, request, send_from_directory
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 COUNTS_PER_CM = 25
-UDP_PORT = 2055
-EMA_ALPHA = 0.3
 SMOOTHING_WIN = 5
 
 # Linux input_event layout (64-bit kernel, ARM64)
@@ -52,368 +49,168 @@ _click_count = 0
 _last_click = 0.0
 _last_mouse_move_time = 0.0  # monotonic time of last REL_X/REL_Y event
 
-# Phone's raw (un-zeroed) smoothed yaw, and the offset subtracted from it to
-# produce state["yaw"]. The phone's quaternion is referenced to its own
-# arbitrary/magnetic-north origin, not the robot's facing direction, so a
-# zero point must be captured at run start (see /zero_yaw).
+# Fused raw (un-zeroed) yaw from the gyro+mag complementary filter, and the
+# offset subtracted from it to produce state["yaw"]. The mag heading is
+# referenced to magnetic north, not the robot's facing direction, so a zero
+# point is captured at run start / on demand (see /zero_yaw).
 _raw_smoothed_yaw = None
 _yaw_offset = 0.0
 
 # ── Yaw helpers ───────────────────────────────────────────────────────────────
 
 
-def quaternion_to_yaw(x, y, z):
-    w = math.sqrt(max(0.0, 1.0 - x*x - y*y - z*z))
-    yaw = math.atan2(
-        2.0 * (w * z + x * y),
-        1.0 - 2.0 * (y * y + z * z)
-    )
-    return math.degrees(yaw)
-
-
 def angle_diff(a, b):
     return (a - b + 180) % 360 - 180
 
-# ── UDP Listener (phone IMU) ─────────────────────────────────────────────────
-# Not started by default anymore -- see imu_yaw_thread() below, which reads the
-# board's own LSM6DSV16X gyro instead so the map doesn't depend on a phone.
-# Kept for reference / easy revert (swap the thread started in __main__).
-
-
-def udp_listener():
-    global _raw_smoothed_yaw
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    sock.bind(("0.0.0.0", UDP_PORT))
-    sock.settimeout(1.0)
-    print(f"[UDP] Listening on port {UDP_PORT}")
-
-    while True:
-        try:
-            data, _ = sock.recvfrom(256)
-            parts = data.decode().strip().split(",")
-            if len(parts) < 3:
-                continue
-            x, y, z = float(parts[0]), float(parts[1]), float(parts[2])
-            raw_yaw = quaternion_to_yaw(x, y, z)
-
-            if _raw_smoothed_yaw is None:
-                _raw_smoothed_yaw = raw_yaw
-            else:
-                diff = angle_diff(raw_yaw, _raw_smoothed_yaw)
-                _raw_smoothed_yaw = _raw_smoothed_yaw + EMA_ALPHA * diff
-                _raw_smoothed_yaw = (_raw_smoothed_yaw + 180) % 360 - 180
-
-            with lock:
-                state["yaw"] = round(angle_diff(
-                    _raw_smoothed_yaw, _yaw_offset), 2)
-
-        except socket.timeout:
-            continue
-        except Exception as e:
-            print(f"[UDP] Error: {e}")
-
-
-# ── Onboard IMU gyro (LSM6DSV16X/ISM330DHCX) ─────────────────────────────────
-# NOT currently used -- during 257F-DK bring-up this chip did not ACK on
-# i2c-1 at 0x6A or 0x6B (see imu_lsm6dsv16x.py header for the full note).
-# Kept for reference / easy revert if the hardware issue gets resolved --
-# swap the thread started in __main__ back to imu_gyro_yaw_thread.
-GYRO_ODR_HZ = 120
-GYRO_BIAS_CALIB_SAMPLES = 60
-GYRO_BIAS_EMA_ALPHA = 0.02
-
-# Total accel magnitude stays ~1000 mg only when there's no linear
-# acceleration, i.e. the board is genuinely still (not just yaw-still).
-STATIONARY_ACCEL_MG_LOW = 950
-STATIONARY_ACCEL_MG_HIGH = 1050
-
-
-def imu_gyro_yaw_thread():
-    global _raw_smoothed_yaw
-    from imu_lsm6dsv16x import LSM6DSV16X
-
-    try:
-        imu = LSM6DSV16X()
-        if not imu.check_who_am_i():
-            print(
-                "[IMU] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled")
-            return
-        imu.configure()
-    except Exception as e:
-        print(f"[IMU] init failed: {e}")
-        return
-
-    print("[IMU] gyro-yaw integration started, calibrating bias...")
-    _raw_smoothed_yaw = 0.0
-
-    calib_samples = []
-    for _ in range(GYRO_BIAS_CALIB_SAMPLES):
-        calib_samples.append(imu.read_gyro_z_dps())
-        time.sleep(1.0 / GYRO_ODR_HZ)
-    gyro_bias_dps = sum(calib_samples) / len(calib_samples)
-    print(f"[IMU] gyro bias = {gyro_bias_dps:.3f} dps")
-
-    last_t = time.time()
-
-    while True:
-        try:
-            now = time.time()
-            dt = now - last_t
-            last_t = now
-
-            gyro_z_dps = imu.read_gyro_z_dps()
-
-            # ponytail: the accelerometer can't observe yaw directly (rotating
-            # about gravity doesn't change the gravity vector) -- it's used
-            # only to detect "no linear acceleration" moments so the gyro's
-            # zero-rate bias can be re-tracked continuously, which is what
-            # actually stops the slow fake rotation while sitting still.
-            ax, ay, az = imu.read_accel_mg()
-            accel_mag = math.sqrt(ax * ax + ay * ay + az * az)
-            if (STATIONARY_ACCEL_MG_LOW < accel_mag < STATIONARY_ACCEL_MG_HIGH
-                    and abs(gyro_z_dps - gyro_bias_dps) < 5):
-                gyro_bias_dps += GYRO_BIAS_EMA_ALPHA * \
-                    (gyro_z_dps - gyro_bias_dps)
-
-            _raw_smoothed_yaw = (
-                _raw_smoothed_yaw + (gyro_z_dps - gyro_bias_dps) * dt + 180) % 360 - 180
-
-            with lock:
-                state["yaw"] = round(angle_diff(
-                    _raw_smoothed_yaw, _yaw_offset), 2)
-
-            time.sleep(1.0 / GYRO_ODR_HZ)
-        except Exception as e:
-            print(f"[IMU] Error: {e}")
-            time.sleep(0.1)
-
 
 # ── Onboard magnetometer (IIS2MDC) ───────────────────────────────────────────
-# Active yaw source (as of this bring-up) -- confirmed alive on i2c-1 @ 0x1e
-# where the gyro didn't respond. Writes into the same shared _raw_smoothed_yaw
-# variable udp_listener()/imu_gyro_yaw_thread() would have, so /zero_yaw and
-# _raw_input_delta_callback need no changes regardless of which yaw source runs.
-#
-# Absolute heading straight from Earth's field -- no dead-reckoning drift like
-# gyro integration has -- but raw and noisy sample-to-sample, so it's smoothed
-# with the same EMA approach as the old phone-UDP source.
-# ponytail: no hard-iron/soft-iron calibration and no tilt compensation (the
-# STSPIN948 motor drivers + steel chassis nearby can bias the field reading;
-# a stray few degrees of constant offset is expected -- use "Zero Heading" to
-# correct for it). Add calibration if accuracy needs to improve further.
+# The RBT01 exposes ONLY the magnetometer (i2c-1 @ 0x1e) and a pressure sensor
+# (0x5d) -- confirmed by `i2cdetect -y 1`. There is no onboard accel/gyro, so
+# those come from the STEVAL-MKBOXPRO over USB (see imu_usb_mkbox.py). Gyro and
+# mag therefore live on two physically separate boards; only their shared
+# vertical axis (yaw) is fused -- see imu_fusion_yaw_thread.
 MAG_ODR_HZ = 100
-
-
-def imu_mag_yaw_thread():
-    global _raw_smoothed_yaw
-    from imu_iis2mdc import IIS2MDC
-
-    try:
-        mag = IIS2MDC()
-        if not mag.check_who_am_i():
-            print(
-                "[MAG] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled")
-            return
-        mag.configure()
-    except Exception as e:
-        print(f"[MAG] init failed: {e}")
-        return
-
-    print("[MAG] IIS2MDC magnetometer-yaw integration started")
-
-    while True:
-        try:
-            mx, my, mz = mag.read_mag_mgauss()
-            raw_yaw = math.degrees(math.atan2(my, mx))
-
-            if _raw_smoothed_yaw is None:
-                _raw_smoothed_yaw = raw_yaw
-            else:
-                diff = angle_diff(raw_yaw, _raw_smoothed_yaw)
-                _raw_smoothed_yaw = _raw_smoothed_yaw + EMA_ALPHA * diff
-                _raw_smoothed_yaw = (_raw_smoothed_yaw + 180) % 360 - 180
-
-            with lock:
-                state["yaw"] = round(angle_diff(
-                    _raw_smoothed_yaw, _yaw_offset), 2)
-
-            time.sleep(1.0 / MAG_ODR_HZ)
-        except Exception as e:
-            print(f"[MAG] Error: {e}")
-            time.sleep(0.1)
-
-
-# ── STEVAL-MKBOXPRO gyro over USB (command channel still BLE) ───────────────
-# Alternate yaw source: the box's own working LSM6DSV16X gyro, in place of
-# either the dead onboard IMU or the magnetometer. Unlike the magnetometer
-# this is rate integration (like the onboard gyro thread was), so it needs
-# the same startup bias calibration to avoid slow drift while stationary --
-# no accelerometer stream wired up here to also gate bias re-tracking
-# continuously (ponytail: add if drift over long runs turns out to matter --
-# see imu_gyro_yaw_thread's accel-gating for the pattern to copy).
-#
-# Data comes over USB bulk (not BLE notify) -- see imu_usb_mkbox.py's header
-# for why: DATALOG2 firmware only accepts start/stop commands over its BLE
-# PnPL channel (direct USB command writes STALL), but once told to stream
-# with interface=1 it pushes continuous samples over USB bulk endpoints,
-# which is far more robust than BLE notifications for a robot-mounted board
-# (no BLE connection to babysit for the actual data path).
 USB_GYRO_POLL_HZ = 200
 
+# Complementary-filter gyro trust. Yaw = COMP_ALPHA * gyro-integrated +
+# (1-COMP_ALPHA) * mag-heading each mag update. Higher = smoother but drifts
+# more between mag corrections; lower = snappier to the (noisy, motor-biased)
+# mag. ponytail: this is the tuning knob the hardware needs -- start at 0.98
+# and lower if yaw lags reality, raise if the mag noise makes it jitter.
+COMP_ALPHA = 0.98
 
-# ── Fusion: Madgwick AHRS — gyro + accel + mag 9-DOF fusion ─────────────────
-# Replaces the old hand-rolled complementary filter with a proper Madgwick
-# gradient-descent AHRS filter.  The filter fuses:
-#   - Gyro (MKBOXPRO USB): smooth short-term angular rate
-#   - Accel (MKBOXPRO USB): gravity reference for tilt compensation
-#   - Mag  (IIS2MDC I2C):  absolute heading reference
-# The Madgwick filter outputs a quaternion; yaw is extracted from it with
-# proper tilt compensation — no more raw atan2(mx,my) that assumes a
-# perfectly level sensor.
-#
-# gyro_bias: running EMA of gyro_z when stationary (accel magnitude ≈ 1g).
-# The filter's gyro input is bias-corrected each sample.
+_MAG_CALIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                               "mag_calib.json")
 
-_latest_mag = None  # (mx, my, mz) in milligauss, set by _mag_reader_thread
+# Hard/soft-iron correction, loaded from mag_calib.json (or identity until a
+# calibration spin runs). offset = hard-iron center; scale = soft-iron X/Y gain.
+_mag_calib = {"offset": [0.0, 0.0], "scale": [1.0, 1.0]}
+_latest_mag = None        # raw (mx,my,mz) mgauss, set by _mag_reader_thread
+_mag_collecting = False   # True while a calibration spin is gathering samples
+_mag_samples = []         # (mx,my) accumulated during a calibration spin
 
 
-class _MadgwickAHRS:
-    """Madgwick AHRS filter (gradient-descent, 9-DOF).
-    Quaternion order: [w, x, y, z]."""
+def _load_mag_calib():
+    global _mag_calib
+    try:
+        with open(_MAG_CALIB_PATH) as f:
+            data = json.load(f)
+        _mag_calib = {"offset": [float(data["offset"][0]), float(data["offset"][1])],
+                      "scale": [float(data["scale"][0]), float(data["scale"][1])]}
+        print(f"[MAG-CAL] loaded {_mag_calib}")
+        return True
+    except (FileNotFoundError, KeyError, ValueError, json.JSONDecodeError):
+        return False
 
-    def __init__(self, beta=0.1):
-        self.q = [1.0, 0.0, 0.0, 0.0]
-        self.beta = beta  # filter gain (0.01–0.5; higher = more trust in accel/mag)
 
-    def _inv_sqrt(self, x):
-        return x ** -0.5 if x > 0 else 1.0
+def _fit_mag_calib(samples):
+    """Hard+soft-iron fit on X/Y (all yaw needs). Hard-iron = per-axis
+    (min+max)/2 center; soft-iron = per-axis avg_radius/axis_radius gain,
+    turning the field-vector ellipse back into a circle. ponytail: X/Y only,
+    no Z and no tilt compensation -- correct for a level rover; upgrade to a
+    full 3D ellipsoid fit + accel tilt-comp if it ever drives on slopes."""
+    xs = [s[0] for s in samples]
+    ys = [s[1] for s in samples]
+    ox = (min(xs) + max(xs)) / 2.0
+    oy = (min(ys) + max(ys)) / 2.0
+    rx = (max(xs) - min(xs)) / 2.0 or 1.0
+    ry = (max(ys) - min(ys)) / 2.0 or 1.0
+    r_avg = (rx + ry) / 2.0
+    return {"offset": [ox, oy], "scale": [r_avg / rx, r_avg / ry]}
 
-    def update(self, gx, gy, gz, ax, ay, az, mx, my, mz, dt):
-        """Update with gyro (dps), accel (mg), mag (mgauss), dt (s).
-        Standard Madgwick AHRS 9-DOF gradient-descent algorithm."""
-        q0, q1, q2, q3 = self.q
 
-        # Convert gyro from dps to rad/s
-        gx_r, gy_r, gz_r = math.radians(gx), math.radians(gy), math.radians(gz)
+def _apply_mag_calib(mx, my):
+    ox, oy = _mag_calib["offset"]
+    sx, sy = _mag_calib["scale"]
+    return (mx - ox) * sx, (my - oy) * sy
 
-        # Normalise accel
-        norm_a = math.sqrt(ax * ax + ay * ay + az * az)
-        if norm_a < 1e-6:
-            return
-        ax_n, ay_n, az_n = ax / norm_a, ay / norm_a, az / norm_a
 
-        # Normalise mag
-        norm_m = math.sqrt(mx * mx + my * my + mz * mz)
-        if norm_m < 1e-6:
-            return
-        mx_n, my_n, mz_n = mx / norm_m, my / norm_m, mz / norm_m
-
-        # Auxiliary variables (reused for efficiency)
-        _2q0 = 2.0 * q0
-        _2q1 = 2.0 * q1
-        _2q2 = 2.0 * q2
-        _2q3 = 2.0 * q3
-        _2q0q2 = 2.0 * q0 * q2
-        _2q2q3 = 2.0 * q2 * q3
-        q0q0 = q0 * q0
-        q0q1 = q0 * q1
-        q0q2 = q0 * q2
-        q0q3 = q0 * q3
-        q1q1 = q1 * q1
-        q1q2 = q1 * q2
-        q1q3 = q1 * q3
-        q2q2 = q2 * q2
-        q2q3 = q2 * q3
-        q3q3 = q3 * q3
-
-        # Reference direction of Earth's magnetic field
-        hx = mx_n * q0q0 - _2q0 * my_n * q3 + _2q0 * mz_n * q2 + mx_n * q1q1 + _2q1 * my_n * q2 + _2q1 * mz_n * q3 - mx_n * q2q2 - mx_n * q3q3
-        hy = _2q0 * mx_n * q3 + my_n * q0q0 - _2q0 * mz_n * q1 + _2q1 * mx_n * q2 - my_n * q1q1 + my_n * q2q2 - _2q2 * mz_n * q3 + my_n * q3q3
-        _2bx = math.sqrt(hx * hx + hy * hy)
-        _2bz = -_2q0 * mx_n * q2 + _2q0 * my_n * q1 + mz_n * q0q0 + _2q1 * mx_n * q3 - mz_n * q1q1 + _2q2 * my_n * q3 - mz_n * q2q2 + mz_n * q3q3
-
-        # Gradient descent corrective step (Madgwick Eq. 32)
-        s0 = -_2q2 * (2.0 * q1q3 - _2q0q2 - ax_n) + _2q1 * (2.0 * q0q1 + _2q2q3 - az_n) - _2bx * q2 * (_2bx * (0.5 - q2q2 - q3q3) + _2bz * (q1q3 - q0q2) - mx_n) + (-_2bx * q3 + _2bz * q1) * (_2bx * (q1q2 - q0q3) + _2bz * (q0q1 + q2q3) - my_n) + _2bx * q2 * (_2bx * (q0q2 + q1q3) + _2bz * (0.5 - q1q1 - q2q2) - mz_n) + (_2bx * q1 + _2bz * q0) * (_2bx * (q0q3 + q1q2) + _2bz * (q2q3 - q0q1) - mz_n)
-        s1 = _2q3 * (2.0 * q1q3 - _2q0q2 - ax_n) + _2q0 * (2.0 * q0q1 + _2q2q3 - az_n) - 4.0 * q1 * (1.0 - 2.0 * q1q1 - 2.0 * q2q2 - az_n) + _2bz * q0 * (_2bx * (0.5 - q2q2 - q3q3) + _2bz * (q1q3 - q0q2) - mx_n) + _2bz * q2 * (_2bx * (q1q2 - q0q3) + _2bz * (q0q1 + q2q3) - my_n) + (_2bx * q3 + _2bz * q1) * (_2bx * (q0q2 + q1q3) + _2bz * (0.5 - q1q1 - q2q2) - mz_n) + (_2bx * q0 - _2bz * q2) * (_2bx * (q0q3 + q1q2) + _2bz * (q2q3 - q0q1) - mz_n)
-        s2 = -_2q0 * (2.0 * q1q3 - _2q0q2 - ax_n) + _2q3 * (2.0 * q0q1 + _2q2q3 - az_n) - 4.0 * q2 * (1.0 - 2.0 * q1q1 - 2.0 * q2q2 - az_n) + (-_2bx * q1 + _2bz * q0) * (_2bx * (0.5 - q2q2 - q3q3) + _2bz * (q1q3 - q0q2) - mx_n) + (_2bx * q2 + _2bz * q3) * (_2bx * (q1q2 - q0q3) + _2bz * (q0q1 + q2q3) - my_n) + (_2bx * q1 + _2bz * q0) * (_2bx * (q0q2 + q1q3) + _2bz * (0.5 - q1q1 - q2q2) - mz_n) + (_2bx * q3 - _2bz * q1) * (_2bx * (q0q3 + q1q2) + _2bz * (q2q3 - q0q1) - mz_n)
-        s3 = _2q1 * (2.0 * q1q3 - _2q0q2 - ax_n) + _2q2 * (2.0 * q0q1 + _2q2q3 - az_n) + (-_2bx * q0 + _2bz * q2) * (_2bx * (0.5 - q2q2 - q3q3) + _2bz * (q1q3 - q0q2) - mx_n) + (-_2bx * q3 - _2bz * q1) * (_2bx * (q1q2 - q0q3) + _2bz * (q0q1 + q2q3) - my_n) + (-_2bx * q2 + _2bz * q3) * (_2bx * (q0q2 + q1q3) + _2bz * (0.5 - q1q1 - q2q2) - mz_n) + (_2bx * q0 + _2bz * q2) * (_2bx * (q0q3 + q1q2) + _2bz * (q2q3 - q0q1) - mz_n)
-
-        # Normalise step
-        norm_s = math.sqrt(s0 * s0 + s1 * s1 + s2 * s2 + s3 * s3)
-        if norm_s < 1e-6:
-            return
-        s0 /= norm_s
-        s1 /= norm_s
-        s2 /= norm_s
-        s3 /= norm_s
-
-        # Rate of change of quaternion from gyroscope + corrective term
-        qDot0 = 0.5 * (-q1 * gx_r - q2 * gy_r - q3 * gz_r) - self.beta * s0
-        qDot1 = 0.5 * (q0 * gx_r + q2 * gz_r - q3 * gy_r) - self.beta * s1
-        qDot2 = 0.5 * (q0 * gy_r - q1 * gz_r + q3 * gx_r) - self.beta * s2
-        qDot3 = 0.5 * (q0 * gz_r + q1 * gy_r - q2 * gx_r) - self.beta * s3
-
-        # Integrate
-        q0 += qDot0 * dt
-        q1 += qDot1 * dt
-        q2 += qDot2 * dt
-        q3 += qDot3 * dt
-
-        # Normalise
-        norm_q = math.sqrt(q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3)
-        self.q = [q0 / norm_q, q1 / norm_q, q2 / norm_q, q3 / norm_q]
-
-    def update_gyro_only(self, gx, gy, gz, dt):
-        """Gyro-only update (no accel/mag) — used when accel/mag unavailable."""
-        q0, q1, q2, q3 = self.q
-        gx_r, gy_r, gz_r = math.radians(gx), math.radians(gy), math.radians(gz)
-        q0 += 0.5 * (-q1 * gx_r - q2 * gy_r - q3 * gz_r) * dt
-        q1 += 0.5 * (q0 * gx_r + q2 * gz_r - q3 * gy_r) * dt
-        q2 += 0.5 * (q0 * gy_r - q1 * gz_r + q3 * gx_r) * dt
-        q3 += 0.5 * (q0 * gz_r + q1 * gy_r - q2 * gx_r) * dt
-        norm_q = math.sqrt(q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3)
-        self.q = [q0 / norm_q, q1 / norm_q, q2 / norm_q, q3 / norm_q]
-
-    def yaw_degrees(self):
-        """Extract yaw (Z-axis rotation) from quaternion in degrees [-180, 180)."""
-        q0, q1, q2, q3 = self.q
-        yaw = math.degrees(math.atan2(2.0 * (q0 * q3 + q1 * q2),
-                                      1.0 - 2.0 * (q2 * q2 + q3 * q3)))
-        return yaw
+def _mag_heading_deg():
+    """Calibrated absolute heading from the latest mag reading, or None."""
+    if _latest_mag is None:
+        return None
+    mxc, myc = _apply_mag_calib(_latest_mag[0], _latest_mag[1])
+    return math.degrees(math.atan2(myc, mxc))
 
 
 def _mag_reader_thread():
-    """Read IIS2MDC magnetometer and publish raw (mx,my,mz) for the fusion filter."""
+    """Read IIS2MDC and publish raw (mx,my,mz); feed the calibration collector
+    when a spin is active."""
     global _latest_mag
     from imu_iis2mdc import IIS2MDC
 
     try:
         mag = IIS2MDC()
         if not mag.check_who_am_i():
-            print("[FUSION-MAG] WHO_AM_I mismatch -- magnetometer correction disabled")
+            print("[MAG] WHO_AM_I mismatch -- magnetometer correction disabled")
             return
         mag.configure()
     except Exception as e:
-        print(f"[FUSION-MAG] init failed: {e}")
+        print(f"[MAG] init failed: {e}")
         return
 
-    print("[FUSION-MAG] magnetometer reader started")
+    print("[MAG] IIS2MDC reader started")
     while True:
         try:
             mx, my, mz = mag.read_mag_mgauss()
             _latest_mag = (mx, my, mz)
+            if _mag_collecting:
+                _mag_samples.append((mx, my))
             time.sleep(1.0 / MAG_ODR_HZ)
         except Exception as e:
-            print(f"[FUSION-MAG] Error: {e}")
+            print(f"[MAG] Error: {e}")
             time.sleep(0.1)
 
 
+async def _run_mag_calibration_spin():
+    """Trigger the robot's warmup spin and collect mag samples during it, then
+    fit + persist the hard/soft-iron correction. Returns True on success."""
+    global _mag_collecting, _mag_samples, _mag_calib
+    import ssl
+    import urllib.request
+
+    _mag_samples = []
+    _mag_collecting = True
+    print("[MAG-CAL] spin starting, collecting samples...")
+    try:
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        req = urllib.request.Request(
+            "https://127.0.0.1:8000/calibrate_rotate", method="POST")
+        with urllib.request.urlopen(req, timeout=1, context=ctx):
+            pass
+    except Exception as e:
+        print(f"[MAG-CAL] spin request failed: {e}")
+
+    await asyncio.sleep(11.0)   # matches /calibrate_rotate's ~10 s left+right spin
+    _mag_collecting = False
+
+    if len(_mag_samples) < 20:
+        print(f"[MAG-CAL] too few samples ({len(_mag_samples)}); keeping identity calib")
+        return False
+
+    _mag_calib = _fit_mag_calib(_mag_samples)
+    try:
+        with open(_MAG_CALIB_PATH, "w") as f:
+            json.dump(_mag_calib, f)
+        print(f"[MAG-CAL] fitted + saved {_mag_calib} ({len(_mag_samples)} samples)")
+    except OSError as e:
+        print(f"[MAG-CAL] save failed: {e}")
+    return True
+
+
 def imu_fusion_yaw_thread():
+    """Yaw-only complementary filter: MKBOXPRO gyro-Z (USB) integrated for smooth
+    short-term rate, corrected toward the calibrated IIS2MDC magnetic heading
+    (I2C) for absolute, drift-free heading. Gyro and mag sit on two separate
+    boards, so only the shared vertical (yaw) axis is fused -- no full 9-DOF
+    attitude, which would (wrongly) assume one common body frame."""
     global _raw_smoothed_yaw
     import imu_usb_mkbox
 
     threading.Thread(target=_mag_reader_thread, daemon=True).start()
+    _load_mag_calib()
 
     async def run():
         global _raw_smoothed_yaw
@@ -425,29 +222,22 @@ def imu_fusion_yaw_thread():
         while _latest_mag is None:
             await asyncio.sleep(0.1)
 
-        # ── Warmup rotation ──
-        print("[FUSION] requesting warmup rotation...")
-        try:
-            import urllib.request
-            import ssl
-            ctx = ssl.create_default_context()
-            ctx.check_hostname = False
-            ctx.verify_mode = ssl.CERT_NONE
-            req = urllib.request.Request("https://127.0.0.1:8000/calibrate_rotate",
-                                        method="POST")
-            with urllib.request.urlopen(req, timeout=1, context=ctx) as resp:
-                print(f"[FUSION] warmup rotation started ({resp.read().decode()})")
-        except Exception as e:
-            print(f"[FUSION] warmup rotation request failed: {e}")
+        # First-ever run (no cached calib): spin to fit hard/soft-iron. Later
+        # runs reuse mag_calib.json and skip straight to gyro-bias calibration.
+        if _mag_calib["scale"] == [1.0, 1.0] and _mag_calib["offset"] == [0.0, 0.0]:
+            await _run_mag_calibration_spin()
+        else:
+            print("[FUSION] using cached mag calibration; warming up gyro...")
+            await asyncio.sleep(2.0)
 
-        await asyncio.sleep(11.0)
+        # Flush any samples buffered during the spin/warmup.
         for _ in range(30):
             box.read_gyro_dps()
             box.read_accel_mg()
             await asyncio.sleep(0.02)
 
         # ── Gyro bias calibration (2 s stationary) ──
-        print("[FUSION] warmup done, calibrating gyro bias (keep robot still)...")
+        print("[FUSION] calibrating gyro bias (keep robot still)...")
         bias_samples = []
         cal_deadline = time.time() + 2.0
         while time.time() < cal_deadline:
@@ -458,16 +248,13 @@ def imu_fusion_yaw_thread():
         gyro_bias = sum(bias_samples) / len(bias_samples) if bias_samples else 0.0
         print(f"[FUSION] gyro bias = {gyro_bias:.3f} dps ({len(bias_samples)} samples)")
 
-        # ── Init Madgwick filter ──
-        ahrs = _MadgwickAHRS(beta=0.1)
-
-        # Bootstrap: set initial orientation from mag + accel
-        mx, my, mz = _latest_mag
-        ax, ay, az = 1000.0, 0.0, 0.0  # assume roughly level
-        ahrs.update(0, 0, 0, ax, ay, az, mx, my, mz, 0.1)
-        _raw_smoothed_yaw = ahrs.yaw_degrees()
-        print(f"[FUSION] initial yaw from mag: {_raw_smoothed_yaw:.1f} deg")
-        print("[FUSION] Madgwick 9-DOF fusion started")
+        # ── Bootstrap yaw from absolute mag heading ──
+        yaw = _mag_heading_deg()
+        if yaw is None:
+            yaw = 0.0
+        _raw_smoothed_yaw = yaw
+        print(f"[FUSION] initial yaw from mag: {yaw:.1f} deg")
+        print("[FUSION] complementary gyro+mag fusion started")
 
         last_t = time.time()
         while True:
@@ -478,40 +265,33 @@ def imu_fusion_yaw_thread():
                 await asyncio.sleep(1.0 / USB_GYRO_POLL_HZ)
                 continue
 
-            # Process each gyro sample; pair with latest accel sample
-            dt_per_sample = (now - last_t) / len(gyro_batch) if gyro_batch else 1.0 / USB_GYRO_POLL_HZ
+            dt_per_sample = (now - last_t) / len(gyro_batch)
             last_t = now
 
+            # ── Gyro integration (fast path) ──
             for gx, gy, gz in gyro_batch:
-                dt = dt_per_sample
-
-                # Bias correction
                 gz_corrected = gz - gyro_bias
+                # ponytail: gz sign assumed = CCW-positive yaw rate. If the HUD
+                # turns the wrong way, negate here (axis order unverified -- see
+                # imu_usb_mkbox.py header).
+                yaw = (yaw + gz_corrected * dt_per_sample + 180) % 360 - 180
 
-                # Get accel sample (use last available)
-                ax_mg, ay_mg, az_mg = accel_batch[-1] if accel_batch else (1000.0, 0.0, 0.0)
-
-                # Get mag sample (may be None if mag reader hasn't delivered yet)
-                if _latest_mag is not None:
-                    mx_mg, my_mg, mz_mg = _latest_mag
-                else:
-                    mx_mg, my_mg, mz_mg = 0.0, 1.0, 0.0  # fallback: assume north
-
-                # Full 9-DOF update (always — yaw tracks regardless of recording)
-                ahrs.update(gx, gy, gz_corrected,
-                            ax_mg, ay_mg, az_mg,
-                            mx_mg, my_mg, mz_mg, dt)
-                _raw_smoothed_yaw = ahrs.yaw_degrees()
-
-                # When idle, also track gyro bias for next recording session
                 if not state["recording"]:
+                    ax_mg, ay_mg, az_mg = accel_batch[-1] if accel_batch else (1000.0, 0.0, 0.0)
                     accel_mag = math.sqrt(ax_mg**2 + ay_mg**2 + az_mg**2)
                     if 950 < accel_mag < 1050 and abs(gz_corrected) < 5:
                         gyro_bias += 0.01 * (gz - gyro_bias)
 
+            # ── Mag correction (slow path, absolute heading) ──
+            mag_heading = _mag_heading_deg()
+            if mag_heading is not None:
+                # Blend toward mag along the shortest arc so wrap is handled.
+                yaw = (yaw + (1.0 - COMP_ALPHA) *
+                       angle_diff(mag_heading, yaw) + 180) % 360 - 180
+
+            _raw_smoothed_yaw = yaw
             with lock:
-                state["yaw"] = round(angle_diff(
-                    _raw_smoothed_yaw, _yaw_offset), 2)
+                state["yaw"] = round(angle_diff(yaw, _yaw_offset), 2)
 
             await asyncio.sleep(1.0 / USB_GYRO_POLL_HZ)
 
@@ -714,6 +494,29 @@ def zero_yaw():
             _yaw_offset = _raw_smoothed_yaw
             state["yaw"] = 0.0
         return jsonify({"ok": _raw_smoothed_yaw is not None, "yaw_offset": round(_yaw_offset, 2)})
+
+
+@app.route("/recalibrate_mag", methods=["POST"])
+def recalibrate_mag():
+    """Drop the cached mag calibration and re-run the spin+fit -- use after
+    moving to a new environment where the ambient/ferrous field differs. The
+    fusion thread owns the actual spin (it holds the USB/gyro loop), so we just
+    delete the cache and signal it; the next filter cycle picks up the change.
+    ponytail: deletes the file and resets to identity so the running thread
+    re-fits on its own next bootstrap -- simplest reliable trigger without
+    cross-thread asyncio plumbing."""
+    global _mag_calib
+    try:
+        os.remove(_MAG_CALIB_PATH)
+    except FileNotFoundError:
+        pass
+    _mag_calib = {"offset": [0.0, 0.0], "scale": [1.0, 1.0]}
+
+    async def _spin():
+        await _run_mag_calibration_spin()
+    threading.Thread(
+        target=lambda: asyncio.run(_spin()), daemon=True).start()
+    return jsonify({"ok": True})
 
 
 # ── Entry Point ───────────────────────────────────────────────────────────────

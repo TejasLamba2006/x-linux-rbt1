@@ -66,31 +66,84 @@ except (ImportError, AttributeError):
 
 if _tokenizer is None:
     import warnings
-    warnings.warn("[infer] tokenizers.lib unavailable; using regex fallback tokenizer")
+    warnings.warn(
+        "[infer] tokenizers.lib unavailable; using pure-Python Unigram fallback "
+        "(reinstall `tokenizers` on the board for the fast path)")
     import unicodedata
-    _VOCAB_PATH = os.path.join(_DIR, "embedder_onnx", "tokenizer.json")
-    with open(_VOCAB_PATH) as _f:
-        _model = json.load(_f).get("model", {})
-        _raw_vocab = _model.get("vocab", {})
-        # vocab may be a {word: id} dict or a [word, ...] list
-        if isinstance(_raw_vocab, dict):
-            _vocab = _raw_vocab  # already {word: id}
-        else:
-            _vocab = {w: i for i, w in enumerate(_raw_vocab)}
-        _unk_id = _vocab.get("[UNK]", 1)
 
-    class _RegexTokenizer:
-        """Minimal regex tokenizer that maps words to vocab IDs."""
-        def encode(self, text):
-            text = unicodedata.normalize("NFKC", text.lower())
-            tokens = re.findall(r"\w+|[^\w\s]", text)
-            ids = [_vocab.get(t, _unk_id) for t in tokens]
-            return _EncResult(ids)
     class _EncResult:
         def __init__(self, ids):
             self.ids = ids
             self.attention_mask = [1] * len(ids)
-    _tokenizer = _RegexTokenizer()
+
+    # The bundled model is SentencePiece Unigram: model.vocab is a list of
+    # [token, log_score] pairs (NOT hashable as-is -- indexing pair[0] is the
+    # fix for the old `unhashable type: 'list'` crash). We reproduce Unigram
+    # inference (Viterbi max-score segmentation) in pure Python so the ONNX
+    # embedder gets the token IDs it was trained on, even when the compiled
+    # tokenizers lib is missing/broken.
+    _VOCAB_PATH = os.path.join(_DIR, "embedder_onnx", "tokenizer.json")
+    with open(_VOCAB_PATH, encoding="utf-8") as _f:
+        _model = json.load(_f).get("model", {})
+    _raw_vocab = _model.get("vocab", [])
+
+    _tok_to_id = {}
+    _tok_to_score = {}
+    if isinstance(_raw_vocab, dict):
+        # {token: id} form -- no scores, treat all equally (degrades to longest-match)
+        for _tok, _idx in _raw_vocab.items():
+            _tok_to_id[_tok] = int(_idx)
+            _tok_to_score[_tok] = 0.0
+    else:
+        for _i, _entry in enumerate(_raw_vocab):
+            if isinstance(_entry, (list, tuple)):
+                _tok, _score = _entry[0], float(_entry[1])
+            else:
+                _tok, _score = _entry, 0.0  # list-of-strings form
+            _tok_to_id[_tok] = _i
+            _tok_to_score[_tok] = _score
+
+    _UNK_ID = _tok_to_id.get("<unk>", _tok_to_id.get("[UNK]", 3))
+    _BOS_ID = _tok_to_id.get("<s>", 0)
+    _EOS_ID = _tok_to_id.get("</s>", 2)
+    _SPACE = "▁"  # SentencePiece space marker
+    _MAX_PIECE = max((len(t) for t in _tok_to_id), default=1)
+
+    class _UnigramTokenizer:
+        """Pure-Python SentencePiece Unigram: Viterbi over vocab log-scores.
+        Wraps output with <s>…</s> to match the model's TemplateProcessing."""
+
+        def encode(self, text):
+            text = unicodedata.normalize("NFKC", text.strip())
+            text = _SPACE + text.replace(" ", _SPACE)
+            n = len(text)
+            # best[i] = (score, start_of_last_piece) for text[:i]
+            neg_inf = float("-inf")
+            best = [(0.0, 0)] + [(neg_inf, 0)] * n
+            for i in range(1, n + 1):
+                for j in range(max(0, i - _MAX_PIECE), i):
+                    piece = text[j:i]
+                    sc = _tok_to_score.get(piece)
+                    if sc is None:
+                        continue
+                    cand = best[j][0] + sc
+                    if cand > best[i][0]:
+                        best[i] = (cand, j)
+            # Backtrack; unknown single chars fall back to <unk>
+            ids = []
+            i = n
+            while i > 0:
+                _, j = best[i]
+                if best[i][0] == neg_inf:  # no piece ended here -> emit unk char
+                    j = i - 1
+                    ids.append(_UNK_ID)
+                else:
+                    ids.append(_tok_to_id[text[j:i]])
+                i = j
+            ids.reverse()
+            return _EncResult([_BOS_ID] + ids + [_EOS_ID])
+
+    _tokenizer = _UnigramTokenizer()
 
 # --- Constants ---
 CONFIDENCE_THRESHOLD = 0.6
@@ -209,7 +262,31 @@ def classify_single_command(text: str) -> dict:
     return {"intent": intent, "value": value, "confidence": confidence}
 
 
+def _selfcheck():
+    """Minimal runnable check: the fallback tokenizer must produce non-empty,
+    <s>…</s>-wrapped IDs, and (when the real lib is present) match it exactly."""
+    enc = _tokenizer.encode("move forward")
+    assert enc.ids, "empty token IDs"
+    assert len(enc.attention_mask) == len(enc.ids)
+    # If we can also load the real tokenizer, cross-check a few commands.
+    try:
+        from tokenizers import Tokenizer as _Ref
+        ref = _Ref.from_file(os.path.join(_DIR, "embedder_onnx", "tokenizer.json"))
+        for s in ("move forward", "turn left", "ruko"):
+            got = _tokenizer.encode(_preprocess(s)).ids
+            want = ref.encode(_preprocess(s)).ids
+            assert got == want, f"mismatch on {s!r}:\n got={got}\n want={want}"
+        print("[selfcheck] fallback matches reference tokenizer")
+    except (ImportError, AttributeError):
+        print("[selfcheck] reference tokenizer unavailable; fallback shape OK")
+    print("[selfcheck] passed")
+
+
 if __name__ == "__main__":
+    import sys
+    if "--selfcheck" in sys.argv:
+        _selfcheck()
+        sys.exit(0)
     while True:
         try:
             text = input("Command: ")

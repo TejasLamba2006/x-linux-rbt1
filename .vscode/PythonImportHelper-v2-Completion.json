@@ -902,15 +902,6 @@
         "documentation": {}
     },
     {
-        "label": "socket",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "socket",
-        "description": "socket",
-        "detail": "socket",
-        "documentation": {}
-    },
-    {
         "label": "deque",
         "importPath": "collections",
         "description": "collections",
@@ -980,6 +971,15 @@
         "description": "flask",
         "isExtraImport": true,
         "detail": "flask",
+        "documentation": {}
+    },
+    {
+        "label": "socket",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "socket",
+        "description": "socket",
+        "detail": "socket",
         "documentation": {}
     },
     {
@@ -4874,56 +4874,11 @@
         "documentation": {}
     },
     {
-        "label": "_MadgwickAHRS",
-        "kind": 6,
-        "importPath": "odometry_locomization.run_linux",
-        "description": "odometry_locomization.run_linux",
-        "peekOfCode": "class _MadgwickAHRS:\n    \"\"\"Madgwick AHRS filter (gradient-descent, 9-DOF).\n    Quaternion order: [w, x, y, z].\"\"\"\n    def __init__(self, beta=0.1):\n        self.q = [1.0, 0.0, 0.0, 0.0]\n        self.beta = beta  # filter gain (0.01–0.5; higher = more trust in accel/mag)\n    def _inv_sqrt(self, x):\n        return x ** -0.5 if x > 0 else 1.0\n    def update(self, gx, gy, gz, ax, ay, az, mx, my, mz, dt):\n        \"\"\"Update with gyro (dps), accel (mg), mag (mgauss), dt (s).",
-        "detail": "odometry_locomization.run_linux",
-        "documentation": {}
-    },
-    {
-        "label": "quaternion_to_yaw",
-        "kind": 2,
-        "importPath": "odometry_locomization.run_linux",
-        "description": "odometry_locomization.run_linux",
-        "peekOfCode": "def quaternion_to_yaw(x, y, z):\n    w = math.sqrt(max(0.0, 1.0 - x*x - y*y - z*z))\n    yaw = math.atan2(\n        2.0 * (w * z + x * y),\n        1.0 - 2.0 * (y * y + z * z)\n    )\n    return math.degrees(yaw)\ndef angle_diff(a, b):\n    return (a - b + 180) % 360 - 180\n# ── UDP Listener (phone IMU) ─────────────────────────────────────────────────",
-        "detail": "odometry_locomization.run_linux",
-        "documentation": {}
-    },
-    {
         "label": "angle_diff",
         "kind": 2,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "def angle_diff(a, b):\n    return (a - b + 180) % 360 - 180\n# ── UDP Listener (phone IMU) ─────────────────────────────────────────────────\n# Not started by default anymore -- see imu_yaw_thread() below, which reads the\n# board's own LSM6DSV16X gyro instead so the map doesn't depend on a phone.\n# Kept for reference / easy revert (swap the thread started in __main__).\ndef udp_listener():\n    global _raw_smoothed_yaw\n    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\n    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)",
-        "detail": "odometry_locomization.run_linux",
-        "documentation": {}
-    },
-    {
-        "label": "udp_listener",
-        "kind": 2,
-        "importPath": "odometry_locomization.run_linux",
-        "description": "odometry_locomization.run_linux",
-        "peekOfCode": "def udp_listener():\n    global _raw_smoothed_yaw\n    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\n    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n    sock.bind((\"0.0.0.0\", UDP_PORT))\n    sock.settimeout(1.0)\n    print(f\"[UDP] Listening on port {UDP_PORT}\")\n    while True:\n        try:\n            data, _ = sock.recvfrom(256)",
-        "detail": "odometry_locomization.run_linux",
-        "documentation": {}
-    },
-    {
-        "label": "imu_gyro_yaw_thread",
-        "kind": 2,
-        "importPath": "odometry_locomization.run_linux",
-        "description": "odometry_locomization.run_linux",
-        "peekOfCode": "def imu_gyro_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X\n    try:\n        imu = LSM6DSV16X()\n        if not imu.check_who_am_i():\n            print(\n                \"[IMU] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")\n            return\n        imu.configure()",
-        "detail": "odometry_locomization.run_linux",
-        "documentation": {}
-    },
-    {
-        "label": "imu_mag_yaw_thread",
-        "kind": 2,
-        "importPath": "odometry_locomization.run_linux",
-        "description": "odometry_locomization.run_linux",
-        "peekOfCode": "def imu_mag_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_iis2mdc import IIS2MDC\n    try:\n        mag = IIS2MDC()\n        if not mag.check_who_am_i():\n            print(\n                \"[MAG] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")\n            return\n        mag.configure()",
+        "peekOfCode": "def angle_diff(a, b):\n    return (a - b + 180) % 360 - 180\n# ── Onboard magnetometer (IIS2MDC) ───────────────────────────────────────────\n# The RBT01 exposes ONLY the magnetometer (i2c-1 @ 0x1e) and a pressure sensor\n# (0x5d) -- confirmed by `i2cdetect -y 1`. There is no onboard accel/gyro, so\n# those come from the STEVAL-MKBOXPRO over USB (see imu_usb_mkbox.py). Gyro and\n# mag therefore live on two physically separate boards; only their shared\n# vertical axis (yaw) is fused -- see imu_fusion_yaw_thread.\nMAG_ODR_HZ = 100\nUSB_GYRO_POLL_HZ = 200",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -4932,7 +4887,7 @@
         "kind": 2,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "def imu_fusion_yaw_thread():\n    global _raw_smoothed_yaw\n    import imu_usb_mkbox\n    threading.Thread(target=_mag_reader_thread, daemon=True).start()\n    async def run():\n        global _raw_smoothed_yaw\n        box = imu_usb_mkbox.MkBoxUsbGyro()\n        print(\"[FUSION] connecting over BLE to start USB streaming (gyro+accel)...\")\n        await box.start()\n        print(\"[FUSION] streaming started, waiting for first mag reading...\")",
+        "peekOfCode": "def imu_fusion_yaw_thread():\n    \"\"\"Yaw-only complementary filter: MKBOXPRO gyro-Z (USB) integrated for smooth\n    short-term rate, corrected toward the calibrated IIS2MDC magnetic heading\n    (I2C) for absolute, drift-free heading. Gyro and mag sit on two separate\n    boards, so only the shared vertical (yaw) axis is fused -- no full 9-DOF\n    attitude, which would (wrongly) assume one common body frame.\"\"\"\n    global _raw_smoothed_yaw\n    import imu_usb_mkbox\n    threading.Thread(target=_mag_reader_thread, daemon=True).start()\n    _load_mag_calib()",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -4982,29 +4937,20 @@
         "documentation": {}
     },
     {
+        "label": "recalibrate_mag",
+        "kind": 2,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "def recalibrate_mag():\n    \"\"\"Drop the cached mag calibration and re-run the spin+fit -- use after\n    moving to a new environment where the ambient/ferrous field differs. The\n    fusion thread owns the actual spin (it holds the USB/gyro loop), so we just\n    delete the cache and signal it; the next filter cycle picks up the change.\n    ponytail: deletes the file and resets to identity so the running thread\n    re-fits on its own next bootstrap -- simplest reliable trigger without\n    cross-thread asyncio plumbing.\"\"\"\n    global _mag_calib\n    try:",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
         "label": "COUNTS_PER_CM",
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "COUNTS_PER_CM = 25\nUDP_PORT = 2055\nEMA_ALPHA = 0.3\nSMOOTHING_WIN = 5\n# Linux input_event layout (64-bit kernel, ARM64)\n# struct input_event { timeval(8+8), type(2), code(2), value(4) } = 24 bytes\nINPUT_EVENT_FMT = \"llHHi\"\nINPUT_EVENT_SIZE = struct.calcsize(INPUT_EVENT_FMT)\n# /linux/input-event-codes.h\nEV_SYN = 0x00",
-        "detail": "odometry_locomization.run_linux",
-        "documentation": {}
-    },
-    {
-        "label": "UDP_PORT",
-        "kind": 5,
-        "importPath": "odometry_locomization.run_linux",
-        "description": "odometry_locomization.run_linux",
-        "peekOfCode": "UDP_PORT = 2055\nEMA_ALPHA = 0.3\nSMOOTHING_WIN = 5\n# Linux input_event layout (64-bit kernel, ARM64)\n# struct input_event { timeval(8+8), type(2), code(2), value(4) } = 24 bytes\nINPUT_EVENT_FMT = \"llHHi\"\nINPUT_EVENT_SIZE = struct.calcsize(INPUT_EVENT_FMT)\n# /linux/input-event-codes.h\nEV_SYN = 0x00\nEV_KEY = 0x01",
-        "detail": "odometry_locomization.run_linux",
-        "documentation": {}
-    },
-    {
-        "label": "EMA_ALPHA",
-        "kind": 5,
-        "importPath": "odometry_locomization.run_linux",
-        "description": "odometry_locomization.run_linux",
-        "peekOfCode": "EMA_ALPHA = 0.3\nSMOOTHING_WIN = 5\n# Linux input_event layout (64-bit kernel, ARM64)\n# struct input_event { timeval(8+8), type(2), code(2), value(4) } = 24 bytes\nINPUT_EVENT_FMT = \"llHHi\"\nINPUT_EVENT_SIZE = struct.calcsize(INPUT_EVENT_FMT)\n# /linux/input-event-codes.h\nEV_SYN = 0x00\nEV_KEY = 0x01\nEV_REL = 0x02",
+        "peekOfCode": "COUNTS_PER_CM = 25\nSMOOTHING_WIN = 5\n# Linux input_event layout (64-bit kernel, ARM64)\n# struct input_event { timeval(8+8), type(2), code(2), value(4) } = 24 bytes\nINPUT_EVENT_FMT = \"llHHi\"\nINPUT_EVENT_SIZE = struct.calcsize(INPUT_EVENT_FMT)\n# /linux/input-event-codes.h\nEV_SYN = 0x00\nEV_KEY = 0x01\nEV_REL = 0x02",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -5130,7 +5076,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_raw_dx_buf = deque(maxlen=SMOOTHING_WIN)\n_ema_distance = 0.0\n_click_count = 0\n_last_click = 0.0\n_last_mouse_move_time = 0.0  # monotonic time of last REL_X/REL_Y event\n# Phone's raw (un-zeroed) smoothed yaw, and the offset subtracted from it to\n# produce state[\"yaw\"]. The phone's quaternion is referenced to its own\n# arbitrary/magnetic-north origin, not the robot's facing direction, so a\n# zero point must be captured at run start (see /zero_yaw).\n_raw_smoothed_yaw = None",
+        "peekOfCode": "_raw_dx_buf = deque(maxlen=SMOOTHING_WIN)\n_ema_distance = 0.0\n_click_count = 0\n_last_click = 0.0\n_last_mouse_move_time = 0.0  # monotonic time of last REL_X/REL_Y event\n# Fused raw (un-zeroed) yaw from the gyro+mag complementary filter, and the\n# offset subtracted from it to produce state[\"yaw\"]. The mag heading is\n# referenced to magnetic north, not the robot's facing direction, so a zero\n# point is captured at run start / on demand (see /zero_yaw).\n_raw_smoothed_yaw = None",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -5139,7 +5085,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_ema_distance = 0.0\n_click_count = 0\n_last_click = 0.0\n_last_mouse_move_time = 0.0  # monotonic time of last REL_X/REL_Y event\n# Phone's raw (un-zeroed) smoothed yaw, and the offset subtracted from it to\n# produce state[\"yaw\"]. The phone's quaternion is referenced to its own\n# arbitrary/magnetic-north origin, not the robot's facing direction, so a\n# zero point must be captured at run start (see /zero_yaw).\n_raw_smoothed_yaw = None\n_yaw_offset = 0.0",
+        "peekOfCode": "_ema_distance = 0.0\n_click_count = 0\n_last_click = 0.0\n_last_mouse_move_time = 0.0  # monotonic time of last REL_X/REL_Y event\n# Fused raw (un-zeroed) yaw from the gyro+mag complementary filter, and the\n# offset subtracted from it to produce state[\"yaw\"]. The mag heading is\n# referenced to magnetic north, not the robot's facing direction, so a zero\n# point is captured at run start / on demand (see /zero_yaw).\n_raw_smoothed_yaw = None\n_yaw_offset = 0.0",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -5148,7 +5094,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_click_count = 0\n_last_click = 0.0\n_last_mouse_move_time = 0.0  # monotonic time of last REL_X/REL_Y event\n# Phone's raw (un-zeroed) smoothed yaw, and the offset subtracted from it to\n# produce state[\"yaw\"]. The phone's quaternion is referenced to its own\n# arbitrary/magnetic-north origin, not the robot's facing direction, so a\n# zero point must be captured at run start (see /zero_yaw).\n_raw_smoothed_yaw = None\n_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────",
+        "peekOfCode": "_click_count = 0\n_last_click = 0.0\n_last_mouse_move_time = 0.0  # monotonic time of last REL_X/REL_Y event\n# Fused raw (un-zeroed) yaw from the gyro+mag complementary filter, and the\n# offset subtracted from it to produce state[\"yaw\"]. The mag heading is\n# referenced to magnetic north, not the robot's facing direction, so a zero\n# point is captured at run start / on demand (see /zero_yaw).\n_raw_smoothed_yaw = None\n_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -5157,7 +5103,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_last_click = 0.0\n_last_mouse_move_time = 0.0  # monotonic time of last REL_X/REL_Y event\n# Phone's raw (un-zeroed) smoothed yaw, and the offset subtracted from it to\n# produce state[\"yaw\"]. The phone's quaternion is referenced to its own\n# arbitrary/magnetic-north origin, not the robot's facing direction, so a\n# zero point must be captured at run start (see /zero_yaw).\n_raw_smoothed_yaw = None\n_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef quaternion_to_yaw(x, y, z):",
+        "peekOfCode": "_last_click = 0.0\n_last_mouse_move_time = 0.0  # monotonic time of last REL_X/REL_Y event\n# Fused raw (un-zeroed) yaw from the gyro+mag complementary filter, and the\n# offset subtracted from it to produce state[\"yaw\"]. The mag heading is\n# referenced to magnetic north, not the robot's facing direction, so a zero\n# point is captured at run start / on demand (see /zero_yaw).\n_raw_smoothed_yaw = None\n_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef angle_diff(a, b):",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -5166,7 +5112,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_last_mouse_move_time = 0.0  # monotonic time of last REL_X/REL_Y event\n# Phone's raw (un-zeroed) smoothed yaw, and the offset subtracted from it to\n# produce state[\"yaw\"]. The phone's quaternion is referenced to its own\n# arbitrary/magnetic-north origin, not the robot's facing direction, so a\n# zero point must be captured at run start (see /zero_yaw).\n_raw_smoothed_yaw = None\n_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef quaternion_to_yaw(x, y, z):\n    w = math.sqrt(max(0.0, 1.0 - x*x - y*y - z*z))",
+        "peekOfCode": "_last_mouse_move_time = 0.0  # monotonic time of last REL_X/REL_Y event\n# Fused raw (un-zeroed) yaw from the gyro+mag complementary filter, and the\n# offset subtracted from it to produce state[\"yaw\"]. The mag heading is\n# referenced to magnetic north, not the robot's facing direction, so a zero\n# point is captured at run start / on demand (see /zero_yaw).\n_raw_smoothed_yaw = None\n_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef angle_diff(a, b):\n    return (a - b + 180) % 360 - 180",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -5175,7 +5121,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_raw_smoothed_yaw = None\n_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef quaternion_to_yaw(x, y, z):\n    w = math.sqrt(max(0.0, 1.0 - x*x - y*y - z*z))\n    yaw = math.atan2(\n        2.0 * (w * z + x * y),\n        1.0 - 2.0 * (y * y + z * z)\n    )\n    return math.degrees(yaw)",
+        "peekOfCode": "_raw_smoothed_yaw = None\n_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef angle_diff(a, b):\n    return (a - b + 180) % 360 - 180\n# ── Onboard magnetometer (IIS2MDC) ───────────────────────────────────────────\n# The RBT01 exposes ONLY the magnetometer (i2c-1 @ 0x1e) and a pressure sensor\n# (0x5d) -- confirmed by `i2cdetect -y 1`. There is no onboard accel/gyro, so\n# those come from the STEVAL-MKBOXPRO over USB (see imu_usb_mkbox.py). Gyro and\n# mag therefore live on two physically separate boards; only their shared",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -5184,52 +5130,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef quaternion_to_yaw(x, y, z):\n    w = math.sqrt(max(0.0, 1.0 - x*x - y*y - z*z))\n    yaw = math.atan2(\n        2.0 * (w * z + x * y),\n        1.0 - 2.0 * (y * y + z * z)\n    )\n    return math.degrees(yaw)\ndef angle_diff(a, b):",
-        "detail": "odometry_locomization.run_linux",
-        "documentation": {}
-    },
-    {
-        "label": "GYRO_ODR_HZ",
-        "kind": 5,
-        "importPath": "odometry_locomization.run_linux",
-        "description": "odometry_locomization.run_linux",
-        "peekOfCode": "GYRO_ODR_HZ = 120\nGYRO_BIAS_CALIB_SAMPLES = 60\nGYRO_BIAS_EMA_ALPHA = 0.02\n# Total accel magnitude stays ~1000 mg only when there's no linear\n# acceleration, i.e. the board is genuinely still (not just yaw-still).\nSTATIONARY_ACCEL_MG_LOW = 950\nSTATIONARY_ACCEL_MG_HIGH = 1050\ndef imu_gyro_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X",
-        "detail": "odometry_locomization.run_linux",
-        "documentation": {}
-    },
-    {
-        "label": "GYRO_BIAS_CALIB_SAMPLES",
-        "kind": 5,
-        "importPath": "odometry_locomization.run_linux",
-        "description": "odometry_locomization.run_linux",
-        "peekOfCode": "GYRO_BIAS_CALIB_SAMPLES = 60\nGYRO_BIAS_EMA_ALPHA = 0.02\n# Total accel magnitude stays ~1000 mg only when there's no linear\n# acceleration, i.e. the board is genuinely still (not just yaw-still).\nSTATIONARY_ACCEL_MG_LOW = 950\nSTATIONARY_ACCEL_MG_HIGH = 1050\ndef imu_gyro_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X\n    try:",
-        "detail": "odometry_locomization.run_linux",
-        "documentation": {}
-    },
-    {
-        "label": "GYRO_BIAS_EMA_ALPHA",
-        "kind": 5,
-        "importPath": "odometry_locomization.run_linux",
-        "description": "odometry_locomization.run_linux",
-        "peekOfCode": "GYRO_BIAS_EMA_ALPHA = 0.02\n# Total accel magnitude stays ~1000 mg only when there's no linear\n# acceleration, i.e. the board is genuinely still (not just yaw-still).\nSTATIONARY_ACCEL_MG_LOW = 950\nSTATIONARY_ACCEL_MG_HIGH = 1050\ndef imu_gyro_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X\n    try:\n        imu = LSM6DSV16X()",
-        "detail": "odometry_locomization.run_linux",
-        "documentation": {}
-    },
-    {
-        "label": "STATIONARY_ACCEL_MG_LOW",
-        "kind": 5,
-        "importPath": "odometry_locomization.run_linux",
-        "description": "odometry_locomization.run_linux",
-        "peekOfCode": "STATIONARY_ACCEL_MG_LOW = 950\nSTATIONARY_ACCEL_MG_HIGH = 1050\ndef imu_gyro_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X\n    try:\n        imu = LSM6DSV16X()\n        if not imu.check_who_am_i():\n            print(\n                \"[IMU] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")",
-        "detail": "odometry_locomization.run_linux",
-        "documentation": {}
-    },
-    {
-        "label": "STATIONARY_ACCEL_MG_HIGH",
-        "kind": 5,
-        "importPath": "odometry_locomization.run_linux",
-        "description": "odometry_locomization.run_linux",
-        "peekOfCode": "STATIONARY_ACCEL_MG_HIGH = 1050\ndef imu_gyro_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_lsm6dsv16x import LSM6DSV16X\n    try:\n        imu = LSM6DSV16X()\n        if not imu.check_who_am_i():\n            print(\n                \"[IMU] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")\n            return",
+        "peekOfCode": "_yaw_offset = 0.0\n# ── Yaw helpers ───────────────────────────────────────────────────────────────\ndef angle_diff(a, b):\n    return (a - b + 180) % 360 - 180\n# ── Onboard magnetometer (IIS2MDC) ───────────────────────────────────────────\n# The RBT01 exposes ONLY the magnetometer (i2c-1 @ 0x1e) and a pressure sensor\n# (0x5d) -- confirmed by `i2cdetect -y 1`. There is no onboard accel/gyro, so\n# those come from the STEVAL-MKBOXPRO over USB (see imu_usb_mkbox.py). Gyro and\n# mag therefore live on two physically separate boards; only their shared\n# vertical axis (yaw) is fused -- see imu_fusion_yaw_thread.",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -5238,7 +5139,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "MAG_ODR_HZ = 100\ndef imu_mag_yaw_thread():\n    global _raw_smoothed_yaw\n    from imu_iis2mdc import IIS2MDC\n    try:\n        mag = IIS2MDC()\n        if not mag.check_who_am_i():\n            print(\n                \"[MAG] WHO_AM_I mismatch -- wrong I2C_BUS/DEVICE_ADDR? yaw integration disabled\")\n            return",
+        "peekOfCode": "MAG_ODR_HZ = 100\nUSB_GYRO_POLL_HZ = 200\n# Complementary-filter gyro trust. Yaw = COMP_ALPHA * gyro-integrated +\n# (1-COMP_ALPHA) * mag-heading each mag update. Higher = smoother but drifts\n# more between mag corrections; lower = snappier to the (noisy, motor-biased)\n# mag. ponytail: this is the tuning knob the hardware needs -- start at 0.98\n# and lower if yaw lags reality, raise if the mag noise makes it jitter.\nCOMP_ALPHA = 0.98\n_MAG_CALIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),\n                               \"mag_calib.json\")",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -5247,7 +5148,34 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "USB_GYRO_POLL_HZ = 200\n# ── Fusion: Madgwick AHRS — gyro + accel + mag 9-DOF fusion ─────────────────\n# Replaces the old hand-rolled complementary filter with a proper Madgwick\n# gradient-descent AHRS filter.  The filter fuses:\n#   - Gyro (MKBOXPRO USB): smooth short-term angular rate\n#   - Accel (MKBOXPRO USB): gravity reference for tilt compensation\n#   - Mag  (IIS2MDC I2C):  absolute heading reference\n# The Madgwick filter outputs a quaternion; yaw is extracted from it with\n# proper tilt compensation — no more raw atan2(mx,my) that assumes a\n# perfectly level sensor.",
+        "peekOfCode": "USB_GYRO_POLL_HZ = 200\n# Complementary-filter gyro trust. Yaw = COMP_ALPHA * gyro-integrated +\n# (1-COMP_ALPHA) * mag-heading each mag update. Higher = smoother but drifts\n# more between mag corrections; lower = snappier to the (noisy, motor-biased)\n# mag. ponytail: this is the tuning knob the hardware needs -- start at 0.98\n# and lower if yaw lags reality, raise if the mag noise makes it jitter.\nCOMP_ALPHA = 0.98\n_MAG_CALIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),\n                               \"mag_calib.json\")\n# Hard/soft-iron correction, loaded from mag_calib.json (or identity until a",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "COMP_ALPHA",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "COMP_ALPHA = 0.98\n_MAG_CALIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),\n                               \"mag_calib.json\")\n# Hard/soft-iron correction, loaded from mag_calib.json (or identity until a\n# calibration spin runs). offset = hard-iron center; scale = soft-iron X/Y gain.\n_mag_calib = {\"offset\": [0.0, 0.0], \"scale\": [1.0, 1.0]}\n_latest_mag = None        # raw (mx,my,mz) mgauss, set by _mag_reader_thread\n_mag_collecting = False   # True while a calibration spin is gathering samples\n_mag_samples = []         # (mx,my) accumulated during a calibration spin\ndef _load_mag_calib():",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "_MAG_CALIB_PATH",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "_MAG_CALIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),\n                               \"mag_calib.json\")\n# Hard/soft-iron correction, loaded from mag_calib.json (or identity until a\n# calibration spin runs). offset = hard-iron center; scale = soft-iron X/Y gain.\n_mag_calib = {\"offset\": [0.0, 0.0], \"scale\": [1.0, 1.0]}\n_latest_mag = None        # raw (mx,my,mz) mgauss, set by _mag_reader_thread\n_mag_collecting = False   # True while a calibration spin is gathering samples\n_mag_samples = []         # (mx,my) accumulated during a calibration spin\ndef _load_mag_calib():\n    global _mag_calib",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "_mag_calib",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "_mag_calib = {\"offset\": [0.0, 0.0], \"scale\": [1.0, 1.0]}\n_latest_mag = None        # raw (mx,my,mz) mgauss, set by _mag_reader_thread\n_mag_collecting = False   # True while a calibration spin is gathering samples\n_mag_samples = []         # (mx,my) accumulated during a calibration spin\ndef _load_mag_calib():\n    global _mag_calib\n    try:\n        with open(_MAG_CALIB_PATH) as f:\n            data = json.load(f)\n        _mag_calib = {\"offset\": [float(data[\"offset\"][0]), float(data[\"offset\"][1])],",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -5256,7 +5184,25 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_latest_mag = None  # (mx, my, mz) in milligauss, set by _mag_reader_thread\nclass _MadgwickAHRS:\n    \"\"\"Madgwick AHRS filter (gradient-descent, 9-DOF).\n    Quaternion order: [w, x, y, z].\"\"\"\n    def __init__(self, beta=0.1):\n        self.q = [1.0, 0.0, 0.0, 0.0]\n        self.beta = beta  # filter gain (0.01–0.5; higher = more trust in accel/mag)\n    def _inv_sqrt(self, x):\n        return x ** -0.5 if x > 0 else 1.0\n    def update(self, gx, gy, gz, ax, ay, az, mx, my, mz, dt):",
+        "peekOfCode": "_latest_mag = None        # raw (mx,my,mz) mgauss, set by _mag_reader_thread\n_mag_collecting = False   # True while a calibration spin is gathering samples\n_mag_samples = []         # (mx,my) accumulated during a calibration spin\ndef _load_mag_calib():\n    global _mag_calib\n    try:\n        with open(_MAG_CALIB_PATH) as f:\n            data = json.load(f)\n        _mag_calib = {\"offset\": [float(data[\"offset\"][0]), float(data[\"offset\"][1])],\n                      \"scale\": [float(data[\"scale\"][0]), float(data[\"scale\"][1])]}",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "_mag_collecting",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "_mag_collecting = False   # True while a calibration spin is gathering samples\n_mag_samples = []         # (mx,my) accumulated during a calibration spin\ndef _load_mag_calib():\n    global _mag_calib\n    try:\n        with open(_MAG_CALIB_PATH) as f:\n            data = json.load(f)\n        _mag_calib = {\"offset\": [float(data[\"offset\"][0]), float(data[\"offset\"][1])],\n                      \"scale\": [float(data[\"scale\"][0]), float(data[\"scale\"][1])]}\n        print(f\"[MAG-CAL] loaded {_mag_calib}\")",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "_mag_samples",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "_mag_samples = []         # (mx,my) accumulated during a calibration spin\ndef _load_mag_calib():\n    global _mag_calib\n    try:\n        with open(_MAG_CALIB_PATH) as f:\n            data = json.load(f)\n        _mag_calib = {\"offset\": [float(data[\"offset\"][0]), float(data[\"offset\"][1])],\n                      \"scale\": [float(data[\"scale\"][0]), float(data[\"scale\"][1])]}\n        print(f\"[MAG-CAL] loaded {_mag_calib}\")\n        return True",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
