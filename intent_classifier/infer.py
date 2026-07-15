@@ -50,8 +50,40 @@ with open(os.path.join(_DIR, "intent_labels.json")) as f:
     LABELS = json.load(f)  # ["BACKWARD", "FORWARD", "NOP", ...]
 
 # --- Load bundled tokenizer (tokenizers lib, not transformers) ---
-from tokenizers import Tokenizer as _Tokenizer
-_tokenizer = _Tokenizer.from_file(os.path.join(_DIR, "embedder_onnx", "tokenizer.json"))
+# The tokenizers package may not export Tokenizer at the top level on older
+# Yocto builds.  Try multiple import paths, then fall back to a simple
+# regex-based tokenizer that's good enough for short voice commands.
+_tokenizer = None
+try:
+    from tokenizers import Tokenizer as _TkCls
+    _tokenizer = _TkCls.from_file(os.path.join(_DIR, "embedder_onnx", "tokenizer.json"))
+except (ImportError, AttributeError):
+    try:
+        from tokenizers.implementations import BaseTokenizer as _TkCls
+        _tokenizer = _TkCls.from_file(os.path.join(_DIR, "embedder_onnx", "tokenizer.json"))
+    except (ImportError, AttributeError, OSError):
+        pass
+
+if _tokenizer is None:
+    import warnings
+    warnings.warn("[infer] tokenizers.lib unavailable; using regex fallback tokenizer")
+    import unicodedata
+    _VOCAB_PATH = os.path.join(_DIR, "embedder_onnx", "tokenizer.json")
+    with open(_VOCAB_PATH) as _f:
+        _vocab = {w: i for i, w in enumerate(json.load(_f).get("model", {}).get("vocab", []))}
+
+    class _RegexTokenizer:
+        """Minimal regex tokenizer that maps words to vocab IDs."""
+        def encode(self, text):
+            text = unicodedata.normalize("NFKC", text.lower())
+            tokens = re.findall(r"\w+|[^\w\s]", text)
+            ids = [_vocab.get(t, _vocab.get("[UNK]", 1)) for t in tokens]
+            return _EncResult(ids)
+    class _EncResult:
+        def __init__(self, ids):
+            self.ids = ids
+            self.attention_mask = [1] * len(ids)
+    _tokenizer = _RegexTokenizer()
 
 # --- Constants ---
 CONFIDENCE_THRESHOLD = 0.6

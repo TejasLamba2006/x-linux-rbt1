@@ -473,14 +473,6 @@
         "documentation": {}
     },
     {
-        "label": "Tokenizer",
-        "importPath": "tokenizers",
-        "description": "tokenizers",
-        "isExtraImport": true,
-        "detail": "tokenizers",
-        "documentation": {}
-    },
-    {
         "label": "classify_single_command",
         "importPath": "infer",
         "description": "infer",
@@ -3392,7 +3384,7 @@
         "kind": 5,
         "importPath": "intent_classifier.infer",
         "description": "intent_classifier.infer",
-        "peekOfCode": "_embed_input_names = [inp.name for inp in _embed_session.get_inputs()]\n_head_session = ort.InferenceSession(\n    os.path.join(_DIR, \"intent_head.onnx\"),\n    providers=[\"CPUExecutionProvider\"],\n)\n_head_input_name = _head_session.get_inputs()[0].name\nwith open(os.path.join(_DIR, \"intent_labels.json\")) as f:\n    LABELS = json.load(f)  # [\"BACKWARD\", \"FORWARD\", \"NOP\", ...]\n# --- Load bundled tokenizer (tokenizers lib, not transformers) ---\nfrom tokenizers import Tokenizer as _Tokenizer",
+        "peekOfCode": "_embed_input_names = [inp.name for inp in _embed_session.get_inputs()]\n_head_session = ort.InferenceSession(\n    os.path.join(_DIR, \"intent_head.onnx\"),\n    providers=[\"CPUExecutionProvider\"],\n)\n_head_input_name = _head_session.get_inputs()[0].name\nwith open(os.path.join(_DIR, \"intent_labels.json\")) as f:\n    LABELS = json.load(f)  # [\"BACKWARD\", \"FORWARD\", \"NOP\", ...]\n# --- Load bundled tokenizer (tokenizers lib, not transformers) ---\n# The tokenizers package may not export Tokenizer at the top level on older",
         "detail": "intent_classifier.infer",
         "documentation": {}
     },
@@ -3401,7 +3393,7 @@
         "kind": 5,
         "importPath": "intent_classifier.infer",
         "description": "intent_classifier.infer",
-        "peekOfCode": "_head_session = ort.InferenceSession(\n    os.path.join(_DIR, \"intent_head.onnx\"),\n    providers=[\"CPUExecutionProvider\"],\n)\n_head_input_name = _head_session.get_inputs()[0].name\nwith open(os.path.join(_DIR, \"intent_labels.json\")) as f:\n    LABELS = json.load(f)  # [\"BACKWARD\", \"FORWARD\", \"NOP\", ...]\n# --- Load bundled tokenizer (tokenizers lib, not transformers) ---\nfrom tokenizers import Tokenizer as _Tokenizer\n_tokenizer = _Tokenizer.from_file(os.path.join(_DIR, \"embedder_onnx\", \"tokenizer.json\"))",
+        "peekOfCode": "_head_session = ort.InferenceSession(\n    os.path.join(_DIR, \"intent_head.onnx\"),\n    providers=[\"CPUExecutionProvider\"],\n)\n_head_input_name = _head_session.get_inputs()[0].name\nwith open(os.path.join(_DIR, \"intent_labels.json\")) as f:\n    LABELS = json.load(f)  # [\"BACKWARD\", \"FORWARD\", \"NOP\", ...]\n# --- Load bundled tokenizer (tokenizers lib, not transformers) ---\n# The tokenizers package may not export Tokenizer at the top level on older\n# Yocto builds.  Try multiple import paths, then fall back to a simple",
         "detail": "intent_classifier.infer",
         "documentation": {}
     },
@@ -3410,7 +3402,7 @@
         "kind": 5,
         "importPath": "intent_classifier.infer",
         "description": "intent_classifier.infer",
-        "peekOfCode": "_head_input_name = _head_session.get_inputs()[0].name\nwith open(os.path.join(_DIR, \"intent_labels.json\")) as f:\n    LABELS = json.load(f)  # [\"BACKWARD\", \"FORWARD\", \"NOP\", ...]\n# --- Load bundled tokenizer (tokenizers lib, not transformers) ---\nfrom tokenizers import Tokenizer as _Tokenizer\n_tokenizer = _Tokenizer.from_file(os.path.join(_DIR, \"embedder_onnx\", \"tokenizer.json\"))\n# --- Constants ---\nCONFIDENCE_THRESHOLD = 0.6\nMAX_LENGTH = 128\nNUMBER_WORDS = {",
+        "peekOfCode": "_head_input_name = _head_session.get_inputs()[0].name\nwith open(os.path.join(_DIR, \"intent_labels.json\")) as f:\n    LABELS = json.load(f)  # [\"BACKWARD\", \"FORWARD\", \"NOP\", ...]\n# --- Load bundled tokenizer (tokenizers lib, not transformers) ---\n# The tokenizers package may not export Tokenizer at the top level on older\n# Yocto builds.  Try multiple import paths, then fall back to a simple\n# regex-based tokenizer that's good enough for short voice commands.\n_tokenizer = None\ntry:\n    from tokenizers import Tokenizer as _TkCls",
         "detail": "intent_classifier.infer",
         "documentation": {}
     },
@@ -3419,7 +3411,7 @@
         "kind": 5,
         "importPath": "intent_classifier.infer",
         "description": "intent_classifier.infer",
-        "peekOfCode": "_tokenizer = _Tokenizer.from_file(os.path.join(_DIR, \"embedder_onnx\", \"tokenizer.json\"))\n# --- Constants ---\nCONFIDENCE_THRESHOLD = 0.6\nMAX_LENGTH = 128\nNUMBER_WORDS = {\n    \"zero\": 0, \"one\": 1, \"two\": 2, \"three\": 3, \"four\": 4,\n    \"five\": 5, \"six\": 6, \"seven\": 7, \"eight\": 8, \"nine\": 9,\n    \"ten\": 10, \"twenty\": 20, \"thirty\": 30, \"forty\": 40, \"fifty\": 50,\n    \"sixty\": 60, \"seventy\": 70, \"eighty\": 80, \"ninety\": 90, \"hundred\": 100,\n}",
+        "peekOfCode": "_tokenizer = None\ntry:\n    from tokenizers import Tokenizer as _TkCls\n    _tokenizer = _TkCls.from_file(os.path.join(_DIR, \"embedder_onnx\", \"tokenizer.json\"))\nexcept (ImportError, AttributeError):\n    try:\n        from tokenizers.implementations import BaseTokenizer as _TkCls\n        _tokenizer = _TkCls.from_file(os.path.join(_DIR, \"embedder_onnx\", \"tokenizer.json\"))\n    except (ImportError, AttributeError, OSError):\n        pass",
         "detail": "intent_classifier.infer",
         "documentation": {}
     },
