@@ -281,7 +281,9 @@
 
         ctx.save();
         ctx.translate(cx, cy);
-        ctx.rotate((robotYaw * Math.PI) / 180);
+        // +90° so the drawn car (art points up, -Y) matches the motion frame,
+        // which references heading as yaw-90 (see _raw_input_delta_callback).
+        ctx.rotate(((robotYaw + 90) * Math.PI) / 180);
 
         // Car body
         ctx.fillStyle = "#2255ff";

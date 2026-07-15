@@ -79,6 +79,12 @@ USB_GYRO_POLL_HZ = 200
 # and lower if yaw lags reality, raise if the mag noise makes it jitter.
 COMP_ALPHA = 0.98
 
+# Below this |bias-corrected gyro rate| (dps), with accel ≈ 1g, the robot is
+# treated as stationary: yaw snaps toward the absolute mag heading instead of
+# integrating (near-zero) gyro, which is what kills the slow rest drift.
+STATIONARY_GYRO_DPS = 2.0
+MAG_WEIGHT_AT_REST = 0.20   # strong pull to mag when parked (vs 1-COMP_ALPHA moving)
+
 _MAG_CALIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                "mag_calib.json")
 
@@ -269,6 +275,7 @@ def imu_fusion_yaw_thread():
             last_t = now
 
             # ── Gyro integration (fast path) ──
+            stationary = True
             for gx, gy, gz in gyro_batch:
                 gz_corrected = gz - gyro_bias
                 # ponytail: gz sign assumed = CCW-positive yaw rate. If the HUD
@@ -276,18 +283,24 @@ def imu_fusion_yaw_thread():
                 # imu_usb_mkbox.py header).
                 yaw = (yaw + gz_corrected * dt_per_sample + 180) % 360 - 180
 
-                if not state["recording"]:
-                    ax_mg, ay_mg, az_mg = accel_batch[-1] if accel_batch else (1000.0, 0.0, 0.0)
-                    accel_mag = math.sqrt(ax_mg**2 + ay_mg**2 + az_mg**2)
-                    if 950 < accel_mag < 1050 and abs(gz_corrected) < 5:
-                        gyro_bias += 0.01 * (gz - gyro_bias)
+                ax_mg, ay_mg, az_mg = accel_batch[-1] if accel_batch else (1000.0, 0.0, 0.0)
+                accel_mag = math.sqrt(ax_mg**2 + ay_mg**2 + az_mg**2)
+                at_rest = 950 < accel_mag < 1050 and abs(gz_corrected) < STATIONARY_GYRO_DPS
+                if not at_rest:
+                    stationary = False
+                # Track gyro bias whenever genuinely still (any mode).
+                if at_rest:
+                    gyro_bias += 0.01 * (gz - gyro_bias)
 
-            # ── Mag correction (slow path, absolute heading) ──
+            # ── Mag correction (absolute heading) ──
+            # At rest, trust the mag hard so residual gyro-bias creep can't
+            # accumulate -- this is what stops the slow settling drift while
+            # parked. Moving, trust the gyro (COMP_ALPHA) for smoothness and let
+            # the mag only trim slow drift.
             mag_heading = _mag_heading_deg()
             if mag_heading is not None:
-                # Blend toward mag along the shortest arc so wrap is handled.
-                yaw = (yaw + (1.0 - COMP_ALPHA) *
-                       angle_diff(mag_heading, yaw) + 180) % 360 - 180
+                w = MAG_WEIGHT_AT_REST if stationary else (1.0 - COMP_ALPHA)
+                yaw = (yaw + w * angle_diff(mag_heading, yaw) + 180) % 360 - 180
 
             _raw_smoothed_yaw = yaw
             with lock:
