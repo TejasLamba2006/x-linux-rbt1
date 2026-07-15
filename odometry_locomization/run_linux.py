@@ -135,6 +135,11 @@ _latest_mag = None        # raw (mx,my,mz) mgauss, set by _mag_reader_thread
 _mag_collecting = False   # True while a calibration spin is gathering samples
 _mag_samples = []         # (mx,my) accumulated during a calibration spin
 
+# Fusion internals exposed on /debug_yaw so gyro-vs-mag disagreement (sign
+# flips, scale errors, mag disturbance) is observable instead of guessed at.
+_debug = {"gyro_yaw": None, "mag_heading": None, "gyro_bias": None,
+          "stationary": None, "gz_last": None}
+
 
 def _load_mag_calib():
     global _mag_calib

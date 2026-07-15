@@ -5203,7 +5203,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "FUSION_STALE_S = 0.5        # watchdog takes over yaw after this publish gap\n_MAG_CALIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),\n                               \"mag_calib.json\")\n# Hard/soft-iron correction, loaded from mag_calib.json (or identity until a\n# calibration spin runs). offset = hard-iron center; scale = soft-iron X/Y gain.\n_mag_calib = {\"offset\": [0.0, 0.0], \"scale\": [1.0, 1.0]}\n_latest_mag = None        # raw (mx,my,mz) mgauss, set by _mag_reader_thread\n_mag_collecting = False   # True while a calibration spin is gathering samples\n_mag_samples = []         # (mx,my) accumulated during a calibration spin\ndef _load_mag_calib():",
+        "peekOfCode": "FUSION_STALE_S = 0.5        # watchdog takes over yaw after this publish gap\n_MAG_CALIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),\n                               \"mag_calib.json\")\n# Hard/soft-iron correction, loaded from mag_calib.json (or identity until a\n# calibration spin runs). offset = hard-iron center; scale = soft-iron X/Y gain.\n_mag_calib = {\"offset\": [0.0, 0.0], \"scale\": [1.0, 1.0]}\n_latest_mag = None        # raw (mx,my,mz) mgauss, set by _mag_reader_thread\n_mag_collecting = False   # True while a calibration spin is gathering samples\n_mag_samples = []         # (mx,my) accumulated during a calibration spin\n# Fusion internals exposed on /debug_yaw so gyro-vs-mag disagreement (sign",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -5212,7 +5212,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_MAG_CALIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),\n                               \"mag_calib.json\")\n# Hard/soft-iron correction, loaded from mag_calib.json (or identity until a\n# calibration spin runs). offset = hard-iron center; scale = soft-iron X/Y gain.\n_mag_calib = {\"offset\": [0.0, 0.0], \"scale\": [1.0, 1.0]}\n_latest_mag = None        # raw (mx,my,mz) mgauss, set by _mag_reader_thread\n_mag_collecting = False   # True while a calibration spin is gathering samples\n_mag_samples = []         # (mx,my) accumulated during a calibration spin\ndef _load_mag_calib():\n    global _mag_calib",
+        "peekOfCode": "_MAG_CALIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),\n                               \"mag_calib.json\")\n# Hard/soft-iron correction, loaded from mag_calib.json (or identity until a\n# calibration spin runs). offset = hard-iron center; scale = soft-iron X/Y gain.\n_mag_calib = {\"offset\": [0.0, 0.0], \"scale\": [1.0, 1.0]}\n_latest_mag = None        # raw (mx,my,mz) mgauss, set by _mag_reader_thread\n_mag_collecting = False   # True while a calibration spin is gathering samples\n_mag_samples = []         # (mx,my) accumulated during a calibration spin\n# Fusion internals exposed on /debug_yaw so gyro-vs-mag disagreement (sign\n# flips, scale errors, mag disturbance) is observable instead of guessed at.",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -5221,7 +5221,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_mag_calib = {\"offset\": [0.0, 0.0], \"scale\": [1.0, 1.0]}\n_latest_mag = None        # raw (mx,my,mz) mgauss, set by _mag_reader_thread\n_mag_collecting = False   # True while a calibration spin is gathering samples\n_mag_samples = []         # (mx,my) accumulated during a calibration spin\ndef _load_mag_calib():\n    global _mag_calib\n    try:\n        with open(_MAG_CALIB_PATH) as f:\n            data = json.load(f)\n        _mag_calib = {\"offset\": [float(data[\"offset\"][0]), float(data[\"offset\"][1])],",
+        "peekOfCode": "_mag_calib = {\"offset\": [0.0, 0.0], \"scale\": [1.0, 1.0]}\n_latest_mag = None        # raw (mx,my,mz) mgauss, set by _mag_reader_thread\n_mag_collecting = False   # True while a calibration spin is gathering samples\n_mag_samples = []         # (mx,my) accumulated during a calibration spin\n# Fusion internals exposed on /debug_yaw so gyro-vs-mag disagreement (sign\n# flips, scale errors, mag disturbance) is observable instead of guessed at.\n_debug = {\"gyro_yaw\": None, \"mag_heading\": None, \"gyro_bias\": None,\n          \"stationary\": None, \"gz_last\": None}\ndef _load_mag_calib():\n    global _mag_calib",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -5230,7 +5230,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_latest_mag = None        # raw (mx,my,mz) mgauss, set by _mag_reader_thread\n_mag_collecting = False   # True while a calibration spin is gathering samples\n_mag_samples = []         # (mx,my) accumulated during a calibration spin\ndef _load_mag_calib():\n    global _mag_calib\n    try:\n        with open(_MAG_CALIB_PATH) as f:\n            data = json.load(f)\n        _mag_calib = {\"offset\": [float(data[\"offset\"][0]), float(data[\"offset\"][1])],\n                      \"scale\": [float(data[\"scale\"][0]), float(data[\"scale\"][1])]}",
+        "peekOfCode": "_latest_mag = None        # raw (mx,my,mz) mgauss, set by _mag_reader_thread\n_mag_collecting = False   # True while a calibration spin is gathering samples\n_mag_samples = []         # (mx,my) accumulated during a calibration spin\n# Fusion internals exposed on /debug_yaw so gyro-vs-mag disagreement (sign\n# flips, scale errors, mag disturbance) is observable instead of guessed at.\n_debug = {\"gyro_yaw\": None, \"mag_heading\": None, \"gyro_bias\": None,\n          \"stationary\": None, \"gz_last\": None}\ndef _load_mag_calib():\n    global _mag_calib\n    try:",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -5239,7 +5239,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_mag_collecting = False   # True while a calibration spin is gathering samples\n_mag_samples = []         # (mx,my) accumulated during a calibration spin\ndef _load_mag_calib():\n    global _mag_calib\n    try:\n        with open(_MAG_CALIB_PATH) as f:\n            data = json.load(f)\n        _mag_calib = {\"offset\": [float(data[\"offset\"][0]), float(data[\"offset\"][1])],\n                      \"scale\": [float(data[\"scale\"][0]), float(data[\"scale\"][1])]}\n        print(f\"[MAG-CAL] loaded {_mag_calib}\")",
+        "peekOfCode": "_mag_collecting = False   # True while a calibration spin is gathering samples\n_mag_samples = []         # (mx,my) accumulated during a calibration spin\n# Fusion internals exposed on /debug_yaw so gyro-vs-mag disagreement (sign\n# flips, scale errors, mag disturbance) is observable instead of guessed at.\n_debug = {\"gyro_yaw\": None, \"mag_heading\": None, \"gyro_bias\": None,\n          \"stationary\": None, \"gz_last\": None}\ndef _load_mag_calib():\n    global _mag_calib\n    try:\n        with open(_MAG_CALIB_PATH) as f:",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -5248,7 +5248,16 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "_mag_samples = []         # (mx,my) accumulated during a calibration spin\ndef _load_mag_calib():\n    global _mag_calib\n    try:\n        with open(_MAG_CALIB_PATH) as f:\n            data = json.load(f)\n        _mag_calib = {\"offset\": [float(data[\"offset\"][0]), float(data[\"offset\"][1])],\n                      \"scale\": [float(data[\"scale\"][0]), float(data[\"scale\"][1])]}\n        print(f\"[MAG-CAL] loaded {_mag_calib}\")\n        return True",
+        "peekOfCode": "_mag_samples = []         # (mx,my) accumulated during a calibration spin\n# Fusion internals exposed on /debug_yaw so gyro-vs-mag disagreement (sign\n# flips, scale errors, mag disturbance) is observable instead of guessed at.\n_debug = {\"gyro_yaw\": None, \"mag_heading\": None, \"gyro_bias\": None,\n          \"stationary\": None, \"gz_last\": None}\ndef _load_mag_calib():\n    global _mag_calib\n    try:\n        with open(_MAG_CALIB_PATH) as f:\n            data = json.load(f)",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "_debug",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "_debug = {\"gyro_yaw\": None, \"mag_heading\": None, \"gyro_bias\": None,\n          \"stationary\": None, \"gz_last\": None}\ndef _load_mag_calib():\n    global _mag_calib\n    try:\n        with open(_MAG_CALIB_PATH) as f:\n            data = json.load(f)\n        _mag_calib = {\"offset\": [float(data[\"offset\"][0]), float(data[\"offset\"][1])],\n                      \"scale\": [float(data[\"scale\"][0]), float(data[\"scale\"][1])]}\n        print(f\"[MAG-CAL] loaded {_mag_calib}\")",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
