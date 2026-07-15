@@ -3393,7 +3393,7 @@
         "kind": 5,
         "importPath": "intent_classifier.infer",
         "description": "intent_classifier.infer",
-        "peekOfCode": "_head_session = ort.InferenceSession(\n    os.path.join(_DIR, \"intent_head.onnx\"),\n    providers=[\"CPUExecutionProvider\"],\n)\n_head_input_name = _head_session.get_inputs()[0].name\nwith open(os.path.join(_DIR, \"intent_labels.json\")) as f:\n    LABELS = json.load(f)  # [\"BACKWARD\", \"FORWARD\", \"NOP\", ...]\n# --- Load bundled tokenizer (tokenizers lib, not transformers) ---\n# The tokenizers package may not export Tokenizer at the top level on older\n# Yocto builds.  Try multiple import paths, then fall back to a simple",
+        "peekOfCode": "_head_session = ort.InferenceSession(\n    os.path.join(_DIR, \"intent_head.onnx\"),\n    providers=[\"CPUExecutionProvider\"],\n)\n_head_input_name = _head_session.get_inputs()[0].name\nwith open(os.path.join(_DIR, \"intent_labels.json\")) as f:\n    LABELS = json.load(f)  # [\"BACKWARD\", \"FORWARD\", \"NOP\", ...]\n# --- Load bundled tokenizer (tokenizers lib, not transformers) ---\n# The tokenizers package may not export Tokenizer at the top level on older\n# Yocto builds (and some images ship a 0-byte stub that never imports). Try",
         "detail": "intent_classifier.infer",
         "documentation": {}
     },
@@ -3402,7 +3402,7 @@
         "kind": 5,
         "importPath": "intent_classifier.infer",
         "description": "intent_classifier.infer",
-        "peekOfCode": "_head_input_name = _head_session.get_inputs()[0].name\nwith open(os.path.join(_DIR, \"intent_labels.json\")) as f:\n    LABELS = json.load(f)  # [\"BACKWARD\", \"FORWARD\", \"NOP\", ...]\n# --- Load bundled tokenizer (tokenizers lib, not transformers) ---\n# The tokenizers package may not export Tokenizer at the top level on older\n# Yocto builds.  Try multiple import paths, then fall back to a simple\n# regex-based tokenizer that's good enough for short voice commands.\n_tokenizer = None\ntry:\n    from tokenizers import Tokenizer as _TkCls",
+        "peekOfCode": "_head_input_name = _head_session.get_inputs()[0].name\nwith open(os.path.join(_DIR, \"intent_labels.json\")) as f:\n    LABELS = json.load(f)  # [\"BACKWARD\", \"FORWARD\", \"NOP\", ...]\n# --- Load bundled tokenizer (tokenizers lib, not transformers) ---\n# The tokenizers package may not export Tokenizer at the top level on older\n# Yocto builds (and some images ship a 0-byte stub that never imports). Try\n# multiple import paths, then fall back to a pure-Python SentencePiece Unigram\n# tokenizer that reproduces the same token IDs the ONNX embedder expects.\n_tokenizer = None\ntry:",
         "detail": "intent_classifier.infer",
         "documentation": {}
     },

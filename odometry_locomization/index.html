@@ -139,7 +139,10 @@
       Recording follows motor motion &nbsp;|&nbsp; Double-click mouse to reset
     </div>
 
-    <button id="zero-yaw-btn" title="Set the phone's current heading as forward (0°)">
+    <button
+      id="zero-yaw-btn"
+      title="Set the phone's current heading as forward (0°)"
+    >
       Zero Heading
     </button>
 
@@ -201,7 +204,9 @@
           if (document.activeElement !== cpcInput && d.counts_per_cm) {
             cpcInput.value = d.counts_per_cm;
           }
-        } catch (e) { /* retry next tick */ }
+        } catch (e) {
+          /* retry next tick */
+        }
       }, 80);
 
       // ── Draw ───────────────────────────────────────────────────────────────────
@@ -276,7 +281,7 @@
 
         ctx.save();
         ctx.translate(cx, cy);
-        ctx.rotate(((robotYaw) * Math.PI) / 180);
+        ctx.rotate((robotYaw * Math.PI) / 180 - 90);
 
         // Car body
         ctx.fillStyle = "#2255ff";
