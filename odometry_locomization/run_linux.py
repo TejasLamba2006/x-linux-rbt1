@@ -72,18 +72,29 @@ def angle_diff(a, b):
 MAG_ODR_HZ = 100
 USB_GYRO_POLL_HZ = 200
 
-# Complementary-filter gyro trust. Yaw = COMP_ALPHA * gyro-integrated +
-# (1-COMP_ALPHA) * mag-heading each mag update. Higher = smoother but drifts
-# more between mag corrections; lower = snappier to the (noisy, motor-biased)
-# mag. ponytail: this is the tuning knob the hardware needs -- start at 0.98
-# and lower if yaw lags reality, raise if the mag noise makes it jitter.
-COMP_ALPHA = 0.98
+# Complementary-filter mag-correction time constants (seconds). Each cycle the
+# gyro-integrated yaw is pulled toward the calibrated mag heading by
+# w = 1 - exp(-dt/tau), so the trust is rate-independent (the loop rate floats
+# with USB timing -- a fixed per-cycle weight would change strength with data
+# rate). Moving: long tau so the (motor-field-biased) mag only trims slow gyro
+# drift. At rest: short tau so yaw locks to absolute heading and residual gyro
+# bias can't creep. ponytail: these two taus are the tuning knobs the hardware
+# needs -- raise TAU_MAG_MOVING if driving near the motors bends the heading,
+# lower it if yaw drifts during long drives.
+TAU_MAG_MOVING = 5.0
+TAU_MAG_REST = 0.7
 
 # Below this |bias-corrected gyro rate| (dps), with accel ≈ 1g, the robot is
-# treated as stationary: yaw snaps toward the absolute mag heading instead of
-# integrating (near-zero) gyro, which is what kills the slow rest drift.
+# treated as stationary (selects TAU_MAG_REST + gyro-bias re-tracking).
 STATIONARY_GYRO_DPS = 2.0
-MAG_WEIGHT_AT_REST = 0.20   # strong pull to mag when parked (vs 1-COMP_ALPHA moving)
+
+# Mag-only fallback smoothing (EMA per 100 Hz sample) used whenever the fusion
+# loop isn't publishing (box off/unplugged, BLE scan, gyro-bias calibration) --
+# absolute heading with no gyro smoothing. Measured on this unit: raw
+# calibrated-heading sigma ~0.9 deg -> EMA 0.1 leaves ~0.2 deg jitter.
+MAG_ONLY_EMA = 0.1
+MAG_ONLY_RETRY_S = 30.0     # wait this long between MKBOXPRO reconnect attempts
+FUSION_STALE_S = 0.5        # watchdog takes over yaw after this publish gap
 
 _MAG_CALIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                "mag_calib.json")
@@ -206,20 +217,48 @@ async def _run_mag_calibration_spin():
     return True
 
 
+_last_fusion_pub = 0.0  # time.time() of the fusion loop's last yaw publish
+
+
+def _mag_watchdog_thread():
+    """Publish smoothed mag-only yaw whenever the fusion loop goes quiet
+    (box off/unplugged, BLE scan in progress, gyro-bias calibration). Absolute
+    heading with no gyro smoothing -- keeps the map usable instead of leaving
+    yaw frozen. Backs off automatically the moment fusion publishes again."""
+    global _raw_smoothed_yaw
+    while True:
+        if time.time() - _last_fusion_pub > FUSION_STALE_S:
+            heading = _mag_heading_deg()
+            if heading is not None:
+                if _raw_smoothed_yaw is None:
+                    _raw_smoothed_yaw = heading
+                else:
+                    _raw_smoothed_yaw = (_raw_smoothed_yaw + MAG_ONLY_EMA *
+                                         angle_diff(heading, _raw_smoothed_yaw)
+                                         + 180) % 360 - 180
+                with lock:
+                    state["yaw"] = round(angle_diff(
+                        _raw_smoothed_yaw, _yaw_offset), 2)
+        time.sleep(1.0 / MAG_ODR_HZ)
+
+
 def imu_fusion_yaw_thread():
     """Yaw-only complementary filter: MKBOXPRO gyro-Z (USB) integrated for smooth
     short-term rate, corrected toward the calibrated IIS2MDC magnetic heading
     (I2C) for absolute, drift-free heading. Gyro and mag sit on two separate
     boards, so only the shared vertical (yaw) axis is fused -- no full 9-DOF
-    attitude, which would (wrongly) assume one common body frame."""
+    attitude, which would (wrongly) assume one common body frame.
+    If the box is unreachable (off/unplugged), degrades to mag-only yaw and
+    retries the box every MAG_ONLY_RETRY_S."""
     global _raw_smoothed_yaw
     import imu_usb_mkbox
 
     threading.Thread(target=_mag_reader_thread, daemon=True).start()
     _load_mag_calib()
+    threading.Thread(target=_mag_watchdog_thread, daemon=True).start()
 
     async def run():
-        global _raw_smoothed_yaw
+        global _raw_smoothed_yaw, _last_fusion_pub
         box = imu_usb_mkbox.MkBoxUsbGyro()
         print("[FUSION] connecting over BLE to start USB streaming (gyro+accel)...")
         await box.start()
@@ -263,6 +302,7 @@ def imu_fusion_yaw_thread():
         print("[FUSION] complementary gyro+mag fusion started")
 
         last_t = time.time()
+        cycle_prev = None
         while True:
             gyro_batch, accel_batch = box.read_gyro_and_accel()
             now = time.time()
@@ -293,16 +333,21 @@ def imu_fusion_yaw_thread():
                     gyro_bias += 0.01 * (gz - gyro_bias)
 
             # ── Mag correction (absolute heading) ──
-            # At rest, trust the mag hard so residual gyro-bias creep can't
-            # accumulate -- this is what stops the slow settling drift while
-            # parked. Moving, trust the gyro (COMP_ALPHA) for smoothness and let
-            # the mag only trim slow drift.
+            # At rest, short tau locks yaw to the mag so residual gyro-bias
+            # creep can't accumulate -- this is what stops the slow settling
+            # drift while parked. Moving, long tau lets the gyro dominate and
+            # the mag only trims slow drift. exp() makes the pull strength
+            # independent of the (jittery) USB batch rate.
             mag_heading = _mag_heading_deg()
             if mag_heading is not None:
-                w = MAG_WEIGHT_AT_REST if stationary else (1.0 - COMP_ALPHA)
+                cycle_dt = now - cycle_prev if cycle_prev else 0.005
+                tau = TAU_MAG_REST if stationary else TAU_MAG_MOVING
+                w = 1.0 - math.exp(-cycle_dt / tau)
                 yaw = (yaw + w * angle_diff(mag_heading, yaw) + 180) % 360 - 180
+            cycle_prev = now
 
             _raw_smoothed_yaw = yaw
+            _last_fusion_pub = time.time()
             with lock:
                 state["yaw"] = round(angle_diff(yaw, _yaw_offset), 2)
 
@@ -312,8 +357,9 @@ def imu_fusion_yaw_thread():
         try:
             asyncio.run(run())
         except Exception as e:
-            print(f"[FUSION] Error: {e}")
-            time.sleep(2.0)
+            print(f"[FUSION] Error: {e} -- watchdog serves mag-only yaw; "
+                  f"retrying the box in {MAG_ONLY_RETRY_S:.0f}s")
+            time.sleep(MAG_ONLY_RETRY_S)
 
 
 def _raw_input_delta_callback(raw_dx: int, raw_dy: int):

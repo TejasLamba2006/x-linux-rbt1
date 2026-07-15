@@ -4887,7 +4887,7 @@
         "kind": 2,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "def imu_fusion_yaw_thread():\n    \"\"\"Yaw-only complementary filter: MKBOXPRO gyro-Z (USB) integrated for smooth\n    short-term rate, corrected toward the calibrated IIS2MDC magnetic heading\n    (I2C) for absolute, drift-free heading. Gyro and mag sit on two separate\n    boards, so only the shared vertical (yaw) axis is fused -- no full 9-DOF\n    attitude, which would (wrongly) assume one common body frame.\"\"\"\n    global _raw_smoothed_yaw\n    import imu_usb_mkbox\n    threading.Thread(target=_mag_reader_thread, daemon=True).start()\n    _load_mag_calib()",
+        "peekOfCode": "def imu_fusion_yaw_thread():\n    \"\"\"Yaw-only complementary filter: MKBOXPRO gyro-Z (USB) integrated for smooth\n    short-term rate, corrected toward the calibrated IIS2MDC magnetic heading\n    (I2C) for absolute, drift-free heading. Gyro and mag sit on two separate\n    boards, so only the shared vertical (yaw) axis is fused -- no full 9-DOF\n    attitude, which would (wrongly) assume one common body frame.\n    If the box is unreachable (off/unplugged), degrades to mag-only yaw and\n    retries the box every MAG_ONLY_RETRY_S.\"\"\"\n    global _raw_smoothed_yaw\n    import imu_usb_mkbox",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -5139,7 +5139,7 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "MAG_ODR_HZ = 100\nUSB_GYRO_POLL_HZ = 200\n# Complementary-filter gyro trust. Yaw = COMP_ALPHA * gyro-integrated +\n# (1-COMP_ALPHA) * mag-heading each mag update. Higher = smoother but drifts\n# more between mag corrections; lower = snappier to the (noisy, motor-biased)\n# mag. ponytail: this is the tuning knob the hardware needs -- start at 0.98\n# and lower if yaw lags reality, raise if the mag noise makes it jitter.\nCOMP_ALPHA = 0.98\n# Below this |bias-corrected gyro rate| (dps), with accel ≈ 1g, the robot is\n# treated as stationary: yaw snaps toward the absolute mag heading instead of",
+        "peekOfCode": "MAG_ODR_HZ = 100\nUSB_GYRO_POLL_HZ = 200\n# Complementary-filter mag-correction time constants (seconds). Each cycle the\n# gyro-integrated yaw is pulled toward the calibrated mag heading by\n# w = 1 - exp(-dt/tau), so the trust is rate-independent (the loop rate floats\n# with USB timing -- a fixed per-cycle weight would change strength with data\n# rate). Moving: long tau so the (motor-field-biased) mag only trims slow gyro\n# drift. At rest: short tau so yaw locks to absolute heading and residual gyro\n# bias can't creep. ponytail: these two taus are the tuning knobs the hardware\n# needs -- raise TAU_MAG_MOVING if driving near the motors bends the heading,",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -5148,16 +5148,25 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "USB_GYRO_POLL_HZ = 200\n# Complementary-filter gyro trust. Yaw = COMP_ALPHA * gyro-integrated +\n# (1-COMP_ALPHA) * mag-heading each mag update. Higher = smoother but drifts\n# more between mag corrections; lower = snappier to the (noisy, motor-biased)\n# mag. ponytail: this is the tuning knob the hardware needs -- start at 0.98\n# and lower if yaw lags reality, raise if the mag noise makes it jitter.\nCOMP_ALPHA = 0.98\n# Below this |bias-corrected gyro rate| (dps), with accel ≈ 1g, the robot is\n# treated as stationary: yaw snaps toward the absolute mag heading instead of\n# integrating (near-zero) gyro, which is what kills the slow rest drift.",
+        "peekOfCode": "USB_GYRO_POLL_HZ = 200\n# Complementary-filter mag-correction time constants (seconds). Each cycle the\n# gyro-integrated yaw is pulled toward the calibrated mag heading by\n# w = 1 - exp(-dt/tau), so the trust is rate-independent (the loop rate floats\n# with USB timing -- a fixed per-cycle weight would change strength with data\n# rate). Moving: long tau so the (motor-field-biased) mag only trims slow gyro\n# drift. At rest: short tau so yaw locks to absolute heading and residual gyro\n# bias can't creep. ponytail: these two taus are the tuning knobs the hardware\n# needs -- raise TAU_MAG_MOVING if driving near the motors bends the heading,\n# lower it if yaw drifts during long drives.",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
     {
-        "label": "COMP_ALPHA",
+        "label": "TAU_MAG_MOVING",
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "COMP_ALPHA = 0.98\n# Below this |bias-corrected gyro rate| (dps), with accel ≈ 1g, the robot is\n# treated as stationary: yaw snaps toward the absolute mag heading instead of\n# integrating (near-zero) gyro, which is what kills the slow rest drift.\nSTATIONARY_GYRO_DPS = 2.0\nMAG_WEIGHT_AT_REST = 0.20   # strong pull to mag when parked (vs 1-COMP_ALPHA moving)\n_MAG_CALIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),\n                               \"mag_calib.json\")\n# Hard/soft-iron correction, loaded from mag_calib.json (or identity until a\n# calibration spin runs). offset = hard-iron center; scale = soft-iron X/Y gain.",
+        "peekOfCode": "TAU_MAG_MOVING = 5.0\nTAU_MAG_REST = 0.7\n# Below this |bias-corrected gyro rate| (dps), with accel ≈ 1g, the robot is\n# treated as stationary (selects TAU_MAG_REST + gyro-bias re-tracking).\nSTATIONARY_GYRO_DPS = 2.0\n# Mag-only fallback smoothing (EMA per 100 Hz sample) used whenever the fusion\n# loop isn't publishing (box off/unplugged, BLE scan, gyro-bias calibration) --\n# absolute heading with no gyro smoothing. Measured on this unit: raw\n# calibrated-heading sigma ~0.9 deg -> EMA 0.1 leaves ~0.2 deg jitter.\nMAG_ONLY_EMA = 0.1",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "TAU_MAG_REST",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "TAU_MAG_REST = 0.7\n# Below this |bias-corrected gyro rate| (dps), with accel ≈ 1g, the robot is\n# treated as stationary (selects TAU_MAG_REST + gyro-bias re-tracking).\nSTATIONARY_GYRO_DPS = 2.0\n# Mag-only fallback smoothing (EMA per 100 Hz sample) used whenever the fusion\n# loop isn't publishing (box off/unplugged, BLE scan, gyro-bias calibration) --\n# absolute heading with no gyro smoothing. Measured on this unit: raw\n# calibrated-heading sigma ~0.9 deg -> EMA 0.1 leaves ~0.2 deg jitter.\nMAG_ONLY_EMA = 0.1\nMAG_ONLY_RETRY_S = 30.0     # wait this long between MKBOXPRO reconnect attempts",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -5166,16 +5175,34 @@
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "STATIONARY_GYRO_DPS = 2.0\nMAG_WEIGHT_AT_REST = 0.20   # strong pull to mag when parked (vs 1-COMP_ALPHA moving)\n_MAG_CALIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),\n                               \"mag_calib.json\")\n# Hard/soft-iron correction, loaded from mag_calib.json (or identity until a\n# calibration spin runs). offset = hard-iron center; scale = soft-iron X/Y gain.\n_mag_calib = {\"offset\": [0.0, 0.0], \"scale\": [1.0, 1.0]}\n_latest_mag = None        # raw (mx,my,mz) mgauss, set by _mag_reader_thread\n_mag_collecting = False   # True while a calibration spin is gathering samples\n_mag_samples = []         # (mx,my) accumulated during a calibration spin",
+        "peekOfCode": "STATIONARY_GYRO_DPS = 2.0\n# Mag-only fallback smoothing (EMA per 100 Hz sample) used whenever the fusion\n# loop isn't publishing (box off/unplugged, BLE scan, gyro-bias calibration) --\n# absolute heading with no gyro smoothing. Measured on this unit: raw\n# calibrated-heading sigma ~0.9 deg -> EMA 0.1 leaves ~0.2 deg jitter.\nMAG_ONLY_EMA = 0.1\nMAG_ONLY_RETRY_S = 30.0     # wait this long between MKBOXPRO reconnect attempts\nFUSION_STALE_S = 0.5        # watchdog takes over yaw after this publish gap\n_MAG_CALIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),\n                               \"mag_calib.json\")",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
     {
-        "label": "MAG_WEIGHT_AT_REST",
+        "label": "MAG_ONLY_EMA",
         "kind": 5,
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
-        "peekOfCode": "MAG_WEIGHT_AT_REST = 0.20   # strong pull to mag when parked (vs 1-COMP_ALPHA moving)\n_MAG_CALIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),\n                               \"mag_calib.json\")\n# Hard/soft-iron correction, loaded from mag_calib.json (or identity until a\n# calibration spin runs). offset = hard-iron center; scale = soft-iron X/Y gain.\n_mag_calib = {\"offset\": [0.0, 0.0], \"scale\": [1.0, 1.0]}\n_latest_mag = None        # raw (mx,my,mz) mgauss, set by _mag_reader_thread\n_mag_collecting = False   # True while a calibration spin is gathering samples\n_mag_samples = []         # (mx,my) accumulated during a calibration spin\ndef _load_mag_calib():",
+        "peekOfCode": "MAG_ONLY_EMA = 0.1\nMAG_ONLY_RETRY_S = 30.0     # wait this long between MKBOXPRO reconnect attempts\nFUSION_STALE_S = 0.5        # watchdog takes over yaw after this publish gap\n_MAG_CALIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),\n                               \"mag_calib.json\")\n# Hard/soft-iron correction, loaded from mag_calib.json (or identity until a\n# calibration spin runs). offset = hard-iron center; scale = soft-iron X/Y gain.\n_mag_calib = {\"offset\": [0.0, 0.0], \"scale\": [1.0, 1.0]}\n_latest_mag = None        # raw (mx,my,mz) mgauss, set by _mag_reader_thread\n_mag_collecting = False   # True while a calibration spin is gathering samples",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "MAG_ONLY_RETRY_S",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "MAG_ONLY_RETRY_S = 30.0     # wait this long between MKBOXPRO reconnect attempts\nFUSION_STALE_S = 0.5        # watchdog takes over yaw after this publish gap\n_MAG_CALIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),\n                               \"mag_calib.json\")\n# Hard/soft-iron correction, loaded from mag_calib.json (or identity until a\n# calibration spin runs). offset = hard-iron center; scale = soft-iron X/Y gain.\n_mag_calib = {\"offset\": [0.0, 0.0], \"scale\": [1.0, 1.0]}\n_latest_mag = None        # raw (mx,my,mz) mgauss, set by _mag_reader_thread\n_mag_collecting = False   # True while a calibration spin is gathering samples\n_mag_samples = []         # (mx,my) accumulated during a calibration spin",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "FUSION_STALE_S",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "FUSION_STALE_S = 0.5        # watchdog takes over yaw after this publish gap\n_MAG_CALIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),\n                               \"mag_calib.json\")\n# Hard/soft-iron correction, loaded from mag_calib.json (or identity until a\n# calibration spin runs). offset = hard-iron center; scale = soft-iron X/Y gain.\n_mag_calib = {\"offset\": [0.0, 0.0], \"scale\": [1.0, 1.0]}\n_latest_mag = None        # raw (mx,my,mz) mgauss, set by _mag_reader_thread\n_mag_collecting = False   # True while a calibration spin is gathering samples\n_mag_samples = []         # (mx,my) accumulated during a calibration spin\ndef _load_mag_calib():",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
@@ -5221,6 +5248,15 @@
         "importPath": "odometry_locomization.run_linux",
         "description": "odometry_locomization.run_linux",
         "peekOfCode": "_mag_samples = []         # (mx,my) accumulated during a calibration spin\ndef _load_mag_calib():\n    global _mag_calib\n    try:\n        with open(_MAG_CALIB_PATH) as f:\n            data = json.load(f)\n        _mag_calib = {\"offset\": [float(data[\"offset\"][0]), float(data[\"offset\"][1])],\n                      \"scale\": [float(data[\"scale\"][0]), float(data[\"scale\"][1])]}\n        print(f\"[MAG-CAL] loaded {_mag_calib}\")\n        return True",
+        "detail": "odometry_locomization.run_linux",
+        "documentation": {}
+    },
+    {
+        "label": "_last_fusion_pub",
+        "kind": 5,
+        "importPath": "odometry_locomization.run_linux",
+        "description": "odometry_locomization.run_linux",
+        "peekOfCode": "_last_fusion_pub = 0.0  # time.time() of the fusion loop's last yaw publish\ndef _mag_watchdog_thread():\n    \"\"\"Publish smoothed mag-only yaw whenever the fusion loop goes quiet\n    (box off/unplugged, BLE scan in progress, gyro-bias calibration). Absolute\n    heading with no gyro smoothing -- keeps the map usable instead of leaving\n    yaw frozen. Backs off automatically the moment fusion publishes again.\"\"\"\n    global _raw_smoothed_yaw\n    while True:\n        if time.time() - _last_fusion_pub > FUSION_STALE_S:\n            heading = _mag_heading_deg()",
         "detail": "odometry_locomization.run_linux",
         "documentation": {}
     },
