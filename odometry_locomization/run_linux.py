@@ -274,7 +274,6 @@ USB_GYRO_POLL_HZ = 200
 #
 # gyro_bias: running EMA of gyro_z when stationary (accel magnitude ≈ 1g).
 # The filter's gyro input is bias-corrected each sample.
-# When state["recording"] is False, yaw is frozen (no integration).
 
 _latest_mag = None  # (mx, my, mz) in milligauss, set by _mag_reader_thread
 
@@ -498,14 +497,14 @@ def imu_fusion_yaw_thread():
                 else:
                     mx_mg, my_mg, mz_mg = 0.0, 1.0, 0.0  # fallback: assume north
 
-                if state["recording"]:
-                    # Full 9-DOF update
-                    ahrs.update(gx, gy, gz_corrected,
-                                ax_mg, ay_mg, az_mg,
-                                mx_mg, my_mg, mz_mg, dt)
-                    _raw_smoothed_yaw = ahrs.yaw_degrees()
-                else:
-                    # When idle: only track gyro bias, don't update yaw
+                # Full 9-DOF update (always — yaw tracks regardless of recording)
+                ahrs.update(gx, gy, gz_corrected,
+                            ax_mg, ay_mg, az_mg,
+                            mx_mg, my_mg, mz_mg, dt)
+                _raw_smoothed_yaw = ahrs.yaw_degrees()
+
+                # When idle, also track gyro bias for next recording session
+                if not state["recording"]:
                     accel_mag = math.sqrt(ax_mg**2 + ay_mg**2 + az_mg**2)
                     if 950 < accel_mag < 1050 and abs(gz_corrected) < 5:
                         gyro_bias += 0.01 * (gz - gyro_bias)
