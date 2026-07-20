@@ -93,6 +93,12 @@ function connectWebSocket() {
             if (data.vision) {
                 handleVisionStatus(data.vision);
             }
+            if (data.follow_result) {
+                handleFollowResult(data.follow_result);
+            }
+            if (data.follow) {
+                handleFollowStatus(data.follow);
+            }
         } catch (e) {
             debugLog('Failed to parse message: ' + e);
         }
@@ -809,6 +815,31 @@ if (visionNavBtn) {
     visionNavBtn.addEventListener('click', toggleVisionNav);
 }
 
+// --- Follow-me status ---
+const followStatus = document.getElementById('follow-status');
+
+function handleFollowResult(result) {
+    if (!followStatus) return;
+    if (result.error) {
+        followStatus.textContent = result.error;
+    } else if (result.started) {
+        const id = result.marker_id != null ? `#${result.marker_id}` : 'nearest';
+        followStatus.textContent = `Following ${id} @ ${Math.round(result.distance_mm / 10)}cm`;
+    } else if (result.stopped) {
+        followStatus.textContent = '';
+    }
+}
+
+function handleFollowStatus(f) {
+    if (!followStatus) return;
+    let s = f.state || '';
+    if (f.marker_id !== undefined && f.marker_id !== null) s += ` #${f.marker_id}`;
+    if (f.distance_mm !== undefined) s += ` ${Math.round(f.distance_mm)}mm`;
+    if (f.bearing_deg !== undefined) s += ` ${f.bearing_deg > 0 ? '+' : ''}${f.bearing_deg}°`;
+    if (f.note) s += ` (${f.note})`;
+    followStatus.textContent = s;
+}
+
 // =============================================================================
 // MODE SELECTOR
 // =============================================================================
@@ -819,6 +850,20 @@ function selectMode(mode) {
     modeButtons.forEach(btn => btn.classList.remove('selected'));
     const btn = document.querySelector(`[data-mode="${mode}"]`);
     if (btn) btn.classList.add('selected');
+
+    // Follow-me carries the marker id + keep-distance from the UI fields so the
+    // backend can start the follower with them (see the mode gate in main.py).
+    if (mode === 'follow-me') {
+        const cmd = { [FIELD_STR_MODE]: mode };
+        const idEl = document.getElementById('follow-marker-id');
+        const cmEl = document.getElementById('follow-distance-cm');
+        const idVal = idEl && idEl.value !== '' ? parseInt(idEl.value, 10) : null;
+        const cmVal = cmEl && cmEl.value !== '' ? parseFloat(cmEl.value) : null;
+        if (idVal !== null && !isNaN(idVal)) cmd.follow_marker_id = idVal;
+        if (cmVal !== null && !isNaN(cmVal)) cmd.follow_distance_mm = cmVal * 10; // cm -> mm
+        sendCommand(cmd);
+        return;
+    }
     sendCommand({ [FIELD_STR_MODE]: mode });
 }
 
