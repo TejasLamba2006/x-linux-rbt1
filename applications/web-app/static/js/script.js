@@ -86,6 +86,13 @@ function connectWebSocket() {
             if (data.move_result) {
                 handleMoveResult(data.move_result);
             }
+            // Handle ArUco vision-nav messages (start/stop ack + live status)
+            if (data.vision_result) {
+                handleVisionResult(data.vision_result);
+            }
+            if (data.vision) {
+                handleVisionStatus(data.vision);
+            }
         } catch (e) {
             debugLog('Failed to parse message: ' + e);
         }
@@ -738,6 +745,53 @@ function handleMoveResult(result) {
     } else {
         moveCmStatus.textContent = `Moved ${result.moved_cm} cm`;
     }
+}
+
+// =============================================================================
+// VISION NAV (ArUco drive-to-marker)
+// =============================================================================
+const visionNavBtn = document.getElementById('vision-nav-btn');
+const visionNavStatus = document.getElementById('vision-nav-status');
+let visionNavActive = false;
+
+function toggleVisionNav() {
+    sendCommand({ vision_nav: visionNavActive ? 'stop' : 'start' });
+}
+
+function setVisionButton(active) {
+    visionNavActive = active;
+    if (visionNavBtn) {
+        visionNavBtn.textContent = active ? 'Stop Vision Nav' : 'Start Vision Nav';
+        visionNavBtn.classList.toggle('active', active);
+    }
+}
+
+function handleVisionResult(result) {
+    if (result.error) {
+        if (visionNavStatus) visionNavStatus.textContent = result.error;
+        setVisionButton(false);
+    } else if (result.started) {
+        setVisionButton(true);
+    } else if (result.stopped) {
+        setVisionButton(false);
+        if (visionNavStatus) visionNavStatus.textContent = 'Stopped';
+    }
+}
+
+function handleVisionStatus(v) {
+    if (!visionNavStatus) return;
+    let s = v.state || '';
+    if (v.marker_id !== undefined && v.marker_id !== null) s += ` #${v.marker_id}`;
+    if (v.distance_mm !== undefined) s += ` ${Math.round(v.distance_mm)}mm`;
+    if (v.bearing_deg !== undefined) s += ` ${v.bearing_deg > 0 ? '+' : ''}${v.bearing_deg}°`;
+    if (v.note) s += ` (${v.note})`;
+    visionNavStatus.textContent = s;
+    // terminal states release the button
+    if (['ARRIVED', 'GIVEUP', 'ERROR'].includes(v.state)) setVisionButton(false);
+}
+
+if (visionNavBtn) {
+    visionNavBtn.addEventListener('click', toggleVisionNav);
 }
 
 // =============================================================================

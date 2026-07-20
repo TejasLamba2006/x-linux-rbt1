@@ -422,19 +422,12 @@
         "documentation": {}
     },
     {
-        "label": "EVSPIN948Driver",
-        "importPath": "motor.evspin948_driver",
-        "description": "motor.evspin948_driver",
+        "label": "math",
+        "kind": 6,
         "isExtraImport": true,
-        "detail": "motor.evspin948_driver",
-        "documentation": {}
-    },
-    {
-        "label": "EVSPIN948Driver",
-        "importPath": "motor.evspin948_driver",
-        "description": "motor.evspin948_driver",
-        "isExtraImport": true,
-        "detail": "motor.evspin948_driver",
+        "importPath": "math",
+        "description": "math",
+        "detail": "math",
         "documentation": {}
     },
     {
@@ -444,6 +437,22 @@
         "importPath": "numpy",
         "description": "numpy",
         "detail": "numpy",
+        "documentation": {}
+    },
+    {
+        "label": "EVSPIN948Driver",
+        "importPath": "motor.evspin948_driver",
+        "description": "motor.evspin948_driver",
+        "isExtraImport": true,
+        "detail": "motor.evspin948_driver",
+        "documentation": {}
+    },
+    {
+        "label": "EVSPIN948Driver",
+        "importPath": "motor.evspin948_driver",
+        "description": "motor.evspin948_driver",
+        "isExtraImport": true,
+        "detail": "motor.evspin948_driver",
         "documentation": {}
     },
     {
@@ -536,15 +545,6 @@
         "importPath": "random",
         "description": "random",
         "detail": "random",
-        "documentation": {}
-    },
-    {
-        "label": "math",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "math",
-        "description": "math",
-        "detail": "math",
         "documentation": {}
     },
     {
@@ -2148,6 +2148,33 @@
         "documentation": {}
     },
     {
+        "label": "tof_center_distance",
+        "kind": 2,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "def tof_center_distance():\n    \"\"\"(distance_mm, valid) for the ToF centre zone — used by marker vision as\n    an obstacle-stop override. Zone 7 / status {5,9}=valid, mirroring\n    tof_obstacle_detection's read pattern.\"\"\"\n    if tof_driver is None:\n        return (None, False)\n    try:\n        if not tof_driver.check_data_ready():\n            return (None, False)\n        data = tof_driver.get_ranging_data()",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "start_vision_nav",
+        "kind": 2,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "def start_vision_nav(loop):\n    \"\"\"Start ArUco drive-to-marker. loop = the running asyncio loop, so the\n    worker thread can broadcast status back to browsers. Returns a result dict.\"\"\"\n    global navigator\n    if not CV_AVAILABLE:\n        return {\"error\": \"vision unavailable (opencv not installed)\"}\n    if motor_api is None:\n        return {\"error\": \"motor API not initialized\"}\n    if navigator is not None and navigator.running:\n        return {\"error\": \"vision nav already running\"}",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "stop_vision_nav",
+        "kind": 2,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "def stop_vision_nav():\n    \"\"\"Stop drive-to-marker and return to locked.\"\"\"\n    global navigator\n    if navigator is not None:\n        navigator.stop()\n    if motor_api is not None:\n        motor_api.mode_select(\"locked\")\n    return {\"stopped\": True}\n# =============================================================================\n# FASTAPI APPLICATION",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
         "label": "set_odometry_recording",
         "kind": 2,
         "importPath": "applications.web-app.main",
@@ -2170,7 +2197,7 @@
         "kind": 2,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "def signal_handler(signum, frame):\n    \"\"\"Handle shutdown signals gracefully.\"\"\"\n    logger.info(f\"Received signal {signum}. Shutting down...\")\n    shutdown_event.set()\n    cleanup_motor_api()\n    stop_odometry_server()\n    sys.exit(0)\n# =============================================================================\n# MAIN ENTRY POINT\n# =============================================================================",
+        "peekOfCode": "def signal_handler(signum, frame):\n    \"\"\"Handle shutdown signals gracefully.\"\"\"\n    logger.info(f\"Received signal {signum}. Shutting down...\")\n    shutdown_event.set()\n    cleanup_motor_api()\n    stop_odometry_server()\n    if navigator is not None:\n        navigator.stop()\n    sys.exit(0)\n# =============================================================================",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -2377,7 +2404,16 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "INTENT_AVAILABLE = False\ntry:\n    sys.path.insert(0, os.path.join(REPO_ROOT, \"intent_classifier\"))\n    from infer import classify_single_command\n    INTENT_AVAILABLE = True\nexcept Exception as e:\n    logging.getLogger(__name__).warning(f\"Intent classifier unavailable: {e}\")\n# =============================================================================\n# CONFIGURATION FILE MANAGEMENT\n# =============================================================================",
+        "peekOfCode": "INTENT_AVAILABLE = False\ntry:\n    sys.path.insert(0, os.path.join(REPO_ROOT, \"intent_classifier\"))\n    from infer import classify_single_command\n    INTENT_AVAILABLE = True\nexcept Exception as e:\n    logging.getLogger(__name__).warning(f\"Intent classifier unavailable: {e}\")\n# Marker vision (ArUco drive-to-marker) — best-effort like voice: if cv2 is\n# missing, CV_AVAILABLE stays False and the feature silently disables.\ntry:",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "navigator",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "navigator = None  # active MarkerNavigator instance (set on vision_nav start)\n# =============================================================================\n# CONFIGURATION FILE MANAGEMENT\n# =============================================================================\ndef load_config() -> dict:\n    \"\"\"Load configuration from JSON file.\"\"\"\n    default_config = {\n        \"drive_type\": \"mecanum\",\n        \"network_mode\": \"wifi\"\n    }",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -2523,6 +2559,51 @@
         "description": "applications.web-app.main",
         "peekOfCode": "manager = ConnectionManager()\n@app.websocket(\"/ws\")\nasync def websocket_endpoint(websocket: WebSocket):\n    \"\"\"WebSocket endpoint for real-time control.\"\"\"\n    await manager.connect(websocket)\n    await manager.receive_and_process(websocket)\n# =============================================================================\n# SIGNAL HANDLERS\n# =============================================================================\ndef signal_handler(signum, frame):",
         "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "MarkerNavigator",
+        "kind": 6,
+        "importPath": "applications.web-app.marker_vision",
+        "description": "applications.web-app.marker_vision",
+        "peekOfCode": "class MarkerNavigator:\n    \"\"\"Background drive-to-marker controller. One run per start().\"\"\"\n    def __init__(self, config=None):\n        cfg = dict(DEFAULT_CONFIG)\n        if config:\n            cfg.update({k: v for k, v in config.items() if v is not None or k == \"target_marker_id\"})\n        self.cfg = cfg\n        self._thread = None\n        self._stop = threading.Event()\n        self.motor_api = None",
+        "detail": "applications.web-app.marker_vision",
+        "documentation": {}
+    },
+    {
+        "label": "calibrate",
+        "kind": 2,
+        "importPath": "applications.web-app.marker_vision",
+        "description": "applications.web-app.marker_vision",
+        "peekOfCode": "def calibrate(camera=0, marker_size_mm=100.0, known_distance_mm=500.0,\n              frame_w=1280, frame_h=720):\n    \"\"\"One-time focal-length capture. Place a marker flat, facing the camera, at\n    exactly known_distance_mm, then run this. Returns focal_px to put in config.\n    focal_px = marker_pixel_width * known_distance_mm / marker_size_mm\n    \"\"\"\n    if not CV_AVAILABLE:\n        print(\"cv2 not available\")\n        return None\n    cap = cv2.VideoCapture(camera)",
+        "detail": "applications.web-app.marker_vision",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "kind": 5,
+        "importPath": "applications.web-app.marker_vision",
+        "description": "applications.web-app.marker_vision",
+        "peekOfCode": "logger = logging.getLogger(__name__)\nCV_AVAILABLE = False\ntry:\n    import cv2\n    CV_AVAILABLE = True\nexcept Exception as e:  # pragma: no cover - depends on board deps\n    logging.getLogger(__name__).warning(f\"Marker vision unavailable (cv2 not loaded): {e}\")\n# Defaults for every tunable. main.py merges robot_config.json[\"vision\"] over this.\nDEFAULT_CONFIG = {\n    \"camera\": 0,            # cv2.VideoCapture source: int index or \"/dev/videoN\" path",
+        "detail": "applications.web-app.marker_vision",
+        "documentation": {}
+    },
+    {
+        "label": "CV_AVAILABLE",
+        "kind": 5,
+        "importPath": "applications.web-app.marker_vision",
+        "description": "applications.web-app.marker_vision",
+        "peekOfCode": "CV_AVAILABLE = False\ntry:\n    import cv2\n    CV_AVAILABLE = True\nexcept Exception as e:  # pragma: no cover - depends on board deps\n    logging.getLogger(__name__).warning(f\"Marker vision unavailable (cv2 not loaded): {e}\")\n# Defaults for every tunable. main.py merges robot_config.json[\"vision\"] over this.\nDEFAULT_CONFIG = {\n    \"camera\": 0,            # cv2.VideoCapture source: int index or \"/dev/videoN\" path\n    \"frame_width\": 1280,",
+        "detail": "applications.web-app.marker_vision",
+        "documentation": {}
+    },
+    {
+        "label": "DEFAULT_CONFIG",
+        "kind": 5,
+        "importPath": "applications.web-app.marker_vision",
+        "description": "applications.web-app.marker_vision",
+        "peekOfCode": "DEFAULT_CONFIG = {\n    \"camera\": 0,            # cv2.VideoCapture source: int index or \"/dev/videoN\" path\n    \"frame_width\": 1280,\n    \"frame_height\": 720,\n    \"marker_size_mm\": 100.0,\n    \"focal_px\": 900.0,      # MUST calibrate per camera/res; default ~ 1280px @ 60-70deg HFOV\n    \"standoff_mm\": 400.0,   # stop this far from the marker\n    \"target_marker_id\": None,  # None = lock onto the nearest (largest) marker\n    \"kw\": 2.5,              # rotate command per degree of bearing error\n    \"kv\": 0.08,             # throttle command per mm of distance error",
+        "detail": "applications.web-app.marker_vision",
         "documentation": {}
     },
     {

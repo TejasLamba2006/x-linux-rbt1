@@ -98,6 +98,17 @@ try:
 except Exception as e:
     logging.getLogger(__name__).warning(f"Intent classifier unavailable: {e}")
 
+# Marker vision (ArUco drive-to-marker) — best-effort like voice: if cv2 is
+# missing, CV_AVAILABLE stays False and the feature silently disables.
+try:
+    from marker_vision import MarkerNavigator, CV_AVAILABLE
+except Exception as e:
+    CV_AVAILABLE = False
+    MarkerNavigator = None
+    logging.getLogger(__name__).warning(f"Marker vision unavailable: {e}")
+
+navigator = None  # active MarkerNavigator instance (set on vision_nav start)
+
 
 # =============================================================================
 # CONFIGURATION FILE MANAGEMENT
@@ -108,7 +119,6 @@ def load_config() -> dict:
         "drive_type": "mecanum",
         "network_mode": "wifi"
     }
-    
     try:
         if os.path.exists(CONFIG_FILE):
             with open(CONFIG_FILE, 'r') as f:
@@ -989,6 +999,60 @@ def tof_obstacle_detection():
             time.sleep(1)
 
 
+def tof_center_distance():
+    """(distance_mm, valid) for the ToF centre zone — used by marker vision as
+    an obstacle-stop override. Zone 7 / status {5,9}=valid, mirroring
+    tof_obstacle_detection's read pattern."""
+    if tof_driver is None:
+        return (None, False)
+    try:
+        if not tof_driver.check_data_ready():
+            return (None, False)
+        data = tof_driver.get_ranging_data()
+        idx = tof_driver.nb_target_per_zone * 7
+        dist = data.distance_mm[idx]
+        status = data.target_status[idx]
+        return (dist, status in (5, 9))
+    except Exception:
+        return (None, False)
+
+
+def start_vision_nav(loop):
+    """Start ArUco drive-to-marker. loop = the running asyncio loop, so the
+    worker thread can broadcast status back to browsers. Returns a result dict."""
+    global navigator
+    if not CV_AVAILABLE:
+        return {"error": "vision unavailable (opencv not installed)"}
+    if motor_api is None:
+        return {"error": "motor API not initialized"}
+    if navigator is not None and navigator.running:
+        return {"error": "vision nav already running"}
+
+    def _broadcast(status):
+        asyncio.run_coroutine_threadsafe(manager.broadcast({"vision": status}), loop)
+
+    motor_api.mode_select("autopilot")
+    cfg = load_config().get("vision", {})
+    navigator = MarkerNavigator(cfg)
+    started = navigator.start(
+        motor_api,
+        tof_reader=tof_center_distance,
+        status_cb=_broadcast,
+        can_strafe=(current_drive_type == "mecanum"),
+    )
+    return {"started": started, "state": "SEARCH"} if started else {"error": "failed to start"}
+
+
+def stop_vision_nav():
+    """Stop drive-to-marker and return to locked."""
+    global navigator
+    if navigator is not None:
+        navigator.stop()
+    if motor_api is not None:
+        motor_api.mode_select("locked")
+    return {"stopped": True}
+
+
 # =============================================================================
 # FASTAPI APPLICATION
 # =============================================================================
@@ -1443,6 +1507,18 @@ class ConnectionManager:
                             asyncio.create_task(move_distance_cm(websocket, float(parsed_data['move_cm'])))
                             continue
 
+                        # Handle ArUco drive-to-marker vision nav
+                        if 'vision_nav' in parsed_data:
+                            cmd = parsed_data['vision_nav']
+                            if cmd == 'start':
+                                result = start_vision_nav(asyncio.get_running_loop())
+                            elif cmd == 'stop':
+                                result = stop_vision_nav()
+                            else:
+                                result = {"error": f"unknown vision_nav command: {cmd}"}
+                            await websocket.send_json({"vision_result": result})
+                            continue
+
                         # Handle speed-limit slider updates from the GUI
                         if 'max_speed' in parsed_data:
                             global max_speed_percent
@@ -1497,6 +1573,8 @@ def signal_handler(signum, frame):
     shutdown_event.set()
     cleanup_motor_api()
     stop_odometry_server()
+    if navigator is not None:
+        navigator.stop()
     sys.exit(0)
 
 
