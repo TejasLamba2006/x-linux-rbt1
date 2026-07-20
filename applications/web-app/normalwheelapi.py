@@ -113,6 +113,18 @@ def clamp(value: float, min_val: float, max_val: float) -> float:
     return max(min_val, min(max_val, value))
 
 
+# Motors physically stall below ~25% duty (buzz but don't turn), so treat that
+# as a dead zone: any nonzero duty under MIN_DUTY is zeroed rather than sent as
+# a signal the wheels can't act on. Applies to every input path (joystick,
+# voice, vision) since all sides flow through _deadzone() before STSPIN.
+MIN_DUTY = 25
+
+
+def _deadzone(duty: int) -> int:
+    """Zero out sub-stall duty; leave 0 and >=MIN_DUTY untouched."""
+    return 0 if 0 < duty < MIN_DUTY else duty
+
+
 def validate_motor_driver() -> bool:
     """Check if motor driver is available."""
     if STSPIN is None:
@@ -251,8 +263,8 @@ def apply_drive() -> None:
         left_speed *= scale
         right_speed *= scale
 
-        left_duty = int(clamp(abs(left_speed), 0, 100))
-        right_duty = int(clamp(abs(right_speed), 0, 100))
+        left_duty = _deadzone(int(clamp(abs(left_speed), 0, 100)))
+        right_duty = _deadzone(int(clamp(abs(right_speed), 0, 100)))
         left_dir = 0 if left_speed >= 0 else 1
         right_dir = 0 if right_speed >= 0 else 1
 

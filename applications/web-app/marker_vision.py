@@ -58,8 +58,11 @@ DEFAULT_CONFIG = {
     "kw": 2.5,              # rotate command per degree of bearing error
     "kv": 0.08,             # throttle command per mm of distance error
     "max_cmd": 40,          # hard clamp on every motor command in this mode
-    "rotate_floor": 12,     # min rotate command that actually turns the wheels
-    "throttle_floor": 15,   # min throttle command that actually drives
+    "rotate_floor": 25,     # min rotate command that actually turns the wheels
+    "throttle_floor": 25,   # min throttle command that actually drives
+    # NOTE: motors physically stall below ~25% duty, so both floors are 25 --
+    # any computed command below that is bumped up to 25 (when outside the
+    # deadband) or sent as 0 (inside it). Never emit 1..24: it just whines.
     "search_speed": 25,     # rotate command while hunting for a marker
     "bearing_deadband": 3.0,
     "bearing_recenter": 12.0,  # during APPROACH, drift beyond this -> back to CENTER
@@ -76,6 +79,10 @@ DEFAULT_CONFIG = {
     "follow_marker_id": None,   # which marker to follow; None = nearest in view
     "follow_distance_mm": 600.0,  # gap to maintain from the marker
     "follow_deadband_mm": 80.0,   # distance error inside this -> no forward/back
+    "follow_bearing_deadband": 8.0,  # |bearing| under this -> "centered", don't rotate
+    "follow_rotate_pulse_s": 0.12,   # rotate this long then STOP, so it can't
+                                     # overshoot while blind between camera frames
+    "follow_settle_s": 0.10,         # pause after a rotate pulse before re-reading
 }
 
 
@@ -645,18 +652,33 @@ class MarkerFollower:
 
                 _, dist, bearing, _ = target
 
-                # --- rotation: face the marker ---
-                if abs(bearing) > bdead:
-                    if self.can_strafe and abs(bearing) < 8.0:
-                        cmd = _floor_cmd(_clamp(cfg["kw"] * bearing, -maxc, maxc),
-                                         cfg["rotate_floor"])
-                        self.motor_api.direction(int(_clamp(cmd, -maxc, maxc)), 0)
+                # --- rotation: PULSE toward center, don't spin continuously ---
+                # At camera fps the robot turns "blind" between frames; a steady
+                # rotate command overshoots and the marker leaves the FOV (lost).
+                # Instead: if clearly off-center, rotate for a short pulse then
+                # STOP and wait for a fresh frame before deciding again. While
+                # correcting bearing we do NOT drive forward/back -- center first.
+                if abs(bearing) > cfg["follow_bearing_deadband"]:
+                    cmd = _floor_cmd(_clamp(cfg["kw"] * bearing, -maxc, maxc),
+                                     cfg["rotate_floor"])
+                    cmd = int(_clamp(cmd, -maxc, maxc))
+                    if self.can_strafe:
+                        self.motor_api.direction(cmd, 0)  # mecanum strafes to center
                     else:
-                        cmd = _floor_cmd(_clamp(cfg["kw"] * bearing, -maxc, maxc),
-                                         cfg["rotate_floor"])
-                        self.motor_api.rotate_angle(int(_clamp(cmd, -maxc, maxc)))
-                else:
-                    self.motor_api.rotate_angle(0)
+                        self.motor_api.rotate_angle(cmd)
+                    time.sleep(cfg["follow_rotate_pulse_s"])
+                    self.motor_api.stop()
+                    self.camera.set_banner(
+                        f"FOLLOW #{target[0]} {dist:.0f}mm {bearing:+.1f}deg CENTERING")
+                    self._emit(state="CENTERING", distance_mm=round(dist, 1),
+                               bearing_deg=round(bearing, 1), marker_id=target[0],
+                               target_mm=follow_mm)
+                    time.sleep(cfg["follow_settle_s"])  # let motion stop before re-read
+                    last_seq = -1  # force a fresh frame next iteration
+                    continue
+
+                # Centered enough -> hold heading and manage distance only.
+                self.motor_api.rotate_angle(0)
 
                 # --- forward/back: keep the set distance (reverse if too close) ---
                 err = dist - follow_mm  # +ve: too far (advance); -ve: too close (reverse)

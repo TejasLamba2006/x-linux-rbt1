@@ -101,6 +101,18 @@ def clamp(value: float, min_val: float, max_val: float) -> float:
     return max(min_val, min(max_val, value))
 
 
+# Motors physically stall below ~25% duty (they buzz but don't turn), so treat
+# that as a dead zone: any nonzero duty under MIN_DUTY is zeroed rather than
+# sent as a signal the wheels can't act on. Applies to every input path
+# (joystick, voice, vision) since all duty flows through _drive_wheel().
+MIN_DUTY = 25
+
+
+def _deadzone(duty: int) -> int:
+    """Zero out sub-stall duty; leave 0 and >=MIN_DUTY untouched."""
+    return 0 if 0 < duty < MIN_DUTY else duty
+
+
 def validate_motor_driver() -> bool:
     """Check if motor driver is available."""
     if STSPIN is None:
@@ -160,14 +172,14 @@ def rotate_angle(angle: int) -> None:
 # =============================================================================
 def _drive_wheel(motor_fn, value: float) -> None:
     """Convert a signed wheel-speed value to a duty/direction call."""
-    duty = int(clamp(abs(value), 0, 100))
+    duty = _deadzone(int(clamp(abs(value), 0, 100)))
     direction_flag = 0 if value >= 0 else 1
     motor_fn(duty, direction_flag)
 
 
 def _drive_wheel_2b(value: float) -> None:
     """motor_2b needs inverted PWM duty on STM32MP157."""
-    duty = int(clamp(abs(value), 0, 100))
+    duty = _deadzone(int(clamp(abs(value), 0, 100)))
     direction_flag = 0 if value >= 0 else 1
     if Board == "stm32mp257":
         STSPIN.motor_2b(duty, direction_flag)

@@ -2709,7 +2709,7 @@
         "kind": 2,
         "importPath": "applications.web-app.mechanumapi",
         "description": "applications.web-app.mechanumapi",
-        "peekOfCode": "def clamp(value: float, min_val: float, max_val: float) -> float:\n    \"\"\"Clamp a value between min and max bounds.\"\"\"\n    return max(min_val, min(max_val, value))\ndef validate_motor_driver() -> bool:\n    \"\"\"Check if motor driver is available.\"\"\"\n    if STSPIN is None:\n        logger.error(\"Motor driver not initialized\")\n        return False\n    return True\n# =============================================================================",
+        "peekOfCode": "def clamp(value: float, min_val: float, max_val: float) -> float:\n    \"\"\"Clamp a value between min and max bounds.\"\"\"\n    return max(min_val, min(max_val, value))\n# Motors physically stall below ~25% duty (they buzz but don't turn), so treat\n# that as a dead zone: any nonzero duty under MIN_DUTY is zeroed rather than\n# sent as a signal the wheels can't act on. Applies to every input path\n# (joystick, voice, vision) since all duty flows through _drive_wheel().\nMIN_DUTY = 25\ndef _deadzone(duty: int) -> int:\n    \"\"\"Zero out sub-stall duty; leave 0 and >=MIN_DUTY untouched.\"\"\"",
         "detail": "applications.web-app.mechanumapi",
         "documentation": {}
     },
@@ -2754,7 +2754,7 @@
         "kind": 2,
         "importPath": "applications.web-app.mechanumapi",
         "description": "applications.web-app.mechanumapi",
-        "peekOfCode": "def rotate_angle(angle: int) -> None:\n    \"\"\"Set in-place rotation speed (omega) and re-apply combined drive.\"\"\"\n    state.rotation = int(clamp(angle, -100, 100))\n    apply_drive()\n# =============================================================================\n# WHEEL MIXING\n# =============================================================================\ndef _drive_wheel(motor_fn, value: float) -> None:\n    \"\"\"Convert a signed wheel-speed value to a duty/direction call.\"\"\"\n    duty = int(clamp(abs(value), 0, 100))",
+        "peekOfCode": "def rotate_angle(angle: int) -> None:\n    \"\"\"Set in-place rotation speed (omega) and re-apply combined drive.\"\"\"\n    state.rotation = int(clamp(angle, -100, 100))\n    apply_drive()\n# =============================================================================\n# WHEEL MIXING\n# =============================================================================\ndef _drive_wheel(motor_fn, value: float) -> None:\n    \"\"\"Convert a signed wheel-speed value to a duty/direction call.\"\"\"\n    duty = _deadzone(int(clamp(abs(value), 0, 100)))",
         "detail": "applications.web-app.mechanumapi",
         "documentation": {}
     },
@@ -2826,7 +2826,16 @@
         "kind": 5,
         "importPath": "applications.web-app.mechanumapi",
         "description": "applications.web-app.mechanumapi",
-        "peekOfCode": "state = MotorState()\n# =============================================================================\n# UTILITY FUNCTIONS\n# =============================================================================\ndef clamp(value: float, min_val: float, max_val: float) -> float:\n    \"\"\"Clamp a value between min and max bounds.\"\"\"\n    return max(min_val, min(max_val, value))\ndef validate_motor_driver() -> bool:\n    \"\"\"Check if motor driver is available.\"\"\"\n    if STSPIN is None:",
+        "peekOfCode": "state = MotorState()\n# =============================================================================\n# UTILITY FUNCTIONS\n# =============================================================================\ndef clamp(value: float, min_val: float, max_val: float) -> float:\n    \"\"\"Clamp a value between min and max bounds.\"\"\"\n    return max(min_val, min(max_val, value))\n# Motors physically stall below ~25% duty (they buzz but don't turn), so treat\n# that as a dead zone: any nonzero duty under MIN_DUTY is zeroed rather than\n# sent as a signal the wheels can't act on. Applies to every input path",
+        "detail": "applications.web-app.mechanumapi",
+        "documentation": {}
+    },
+    {
+        "label": "MIN_DUTY",
+        "kind": 5,
+        "importPath": "applications.web-app.mechanumapi",
+        "description": "applications.web-app.mechanumapi",
+        "peekOfCode": "MIN_DUTY = 25\ndef _deadzone(duty: int) -> int:\n    \"\"\"Zero out sub-stall duty; leave 0 and >=MIN_DUTY untouched.\"\"\"\n    return 0 if 0 < duty < MIN_DUTY else duty\ndef validate_motor_driver() -> bool:\n    \"\"\"Check if motor driver is available.\"\"\"\n    if STSPIN is None:\n        logger.error(\"Motor driver not initialized\")\n        return False\n    return True",
         "detail": "applications.web-app.mechanumapi",
         "documentation": {}
     },
@@ -2971,6 +2980,15 @@
         "importPath": "applications.web-app.normalwheelapi",
         "description": "applications.web-app.normalwheelapi",
         "peekOfCode": "state = MotorState()\n# =============================================================================\n# UTILITY FUNCTIONS\n# =============================================================================\ndef clamp(value: float, min_val: float, max_val: float) -> float:\n    \"\"\"\n    Clamp a value between min and max bounds.\n    Args:\n        value: The value to clamp\n        min_val: Minimum allowed value",
+        "detail": "applications.web-app.normalwheelapi",
+        "documentation": {}
+    },
+    {
+        "label": "MIN_DUTY",
+        "kind": 5,
+        "importPath": "applications.web-app.normalwheelapi",
+        "description": "applications.web-app.normalwheelapi",
+        "peekOfCode": "MIN_DUTY = 25\ndef _deadzone(duty: int) -> int:\n    \"\"\"Zero out sub-stall duty; leave 0 and >=MIN_DUTY untouched.\"\"\"\n    return 0 if 0 < duty < MIN_DUTY else duty\ndef validate_motor_driver() -> bool:\n    \"\"\"Check if motor driver is available.\"\"\"\n    if STSPIN is None:\n        logger.error(\"Motor driver not initialized\")\n        return False\n    return True",
         "detail": "applications.web-app.normalwheelapi",
         "documentation": {}
     },
