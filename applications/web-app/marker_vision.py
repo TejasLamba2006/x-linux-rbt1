@@ -72,6 +72,10 @@ DEFAULT_CONFIG = {
     "stream": True,         # publish annotated JPEG frames for the MJPEG feed
     "stream_quality": 60,   # JPEG quality 1-100 (lower = less CPU/bandwidth)
     "stream_fps": 15.0,     # camera grab + feed rate (always-on controller feed)
+    # --- follow-me mode (continuous tracking, keeps a set distance) ---
+    "follow_marker_id": None,   # which marker to follow; None = nearest in view
+    "follow_distance_mm": 600.0,  # gap to maintain from the marker
+    "follow_deadband_mm": 80.0,   # distance error inside this -> no forward/back
 }
 
 
@@ -506,6 +510,186 @@ class MarkerNavigator:
             if self.camera:
                 self.camera.set_banner(None)  # restore default LIVE banner
             logger.info("Vision: drive-to-marker stopped")
+
+
+class MarkerFollower:
+    """Follow-me controller: continuously tracks ONE marker and keeps a set
+    distance from it. Unlike MarkerNavigator (drive-to-marker) this never
+    terminally "arrives" -- it runs until stopped, reversing when the marker
+    gets too close and advancing when it moves away. Consumes detections from
+    the shared CameraStream (never opens the camera itself).
+
+    Config keys used: follow_marker_id, follow_distance_mm, follow_deadband_mm,
+    plus the shared kw/kv/max_cmd/*_floor/bearing_deadband/fps/hold_frames/
+    focal_px/marker_size_mm and tof_stop_mm.
+    """
+
+    def __init__(self, config=None):
+        cfg = dict(DEFAULT_CONFIG)
+        if config:
+            cfg.update({k: v for k, v in config.items()
+                        if v is not None or k in ("follow_marker_id",)})
+        self.cfg = cfg
+        self._thread = None
+        self._stop = threading.Event()
+        self.motor_api = None
+        self.camera = None
+        self.tof_reader = None
+        self.status_cb = None
+        self.can_strafe = True
+
+    @property
+    def running(self):
+        return self._thread is not None and self._thread.is_alive()
+
+    def start(self, motor_api, camera, tof_reader=None, status_cb=None, can_strafe=True):
+        """Launch the follow loop in a daemon thread. Args mirror
+        MarkerNavigator.start(); camera is the shared CameraStream."""
+        if not CV_AVAILABLE:
+            return False
+        if self.running:
+            return False
+        if camera is None or not camera.running:
+            logger.error("Follow: camera stream not running; cannot start")
+            return False
+        self.motor_api = motor_api
+        self.camera = camera
+        self.tof_reader = tof_reader
+        self.status_cb = status_cb
+        self.can_strafe = can_strafe
+        self._stop.clear()
+        self._thread = threading.Thread(target=self._run, daemon=True, name="marker-follow")
+        self._thread.start()
+        return True
+
+    def stop(self):
+        self._stop.set()
+        if self.camera:
+            self.camera.set_banner(None)
+        if self.motor_api:
+            try:
+                self.motor_api.stop()
+            except Exception as e:
+                logger.error(f"follow stop(): motor stop failed: {e}")
+
+    def _emit(self, **kw):
+        if self.status_cb:
+            try:
+                self.status_cb(kw)
+            except Exception:
+                pass
+
+    def _tof_blocked(self):
+        if not self.tof_reader:
+            return False
+        try:
+            dist, valid = self.tof_reader()
+        except Exception:
+            return False
+        return valid and dist is not None and dist < self.cfg["tof_stop_mm"]
+
+    def _pick(self, detections):
+        """Follow the configured marker id, or the nearest one if unset."""
+        want = self.cfg["follow_marker_id"]
+        if want is not None:
+            for det in detections:
+                if det[0] == want:
+                    return det
+            return None
+        return max(detections, key=lambda d: d[3]) if detections else None
+
+    def _run(self):
+        cfg = self.cfg
+        try:
+            period = 1.0 / cfg["fps"]
+            follow_mm = float(cfg["follow_distance_mm"])
+            dband_mm = float(cfg["follow_deadband_mm"])
+            bdead = cfg["bearing_deadband"]
+            maxc = cfg["max_cmd"]
+            miss = 0
+            last_seq = -1
+            logger.info(f"Follow: started (id={cfg['follow_marker_id']}, "
+                        f"dist={follow_mm:.0f}mm)")
+
+            while not self._stop.is_set():
+                tick = time.time()
+
+                detections, frame_w, seq = self.camera.latest_detections()
+                if seq == last_seq or detections is None:
+                    time.sleep(period / 2)
+                    continue
+                last_seq = seq
+
+                # ToF obstacle override -- highest priority. Something right in
+                # front (not necessarily the marker) -> stop, don't reverse-hunt.
+                if self._tof_blocked():
+                    self.motor_api.stop()
+                    self.camera.set_banner("FOLLOW blocked (ToF)")
+                    self._emit(state="BLOCKED", note="tof obstacle")
+                    time.sleep(period)
+                    continue
+
+                target = self._pick(detections) if detections else None
+
+                if target is None:
+                    # Marker lost -> stop and wait (per design). Hold a few
+                    # frames of tolerance to ride out detection flicker.
+                    miss += 1
+                    if miss >= cfg["hold_frames"]:
+                        self.motor_api.stop()
+                        self.camera.set_banner("FOLLOW waiting (no marker)")
+                        self._emit(state="WAITING", note="marker lost")
+                    time.sleep(period)
+                    continue
+                miss = 0
+
+                _, dist, bearing, _ = target
+
+                # --- rotation: face the marker ---
+                if abs(bearing) > bdead:
+                    if self.can_strafe and abs(bearing) < 8.0:
+                        cmd = _floor_cmd(_clamp(cfg["kw"] * bearing, -maxc, maxc),
+                                         cfg["rotate_floor"])
+                        self.motor_api.direction(int(_clamp(cmd, -maxc, maxc)), 0)
+                    else:
+                        cmd = _floor_cmd(_clamp(cfg["kw"] * bearing, -maxc, maxc),
+                                         cfg["rotate_floor"])
+                        self.motor_api.rotate_angle(int(_clamp(cmd, -maxc, maxc)))
+                else:
+                    self.motor_api.rotate_angle(0)
+
+                # --- forward/back: keep the set distance (reverse if too close) ---
+                err = dist - follow_mm  # +ve: too far (advance); -ve: too close (reverse)
+                if abs(err) <= dband_mm:
+                    self.motor_api.throttle_value(0)
+                    state = "HOLDING"
+                else:
+                    thr = _floor_cmd(_clamp(cfg["kv"] * err, -maxc, maxc),
+                                     cfg["throttle_floor"])
+                    self.motor_api.throttle_value(int(_clamp(thr, -maxc, maxc)))
+                    state = "ADVANCING" if err > 0 else "REVERSING"
+
+                banner = f"FOLLOW #{target[0]} {dist:.0f}mm {bearing:+.1f}deg {state}"
+                self.camera.set_banner(banner)
+                self._emit(state=state, distance_mm=round(dist, 1),
+                           bearing_deg=round(bearing, 1), marker_id=target[0],
+                           target_mm=follow_mm)
+
+                dt = time.time() - tick
+                if dt < period:
+                    time.sleep(period - dt)
+
+        except Exception as e:
+            logger.error(f"Follow loop error: {e}")
+        finally:
+            if self.motor_api:
+                try:
+                    self.motor_api.stop()
+                except Exception:
+                    pass
+            if self.camera:
+                self.camera.set_banner(None)
+            logger.info("Follow: stopped")
 
 
 def calibrate(camera=0, marker_size_mm=100.0, known_distance_mm=500.0,

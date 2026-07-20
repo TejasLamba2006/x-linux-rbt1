@@ -2615,6 +2615,15 @@
         "documentation": {}
     },
     {
+        "label": "MarkerFollower",
+        "kind": 6,
+        "importPath": "applications.web-app.marker_vision",
+        "description": "applications.web-app.marker_vision",
+        "peekOfCode": "class MarkerFollower:\n    \"\"\"Follow-me controller: continuously tracks ONE marker and keeps a set\n    distance from it. Unlike MarkerNavigator (drive-to-marker) this never\n    terminally \"arrives\" -- it runs until stopped, reversing when the marker\n    gets too close and advancing when it moves away. Consumes detections from\n    the shared CameraStream (never opens the camera itself).\n    Config keys used: follow_marker_id, follow_distance_mm, follow_deadband_mm,\n    plus the shared kw/kv/max_cmd/*_floor/bearing_deadband/fps/hold_frames/\n    focal_px/marker_size_mm and tof_stop_mm.\n    \"\"\"",
+        "detail": "applications.web-app.marker_vision",
+        "documentation": {}
+    },
+    {
         "label": "calibrate",
         "kind": 2,
         "importPath": "applications.web-app.marker_vision",
