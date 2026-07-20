@@ -331,7 +331,11 @@
         ctx.translate(cx, cy);
         // +90° so the drawn car (art points up, -Y) matches the motion frame,
         // which references heading as yaw-90 (see _raw_input_delta_callback).
-        ctx.rotate(((robotYaw + 90) * Math.PI) / 180);
+        // yaw is CCW-positive (left turn increases it), but canvas rotate() is
+        // CW-positive because canvas +Y points down -- so negate yaw here or the
+        // marker spins the wrong way. Render-only flip; does not touch the yaw
+        // value that voice/autopilot heading logic depends on.
+        ctx.rotate(((-robotYaw + 90) * Math.PI) / 180);
 
         // Car body
         ctx.fillStyle = "#2255ff";
