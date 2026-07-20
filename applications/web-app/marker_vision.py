@@ -408,13 +408,15 @@ if __name__ == "__main__":
     # Smoke test / calibration helper (run on the board with a webcam + marker).
     #   python3 marker_vision.py            -> live distance/bearing readout
     #   python3 marker_vision.py calibrate  -> capture focal_px at 500mm
+    # Camera / marker_size / focal are read from robot_config.json["vision"] so
+    # this matches what the running app uses (camera index is board-specific).
+    import json
+    import os
     import sys
 
     logging.basicConfig(level=logging.INFO)
 
     # self-check the pure math with no hardware needed
-    class _FakeCorners:
-        pass
     fake = np.array([[[100, 100], [200, 100], [200, 200], [100, 200]]], dtype=np.float32)
     d, b, w = _measure(fake, focal_px=900.0, marker_size_mm=100.0, frame_w=1280)
     assert abs(w - 100.0) < 1e-6, w
@@ -422,12 +424,23 @@ if __name__ == "__main__":
     assert b < 0, b                            # marker centre (150) left of 640 -> negative bearing
     print(f"self-check OK: dist={d:.0f}mm bearing={b:.1f}deg width={w:.0f}px")
 
+    cfg = dict(DEFAULT_CONFIG)
+    _cfg_path = os.path.join(os.path.dirname(__file__), "robot_config.json")
+    try:
+        cfg.update(json.load(open(_cfg_path)).get("vision", {}))
+    except Exception:
+        pass
+    cam, size, focal = cfg["camera"], cfg["marker_size_mm"], cfg["focal_px"]
+
     if len(sys.argv) > 1 and sys.argv[1] == "calibrate":
-        calibrate()
+        calibrate(camera=cam, marker_size_mm=size,
+                  frame_w=cfg["frame_width"], frame_h=cfg["frame_height"])
     elif CV_AVAILABLE:
-        cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture(cam)
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, cfg["frame_width"])
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg["frame_height"])
         detect = _make_detector()
-        print("Live readout — Ctrl-C to quit.")
+        print(f"Live readout (camera={cam}, focal_px={focal}) — Ctrl-C to quit.")
         try:
             while True:
                 ok, frame = cap.read()
@@ -437,7 +450,7 @@ if __name__ == "__main__":
                 corners, ids, _ = detect(gray)
                 if ids is not None:
                     for i, mid in enumerate(ids.flatten()):
-                        m = _measure(corners[i], 900.0, 100.0, frame.shape[1])
+                        m = _measure(corners[i], focal, size, frame.shape[1])
                         if m:
                             print(f"id={mid}  dist={m[0]:.0f}mm  bearing={m[1]:+.1f}deg")
                 time.sleep(0.1)
