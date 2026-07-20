@@ -611,7 +611,6 @@ class MarkerFollower:
             period = 1.0 / cfg["fps"]
             follow_mm = float(cfg["follow_distance_mm"])
             dband_mm = float(cfg["follow_deadband_mm"])
-            bdead = cfg["bearing_deadband"]
             maxc = cfg["max_cmd"]
             miss = 0
             last_seq = -1
