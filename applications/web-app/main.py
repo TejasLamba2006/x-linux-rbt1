@@ -101,12 +101,14 @@ except Exception as e:
 # Marker vision (ArUco drive-to-marker) — best-effort like voice: if cv2 is
 # missing, CV_AVAILABLE stays False and the feature silently disables.
 try:
-    from marker_vision import MarkerNavigator, CV_AVAILABLE
+    from marker_vision import MarkerNavigator, CameraStream, CV_AVAILABLE
 except Exception as e:
     CV_AVAILABLE = False
     MarkerNavigator = None
+    CameraStream = None
     logging.getLogger(__name__).warning(f"Marker vision unavailable: {e}")
 
+camera_stream = None  # shared CameraStream (owns the webcam; drives the always-on feed)
 navigator = None  # active MarkerNavigator instance (set on vision_nav start)
 
 
@@ -1017,6 +1019,31 @@ def tof_center_distance():
         return (None, False)
 
 
+def start_camera_stream():
+    """Start the always-on camera stream at server startup. Owns the webcam so
+    the controller feed is live whether or not vision nav is active. Best-effort:
+    if opencv or the camera is missing, the feed just stays blank."""
+    global camera_stream
+    if not CV_AVAILABLE or CameraStream is None:
+        logger.info("Camera stream: opencv unavailable, feed disabled")
+        return
+    if camera_stream is not None and camera_stream.running:
+        return
+    cfg = load_config().get("vision", {})
+    camera_stream = CameraStream(cfg)
+    if camera_stream.start():
+        logger.info("✓ Camera stream started (always-on feed)")
+    else:
+        logger.warning("Camera stream failed to start")
+
+
+def stop_camera_stream():
+    """Stop the always-on camera stream (releases the webcam)."""
+    global camera_stream
+    if camera_stream is not None:
+        camera_stream.stop()
+
+
 def start_vision_nav(loop):
     """Start ArUco drive-to-marker. loop = the running asyncio loop, so the
     worker thread can broadcast status back to browsers. Returns a result dict."""
@@ -1025,6 +1052,8 @@ def start_vision_nav(loop):
         return {"error": "vision unavailable (opencv not installed)"}
     if motor_api is None:
         return {"error": "motor API not initialized"}
+    if camera_stream is None or not camera_stream.running:
+        return {"error": "camera stream not running"}
     if navigator is not None and navigator.running:
         return {"error": "vision nav already running"}
 
@@ -1036,6 +1065,7 @@ def start_vision_nav(loop):
     navigator = MarkerNavigator(cfg)
     started = navigator.start(
         motor_api,
+        camera_stream,
         tof_reader=tof_center_distance,
         status_cb=_broadcast,
         can_strafe=(current_drive_type == "mecanum"),
@@ -1060,9 +1090,11 @@ def stop_vision_nav():
 async def lifespan(app: FastAPI):
     """Application lifespan manager for startup/shutdown."""
     logger.info("Application starting...")
+    start_camera_stream()  # always-on webcam feed for the controller
     yield
     logger.info("Application shutting down...")
     shutdown_event.set()
+    stop_camera_stream()
 
 
 app = FastAPI(
@@ -1129,30 +1161,24 @@ async def map_page():
 
 @app.get("/video_feed")
 async def video_feed():
-    """MJPEG stream of the marker-vision camera with detection overlay. Frames
-    come from the active MarkerNavigator (it owns the camera; V4L2 won't allow a
-    second open), so this only produces images while vision nav is running."""
+    """Always-on MJPEG stream of the webcam with ArUco detection overlay. Frames
+    come from the shared CameraStream (single owner of the device; V4L2 won't
+    allow a second open), so the feed is live whether or not vision nav is
+    running — the overlay banner shows LIVE detections or the nav state."""
     if not CV_AVAILABLE:
         return HTMLResponse("<h1>Vision unavailable</h1>", status_code=503)
 
     boundary = "frame"
 
     async def gen():
-        blank_logged = False
-        # ~15 fps ceiling; the nav loop only refreshes at its own fps anyway.
         while True:
-            nav = navigator
-            jpeg = nav.get_frame() if nav is not None and nav.running else None
+            cam = camera_stream
+            if cam is None or not cam.running:
+                break  # camera gone -> end the stream so the browser <img> stops
+            jpeg = cam.get_frame()
             if jpeg is None:
-                if not blank_logged:
-                    blank_logged = True
-                await asyncio.sleep(0.2)
-                # stop streaming once nav is fully done so the browser <img> ends
-                if nav is None or not nav.running:
-                    if blank_logged:
-                        break
+                await asyncio.sleep(0.1)
                 continue
-            blank_logged = False
             yield (b"--" + boundary.encode() + b"\r\n"
                    b"Content-Type: image/jpeg\r\n\r\n" + jpeg + b"\r\n")
             await asyncio.sleep(1 / 15)

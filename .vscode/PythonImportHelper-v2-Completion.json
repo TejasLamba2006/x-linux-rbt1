@@ -2165,11 +2165,29 @@
         "documentation": {}
     },
     {
+        "label": "start_camera_stream",
+        "kind": 2,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "def start_camera_stream():\n    \"\"\"Start the always-on camera stream at server startup. Owns the webcam so\n    the controller feed is live whether or not vision nav is active. Best-effort:\n    if opencv or the camera is missing, the feed just stays blank.\"\"\"\n    global camera_stream\n    if not CV_AVAILABLE or CameraStream is None:\n        logger.info(\"Camera stream: opencv unavailable, feed disabled\")\n        return\n    if camera_stream is not None and camera_stream.running:\n        return",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "stop_camera_stream",
+        "kind": 2,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "def stop_camera_stream():\n    \"\"\"Stop the always-on camera stream (releases the webcam).\"\"\"\n    global camera_stream\n    if camera_stream is not None:\n        camera_stream.stop()\ndef start_vision_nav(loop):\n    \"\"\"Start ArUco drive-to-marker. loop = the running asyncio loop, so the\n    worker thread can broadcast status back to browsers. Returns a result dict.\"\"\"\n    global navigator\n    if not CV_AVAILABLE:",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
         "label": "start_vision_nav",
         "kind": 2,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "def start_vision_nav(loop):\n    \"\"\"Start ArUco drive-to-marker. loop = the running asyncio loop, so the\n    worker thread can broadcast status back to browsers. Returns a result dict.\"\"\"\n    global navigator\n    if not CV_AVAILABLE:\n        return {\"error\": \"vision unavailable (opencv not installed)\"}\n    if motor_api is None:\n        return {\"error\": \"motor API not initialized\"}\n    if navigator is not None and navigator.running:\n        return {\"error\": \"vision nav already running\"}",
+        "peekOfCode": "def start_vision_nav(loop):\n    \"\"\"Start ArUco drive-to-marker. loop = the running asyncio loop, so the\n    worker thread can broadcast status back to browsers. Returns a result dict.\"\"\"\n    global navigator\n    if not CV_AVAILABLE:\n        return {\"error\": \"vision unavailable (opencv not installed)\"}\n    if motor_api is None:\n        return {\"error\": \"motor API not initialized\"}\n    if camera_stream is None or not camera_stream.running:\n        return {\"error\": \"camera stream not running\"}",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -2417,6 +2435,15 @@
         "documentation": {}
     },
     {
+        "label": "camera_stream",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "camera_stream = None  # shared CameraStream (owns the webcam; drives the always-on feed)\nnavigator = None  # active MarkerNavigator instance (set on vision_nav start)\n# =============================================================================\n# CONFIGURATION FILE MANAGEMENT\n# =============================================================================\ndef load_config() -> dict:\n    \"\"\"Load configuration from JSON file.\"\"\"\n    default_config = {\n        \"drive_type\": \"mecanum\",\n        \"network_mode\": \"wifi\"",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
         "label": "navigator",
         "kind": 5,
         "importPath": "applications.web-app.main",
@@ -2567,6 +2594,15 @@
         "description": "applications.web-app.main",
         "peekOfCode": "manager = ConnectionManager()\n@app.websocket(\"/ws\")\nasync def websocket_endpoint(websocket: WebSocket):\n    \"\"\"WebSocket endpoint for real-time control.\"\"\"\n    await manager.connect(websocket)\n    await manager.receive_and_process(websocket)\n# =============================================================================\n# SIGNAL HANDLERS\n# =============================================================================\ndef signal_handler(signum, frame):",
         "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "CameraStream",
+        "kind": 6,
+        "importPath": "applications.web-app.marker_vision",
+        "description": "applications.web-app.marker_vision",
+        "peekOfCode": "class CameraStream:\n    \"\"\"Single owner of the webcam. Runs one background grab loop that always\n    reads frames, detects ArUco markers, publishes an annotated JPEG for the\n    always-on controller feed, and exposes the latest detections so the\n    navigator can consume them WITHOUT opening the camera a second time\n    (V4L2 forbids two opens on one device).\n    Lifecycle is independent of autopilot: started at server startup, stays\n    running so the feed is live whether or not vision nav is active.\n    \"\"\"\n    def __init__(self, config=None):",
+        "detail": "applications.web-app.marker_vision",
         "documentation": {}
     },
     {

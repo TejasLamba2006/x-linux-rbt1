@@ -71,6 +71,7 @@ DEFAULT_CONFIG = {
     "tof_stop_mm": 250.0,   # ToF obstacle override: closer than this -> stop
     "stream": True,         # publish annotated JPEG frames for the MJPEG feed
     "stream_quality": 60,   # JPEG quality 1-100 (lower = less CPU/bandwidth)
+    "stream_fps": 15.0,     # camera grab + feed rate (always-on controller feed)
 }
 
 
@@ -114,6 +115,151 @@ def _measure(corners, focal_px, marker_size_mm, frame_w):
     return distance_mm, bearing_deg, px_width
 
 
+class CameraStream:
+    """Single owner of the webcam. Runs one background grab loop that always
+    reads frames, detects ArUco markers, publishes an annotated JPEG for the
+    always-on controller feed, and exposes the latest detections so the
+    navigator can consume them WITHOUT opening the camera a second time
+    (V4L2 forbids two opens on one device).
+
+    Lifecycle is independent of autopilot: started at server startup, stays
+    running so the feed is live whether or not vision nav is active.
+    """
+
+    def __init__(self, config=None):
+        cfg = dict(DEFAULT_CONFIG)
+        if config:
+            cfg.update({k: v for k, v in config.items() if v is not None or k == "target_marker_id"})
+        self.cfg = cfg
+        self.quality = int(cfg.get("stream_quality", 60))
+        self.stream_fps = float(cfg.get("stream_fps", 15.0))
+        self._thread = None
+        self._stop = threading.Event()
+        self._jpeg = None
+        self._jpeg_lock = threading.Lock()
+        # (detections, frame_w, seq) — seq lets the navigator skip stale frames.
+        self._latest = None
+        self._seq = 0
+        self._latest_lock = threading.Lock()
+        self._banner = "LIVE"
+        self._banner_lock = threading.Lock()
+
+    @property
+    def running(self):
+        return self._thread is not None and self._thread.is_alive()
+
+    def start(self):
+        if not CV_AVAILABLE or self.running:
+            return self.running
+        self._stop.clear()
+        self._thread = threading.Thread(target=self._run, daemon=True, name="camera-stream")
+        self._thread.start()
+        return True
+
+    def stop(self):
+        self._stop.set()
+
+    def get_frame(self):
+        """Latest annotated JPEG bytes, or None if nothing published yet."""
+        with self._jpeg_lock:
+            return self._jpeg
+
+    def latest_detections(self):
+        """(detections, frame_w, seq). detections: list of (id, dist, bearing,
+        px_width). seq increments per grabbed frame so callers can detect new
+        frames. Returns (None, 0, seq) when no frame yet."""
+        with self._latest_lock:
+            if self._latest is None:
+                return (None, 0, self._seq)
+            return (self._latest[0], self._latest[1], self._latest[2])
+
+    def set_banner(self, text):
+        """Override the on-frame status text (navigator uses this to show its
+        state). Pass None/"" to fall back to the default LIVE banner."""
+        with self._banner_lock:
+            self._banner = text or "LIVE"
+
+    def _run(self):
+        cfg = self.cfg
+        cap = None
+        try:
+            cap = cv2.VideoCapture(cfg["camera"])
+            cap.set(cv2.CAP_PROP_FRAME_WIDTH, cfg["frame_width"])
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg["frame_height"])
+            try:
+                cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+            except Exception:
+                pass
+            if not cap.isOpened():
+                logger.error(f"CameraStream: cannot open camera {cfg['camera']}")
+                return
+
+            detect = _make_detector()
+            period = 1.0 / self.stream_fps if self.stream_fps > 0 else 0.066
+            read_fails = 0
+            logger.info(f"CameraStream: live on camera {cfg['camera']}")
+
+            while not self._stop.is_set():
+                tick = time.time()
+                ok, frame = cap.read()
+                if not ok or frame is None:
+                    read_fails += 1
+                    if read_fails >= 20:
+                        logger.error("CameraStream: 20 consecutive read failures, aborting")
+                        break
+                    time.sleep(period)
+                    continue
+                read_fails = 0
+
+                frame_w = frame.shape[1]
+                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                corners, ids, _ = detect(gray)
+
+                detections = []
+                if ids is not None:
+                    for i, mid in enumerate(ids.flatten()):
+                        m = _measure(corners[i], cfg["focal_px"], cfg["marker_size_mm"], frame_w)
+                        if m:
+                            detections.append((int(mid), m[0], m[1], m[2]))
+
+                with self._latest_lock:
+                    self._seq += 1
+                    self._latest = (detections, frame_w, self._seq)
+
+                self._publish(frame, ids, corners, detections)
+
+                dt = time.time() - tick
+                if dt < period:
+                    time.sleep(period - dt)
+        except Exception as e:
+            logger.error(f"CameraStream loop error: {e}")
+        finally:
+            with self._jpeg_lock:
+                self._jpeg = None
+            if cap is not None:
+                cap.release()
+            logger.info("CameraStream: stopped")
+
+    def _publish(self, frame, ids, corners, detections):
+        try:
+            if ids is not None and len(corners):
+                cv2.aruco.drawDetectedMarkers(frame, corners, ids)
+            with self._banner_lock:
+                banner = self._banner
+            # In the default (non-nav) banner, append the nearest marker's read.
+            if banner == "LIVE" and detections:
+                nearest = max(detections, key=lambda d: d[3])
+                banner = f"LIVE  #{nearest[0]}  {nearest[1]:.0f}mm  {nearest[2]:+.1f}deg"
+            cv2.putText(frame, banner, (8, 24), cv2.FONT_HERSHEY_SIMPLEX,
+                        0.7, (0, 255, 0), 2, cv2.LINE_AA)
+            ok, buf = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, self.quality])
+            if ok:
+                with self._jpeg_lock:
+                    self._jpeg = buf.tobytes()
+        except Exception as e:
+            logger.debug(f"CameraStream publish failed: {e}")
+
+
 class MarkerNavigator:
     """Background drive-to-marker controller. One run per start()."""
 
@@ -127,21 +273,18 @@ class MarkerNavigator:
         self.motor_api = None
         self.tof_reader = None
         self.status_cb = None
-        # Latest annotated frame as JPEG bytes, for the MJPEG feed. The nav
-        # thread owns the camera (V4L2 forbids a 2nd open), so the /video_feed
-        # route pulls frames from here instead of opening its own capture.
-        self._jpeg = None
-        self._jpeg_lock = threading.Lock()
-        self.stream_enabled = bool(cfg.get("stream", True))
+        self.camera = None  # shared CameraStream; navigator reads its detections
 
     @property
     def running(self):
         return self._thread is not None and self._thread.is_alive()
 
-    def start(self, motor_api, tof_reader=None, status_cb=None, can_strafe=True):
+    def start(self, motor_api, camera, tof_reader=None, status_cb=None, can_strafe=True):
         """Launch the control loop in a daemon thread.
 
         motor_api  : the active drive module (throttle_value/direction/rotate_angle/stop).
+        camera     : the shared CameraStream to read detections from (it owns the
+                     webcam; the navigator never opens the device itself).
         tof_reader : optional () -> (distance_mm, valid) for the obstacle override.
         status_cb  : optional (dict) -> None, called each tick with nav status.
         can_strafe : True for mecanum (centre by strafing), False for differential.
@@ -150,7 +293,11 @@ class MarkerNavigator:
             return False
         if self.running:
             return False
+        if camera is None or not camera.running:
+            logger.error("Vision: camera stream not running; cannot start nav")
+            return False
         self.motor_api = motor_api
+        self.camera = camera
         self.tof_reader = tof_reader
         self.status_cb = status_cb
         self.can_strafe = can_strafe
@@ -161,8 +308,8 @@ class MarkerNavigator:
 
     def stop(self):
         self._stop.set()
-        with self._jpeg_lock:
-            self._jpeg = None
+        if self.camera:
+            self.camera.set_banner(None)  # restore default LIVE banner
         if self.motor_api:
             try:
                 self.motor_api.stop()
@@ -176,36 +323,6 @@ class MarkerNavigator:
                 self.status_cb(kw)
             except Exception:
                 pass
-
-    def get_frame(self):
-        """Latest annotated JPEG bytes (or None if nothing published yet)."""
-        with self._jpeg_lock:
-            return self._jpeg
-
-    def _publish_frame(self, frame, ids, corners, state, dist, bearing, locked_id):
-        """Draw marker outlines + a status banner and store the frame as JPEG."""
-        if not self.stream_enabled or not CV_AVAILABLE:
-            return
-        try:
-            vis = frame  # draw in place; frame isn't reused after this
-            if ids is not None and len(corners):
-                cv2.aruco.drawDetectedMarkers(vis, corners, ids)
-            banner = state
-            if locked_id is not None:
-                banner += f" #{locked_id}"
-            if dist is not None:
-                banner += f" {dist:.0f}mm"
-            if bearing is not None:
-                banner += f" {bearing:+.1f}deg"
-            cv2.putText(vis, banner, (8, 24), cv2.FONT_HERSHEY_SIMPLEX,
-                        0.7, (0, 255, 0), 2, cv2.LINE_AA)
-            ok, buf = cv2.imencode(".jpg", vis,
-                                   [cv2.IMWRITE_JPEG_QUALITY, int(self.cfg["stream_quality"])])
-            if ok:
-                with self._jpeg_lock:
-                    self._jpeg = buf.tobytes()
-        except Exception as e:
-            logger.debug(f"frame publish failed: {e}")
 
     def _tof_blocked(self):
         if not self.tof_reader:
@@ -235,23 +352,8 @@ class MarkerNavigator:
     # --- main loop --------------------------------------------------------
     def _run(self):
         cfg = self.cfg
-        cap = None
         try:
-            cap = cv2.VideoCapture(cfg["camera"])
-            cap.set(cv2.CAP_PROP_FRAME_WIDTH, cfg["frame_width"])
-            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg["frame_height"])
-            try:
-                cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  # drop stale frames
-            except Exception:
-                pass
-            if not cap.isOpened():
-                logger.error(f"Vision: cannot open camera {cfg['camera']}")
-                self._emit(state="ERROR", note="camera open failed")
-                return
-
-            detect = _make_detector()
             period = 1.0 / cfg["fps"]
-            read_fails = 0
             state = "SEARCH"
             locked_id = None
             confirm = 0            # consecutive good detections
@@ -260,21 +362,21 @@ class MarkerNavigator:
             lost_start = 0.0
             last_bearing = 0.0
             centered = 0          # consecutive centered frames
+            last_seq = -1
 
             logger.info("Vision: drive-to-marker started")
 
             while not self._stop.is_set():
                 tick = time.time()
 
-                ok, frame = cap.read()
-                if not ok or frame is None:
-                    read_fails += 1
-                    if read_fails >= 10:
-                        logger.error("Vision: 10 consecutive frame reads failed, aborting")
-                        break
-                    time.sleep(period)
+                # Consume the latest detections from the shared camera stream
+                # (it owns the device and draws the feed). Wait for a *new*
+                # frame so we act on fresh data, not the same frame twice.
+                detections, frame_w, seq = self.camera.latest_detections()
+                if seq == last_seq or detections is None:
+                    time.sleep(period / 2)
                     continue
-                read_fails = 0
+                last_seq = seq
 
                 # ToF obstacle override — highest priority, every tick.
                 if self._tof_blocked():
@@ -283,24 +385,15 @@ class MarkerNavigator:
                     logger.info("Vision: ToF obstacle -> stop")
                     break
 
-                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                corners, ids, _ = detect(gray)
-                frame_w = frame.shape[1]
-
-                detections = []
-                if ids is not None:
-                    for i, mid in enumerate(ids.flatten()):
-                        m = _measure(corners[i], cfg["focal_px"], cfg["marker_size_mm"], frame_w)
-                        if m:
-                            detections.append((int(mid), m[0], m[1], m[2]))
-
                 target = self._pick_target(detections, locked_id) if detections else None
 
-                # Publish annotated frame for the MJPEG feed (before state logic
-                # mutates `state`; shows what the controller currently sees).
-                _t_dist = target[1] if target else None
-                _t_bear = target[2] if target else None
-                self._publish_frame(frame, ids, corners, state, _t_dist, _t_bear, locked_id)
+                # Show the controller feed what the nav is doing this tick.
+                _banner = state
+                if locked_id is not None:
+                    _banner += f" #{locked_id}"
+                if target:
+                    _banner += f" {target[1]:.0f}mm {target[2]:+.1f}deg"
+                self.camera.set_banner(_banner)
 
                 # --- SEARCH -----------------------------------------------
                 if state == "SEARCH":
@@ -410,8 +503,8 @@ class MarkerNavigator:
                     self.motor_api.stop()
                 except Exception:
                     pass
-            if cap is not None:
-                cap.release()
+            if self.camera:
+                self.camera.set_banner(None)  # restore default LIVE banner
             logger.info("Vision: drive-to-marker stopped")
 
 
