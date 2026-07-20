@@ -35,7 +35,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, StreamingResponse
 import uvicorn
 import netifaces
 import qrcode
@@ -1125,6 +1125,42 @@ async def map_page():
     if not os.path.isfile(ODOMETRY_HTML_FILE):
         return HTMLResponse("<h1>Map unavailable</h1>", status_code=503)
     return FileResponse(ODOMETRY_HTML_FILE)
+
+
+@app.get("/video_feed")
+async def video_feed():
+    """MJPEG stream of the marker-vision camera with detection overlay. Frames
+    come from the active MarkerNavigator (it owns the camera; V4L2 won't allow a
+    second open), so this only produces images while vision nav is running."""
+    if not CV_AVAILABLE:
+        return HTMLResponse("<h1>Vision unavailable</h1>", status_code=503)
+
+    boundary = "frame"
+
+    async def gen():
+        blank_logged = False
+        # ~15 fps ceiling; the nav loop only refreshes at its own fps anyway.
+        while True:
+            nav = navigator
+            jpeg = nav.get_frame() if nav is not None and nav.running else None
+            if jpeg is None:
+                if not blank_logged:
+                    blank_logged = True
+                await asyncio.sleep(0.2)
+                # stop streaming once nav is fully done so the browser <img> ends
+                if nav is None or not nav.running:
+                    if blank_logged:
+                        break
+                continue
+            blank_logged = False
+            yield (b"--" + boundary.encode() + b"\r\n"
+                   b"Content-Type: image/jpeg\r\n\r\n" + jpeg + b"\r\n")
+            await asyncio.sleep(1 / 15)
+
+    return StreamingResponse(
+        gen(),
+        media_type=f"multipart/x-mixed-replace; boundary={boundary}",
+    )
 
 
 def fetch_odometry_state() -> Optional[dict]:

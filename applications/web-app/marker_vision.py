@@ -69,6 +69,8 @@ DEFAULT_CONFIG = {
     "search_timeout_s": 20.0,
     "lost_search_s": 5.0,
     "tof_stop_mm": 250.0,   # ToF obstacle override: closer than this -> stop
+    "stream": True,         # publish annotated JPEG frames for the MJPEG feed
+    "stream_quality": 60,   # JPEG quality 1-100 (lower = less CPU/bandwidth)
 }
 
 
@@ -125,6 +127,12 @@ class MarkerNavigator:
         self.motor_api = None
         self.tof_reader = None
         self.status_cb = None
+        # Latest annotated frame as JPEG bytes, for the MJPEG feed. The nav
+        # thread owns the camera (V4L2 forbids a 2nd open), so the /video_feed
+        # route pulls frames from here instead of opening its own capture.
+        self._jpeg = None
+        self._jpeg_lock = threading.Lock()
+        self.stream_enabled = bool(cfg.get("stream", True))
 
     @property
     def running(self):
@@ -153,6 +161,8 @@ class MarkerNavigator:
 
     def stop(self):
         self._stop.set()
+        with self._jpeg_lock:
+            self._jpeg = None
         if self.motor_api:
             try:
                 self.motor_api.stop()
@@ -166,6 +176,36 @@ class MarkerNavigator:
                 self.status_cb(kw)
             except Exception:
                 pass
+
+    def get_frame(self):
+        """Latest annotated JPEG bytes (or None if nothing published yet)."""
+        with self._jpeg_lock:
+            return self._jpeg
+
+    def _publish_frame(self, frame, ids, corners, state, dist, bearing, locked_id):
+        """Draw marker outlines + a status banner and store the frame as JPEG."""
+        if not self.stream_enabled or not CV_AVAILABLE:
+            return
+        try:
+            vis = frame  # draw in place; frame isn't reused after this
+            if ids is not None and len(corners):
+                cv2.aruco.drawDetectedMarkers(vis, corners, ids)
+            banner = state
+            if locked_id is not None:
+                banner += f" #{locked_id}"
+            if dist is not None:
+                banner += f" {dist:.0f}mm"
+            if bearing is not None:
+                banner += f" {bearing:+.1f}deg"
+            cv2.putText(vis, banner, (8, 24), cv2.FONT_HERSHEY_SIMPLEX,
+                        0.7, (0, 255, 0), 2, cv2.LINE_AA)
+            ok, buf = cv2.imencode(".jpg", vis,
+                                   [cv2.IMWRITE_JPEG_QUALITY, int(self.cfg["stream_quality"])])
+            if ok:
+                with self._jpeg_lock:
+                    self._jpeg = buf.tobytes()
+        except Exception as e:
+            logger.debug(f"frame publish failed: {e}")
 
     def _tof_blocked(self):
         if not self.tof_reader:
@@ -255,6 +295,12 @@ class MarkerNavigator:
                             detections.append((int(mid), m[0], m[1], m[2]))
 
                 target = self._pick_target(detections, locked_id) if detections else None
+
+                # Publish annotated frame for the MJPEG feed (before state logic
+                # mutates `state`; shows what the controller currently sees).
+                _t_dist = target[1] if target else None
+                _t_bear = target[2] if target else None
+                self._publish_frame(frame, ids, corners, state, _t_dist, _t_bear, locked_id)
 
                 # --- SEARCH -----------------------------------------------
                 if state == "SEARCH":
