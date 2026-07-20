@@ -2223,7 +2223,7 @@
         "kind": 2,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "def signal_handler(signum, frame):\n    \"\"\"Handle shutdown signals gracefully.\"\"\"\n    logger.info(f\"Received signal {signum}. Shutting down...\")\n    shutdown_event.set()\n    cleanup_motor_api()\n    stop_odometry_server()\n    if navigator is not None:\n        navigator.stop()\n    sys.exit(0)\n# =============================================================================",
+        "peekOfCode": "def signal_handler(signum, frame):\n    \"\"\"Handle shutdown signals gracefully.\"\"\"\n    logger.info(f\"Received signal {signum}. Shutting down...\")\n    shutdown_event.set()\n    cleanup_motor_api()\n    stop_odometry_server()\n    if navigator is not None:\n        navigator.stop()\n    stop_camera_stream()\n    sys.exit(0)",
         "detail": "applications.web-app.main",
         "documentation": {}
     },

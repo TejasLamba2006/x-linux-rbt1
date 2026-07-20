@@ -1637,6 +1637,7 @@ def signal_handler(signum, frame):
     stop_odometry_server()
     if navigator is not None:
         navigator.stop()
+    stop_camera_stream()
     sys.exit(0)
 
 

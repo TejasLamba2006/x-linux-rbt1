@@ -752,9 +752,22 @@ function handleMoveResult(result) {
 // =============================================================================
 const visionNavBtn = document.getElementById('vision-nav-btn');
 const visionNavStatus = document.getElementById('vision-nav-status');
-const visionFeed = document.getElementById('vision-feed');
 const visionFeedImg = document.getElementById('vision-feed-img');
 let visionNavActive = false;
+
+// Always-on camera feed: point the <img> at the MJPEG stream on page load and
+// keep it alive. If the stream drops (server restart, camera hiccup) the <img>
+// fires onerror; retry after a short delay so the feed self-heals.
+function startVideoFeed() {
+    if (!visionFeedImg) return;
+    visionFeedImg.src = '/video_feed?t=' + Date.now();
+}
+if (visionFeedImg) {
+    visionFeedImg.addEventListener('error', function () {
+        setTimeout(startVideoFeed, 2000);
+    });
+    startVideoFeed();
+}
 
 function toggleVisionNav() {
     sendCommand({ vision_nav: visionNavActive ? 'stop' : 'start' });
@@ -765,17 +778,6 @@ function setVisionButton(active) {
     if (visionNavBtn) {
         visionNavBtn.textContent = active ? 'Stop Vision Nav' : 'Start Vision Nav';
         visionNavBtn.classList.toggle('active', active);
-    }
-    // Show/hide the MJPEG feed. Setting src (with a cache-buster) starts the
-    // stream; clearing it closes the HTTP connection to the /video_feed route.
-    if (visionFeed && visionFeedImg) {
-        if (active) {
-            visionFeedImg.src = '/video_feed?t=' + Date.now();
-            visionFeed.style.display = '';
-        } else {
-            visionFeedImg.removeAttribute('src');
-            visionFeed.style.display = 'none';
-        }
     }
 }
 
