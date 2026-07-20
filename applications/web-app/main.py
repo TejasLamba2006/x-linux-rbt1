@@ -101,15 +101,17 @@ except Exception as e:
 # Marker vision (ArUco drive-to-marker) — best-effort like voice: if cv2 is
 # missing, CV_AVAILABLE stays False and the feature silently disables.
 try:
-    from marker_vision import MarkerNavigator, CameraStream, CV_AVAILABLE
+    from marker_vision import MarkerNavigator, CameraStream, MarkerFollower, CV_AVAILABLE
 except Exception as e:
     CV_AVAILABLE = False
     MarkerNavigator = None
     CameraStream = None
+    MarkerFollower = None
     logging.getLogger(__name__).warning(f"Marker vision unavailable: {e}")
 
 camera_stream = None  # shared CameraStream (owns the webcam; drives the always-on feed)
 navigator = None  # active MarkerNavigator instance (set on vision_nav start)
+follower = None  # active MarkerFollower instance (set when follow-me mode starts)
 
 
 # =============================================================================
@@ -1083,6 +1085,52 @@ def stop_vision_nav():
     return {"stopped": True}
 
 
+def start_follow(loop, marker_id=None, distance_mm=None):
+    """Start follow-me: continuously track a marker and keep a set distance.
+    marker_id / distance_mm override the config values (from the UI fields).
+    loop = running asyncio loop for status broadcasts."""
+    global follower
+    if not CV_AVAILABLE:
+        return {"error": "vision unavailable (opencv not installed)"}
+    if motor_api is None:
+        return {"error": "motor API not initialized"}
+    if camera_stream is None or not camera_stream.running:
+        return {"error": "camera stream not running"}
+    if follower is not None and follower.running:
+        return {"error": "follow already running"}
+
+    def _broadcast(status):
+        asyncio.run_coroutine_threadsafe(manager.broadcast({"follow": status}), loop)
+
+    cfg = dict(load_config().get("vision", {}))
+    if marker_id is not None:
+        cfg["follow_marker_id"] = marker_id
+    if distance_mm is not None:
+        cfg["follow_distance_mm"] = distance_mm
+
+    follower = MarkerFollower(cfg)
+    started = follower.start(
+        motor_api,
+        camera_stream,
+        tof_reader=tof_center_distance,
+        status_cb=_broadcast,
+        can_strafe=(current_drive_type == "mecanum"),
+    )
+    if started:
+        return {"started": True, "state": "FOLLOWING",
+                "marker_id": cfg.get("follow_marker_id"),
+                "distance_mm": cfg.get("follow_distance_mm")}
+    return {"error": "failed to start follow"}
+
+
+def stop_follow():
+    """Stop follow-me tracking."""
+    global follower
+    if follower is not None:
+        follower.stop()
+    return {"stopped": True}
+
+
 # =============================================================================
 # FASTAPI APPLICATION
 # =============================================================================
@@ -1587,6 +1635,25 @@ class ConnectionManager:
                             max_speed_percent = max(0, min(100, int(parsed_data['max_speed'])))
                             continue
 
+                        # Follow-me mode: entering it starts the marker follower
+                        # (using the marker id + distance fields sent alongside);
+                        # leaving it stops the follower. This gates BEFORE parser
+                        # so the vision loop owns the motors in follow-me.
+                        if parsed_data.get('mode') == 'follow-me':
+                            mid = parsed_data.get('follow_marker_id')
+                            mid = int(mid) if mid not in (None, "") else None
+                            dist = parsed_data.get('follow_distance_mm')
+                            dist = float(dist) if dist not in (None, "") else None
+                            if motor_api:
+                                motor_api.mode_select('follow-me')
+                            result = start_follow(asyncio.get_running_loop(),
+                                                  marker_id=mid, distance_mm=dist)
+                            await websocket.send_json({"follow_result": result})
+                            continue
+                        elif 'mode' in parsed_data and follower is not None and follower.running:
+                            # switched away from follow-me -> stop tracking
+                            stop_follow()
+
                         # Process motor commands
                         if motor_api:
                             apply_speed_limit(parsed_data)
@@ -1637,6 +1704,8 @@ def signal_handler(signum, frame):
     stop_odometry_server()
     if navigator is not None:
         navigator.stop()
+    if follower is not None:
+        follower.stop()
     stop_camera_stream()
     sys.exit(0)
 

@@ -76,6 +76,17 @@
                 <button id="vision-nav-btn" title="See an ArUco marker and drive up to it">Start Vision Nav</button>
                 <span id="vision-nav-status"></span>
             </div>
+            <!-- Follow-me settings: which marker to follow + gap to keep.
+                 Applied when the follow-me mode button is selected. -->
+            <div id="follow-control">
+                <label title="ArUco marker ID to follow (blank = nearest)">Follow ID
+                    <input type="number" id="follow-marker-id" min="0" max="49" step="1" placeholder="any">
+                </label>
+                <label title="Distance to keep from the marker, in cm">Keep cm
+                    <input type="number" id="follow-distance-cm" min="10" max="300" step="5" value="60">
+                </label>
+                <span id="follow-status"></span>
+            </div>
             <!-- Always-on live camera feed with ArUco detection overlay -->
             <div id="vision-feed">
                 <img id="vision-feed-img" alt="live camera feed">

@@ -2196,7 +2196,25 @@
         "kind": 2,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "def stop_vision_nav():\n    \"\"\"Stop drive-to-marker and return to locked.\"\"\"\n    global navigator\n    if navigator is not None:\n        navigator.stop()\n    if motor_api is not None:\n        motor_api.mode_select(\"locked\")\n    return {\"stopped\": True}\n# =============================================================================\n# FASTAPI APPLICATION",
+        "peekOfCode": "def stop_vision_nav():\n    \"\"\"Stop drive-to-marker and return to locked.\"\"\"\n    global navigator\n    if navigator is not None:\n        navigator.stop()\n    if motor_api is not None:\n        motor_api.mode_select(\"locked\")\n    return {\"stopped\": True}\ndef start_follow(loop, marker_id=None, distance_mm=None):\n    \"\"\"Start follow-me: continuously track a marker and keep a set distance.",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "start_follow",
+        "kind": 2,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "def start_follow(loop, marker_id=None, distance_mm=None):\n    \"\"\"Start follow-me: continuously track a marker and keep a set distance.\n    marker_id / distance_mm override the config values (from the UI fields).\n    loop = running asyncio loop for status broadcasts.\"\"\"\n    global follower\n    if not CV_AVAILABLE:\n        return {\"error\": \"vision unavailable (opencv not installed)\"}\n    if motor_api is None:\n        return {\"error\": \"motor API not initialized\"}\n    if camera_stream is None or not camera_stream.running:",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "stop_follow",
+        "kind": 2,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "def stop_follow():\n    \"\"\"Stop follow-me tracking.\"\"\"\n    global follower\n    if follower is not None:\n        follower.stop()\n    return {\"stopped\": True}\n# =============================================================================\n# FASTAPI APPLICATION\n# =============================================================================\n@asynccontextmanager",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -2223,7 +2241,7 @@
         "kind": 2,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "def signal_handler(signum, frame):\n    \"\"\"Handle shutdown signals gracefully.\"\"\"\n    logger.info(f\"Received signal {signum}. Shutting down...\")\n    shutdown_event.set()\n    cleanup_motor_api()\n    stop_odometry_server()\n    if navigator is not None:\n        navigator.stop()\n    stop_camera_stream()\n    sys.exit(0)",
+        "peekOfCode": "def signal_handler(signum, frame):\n    \"\"\"Handle shutdown signals gracefully.\"\"\"\n    logger.info(f\"Received signal {signum}. Shutting down...\")\n    shutdown_event.set()\n    cleanup_motor_api()\n    stop_odometry_server()\n    if navigator is not None:\n        navigator.stop()\n    if follower is not None:\n        follower.stop()",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -2439,7 +2457,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "camera_stream = None  # shared CameraStream (owns the webcam; drives the always-on feed)\nnavigator = None  # active MarkerNavigator instance (set on vision_nav start)\n# =============================================================================\n# CONFIGURATION FILE MANAGEMENT\n# =============================================================================\ndef load_config() -> dict:\n    \"\"\"Load configuration from JSON file.\"\"\"\n    default_config = {\n        \"drive_type\": \"mecanum\",\n        \"network_mode\": \"wifi\"",
+        "peekOfCode": "camera_stream = None  # shared CameraStream (owns the webcam; drives the always-on feed)\nnavigator = None  # active MarkerNavigator instance (set on vision_nav start)\nfollower = None  # active MarkerFollower instance (set when follow-me mode starts)\n# =============================================================================\n# CONFIGURATION FILE MANAGEMENT\n# =============================================================================\ndef load_config() -> dict:\n    \"\"\"Load configuration from JSON file.\"\"\"\n    default_config = {\n        \"drive_type\": \"mecanum\",",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -2448,7 +2466,16 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "navigator = None  # active MarkerNavigator instance (set on vision_nav start)\n# =============================================================================\n# CONFIGURATION FILE MANAGEMENT\n# =============================================================================\ndef load_config() -> dict:\n    \"\"\"Load configuration from JSON file.\"\"\"\n    default_config = {\n        \"drive_type\": \"mecanum\",\n        \"network_mode\": \"wifi\"\n    }",
+        "peekOfCode": "navigator = None  # active MarkerNavigator instance (set on vision_nav start)\nfollower = None  # active MarkerFollower instance (set when follow-me mode starts)\n# =============================================================================\n# CONFIGURATION FILE MANAGEMENT\n# =============================================================================\ndef load_config() -> dict:\n    \"\"\"Load configuration from JSON file.\"\"\"\n    default_config = {\n        \"drive_type\": \"mecanum\",\n        \"network_mode\": \"wifi\"",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "follower",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "follower = None  # active MarkerFollower instance (set when follow-me mode starts)\n# =============================================================================\n# CONFIGURATION FILE MANAGEMENT\n# =============================================================================\ndef load_config() -> dict:\n    \"\"\"Load configuration from JSON file.\"\"\"\n    default_config = {\n        \"drive_type\": \"mecanum\",\n        \"network_mode\": \"wifi\"\n    }",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
