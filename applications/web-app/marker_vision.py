@@ -661,10 +661,10 @@ class MarkerFollower:
                     cmd = _floor_cmd(_clamp(cfg["kw"] * bearing, -maxc, maxc),
                                      cfg["rotate_floor"])
                     cmd = int(_clamp(cmd, -maxc, maxc))
-                    if self.can_strafe:
-                        self.motor_api.direction(cmd, 0)  # mecanum strafes to center
-                    else:
-                        self.motor_api.rotate_angle(cmd)
+                    # Rotate to FACE the marker (turn the robot), not strafe. A
+                    # follow-me should point at what it follows; +bearing (marker
+                    # to the right) -> +rotate (turn right) toward it.
+                    self.motor_api.rotate_angle(cmd)
                     time.sleep(cfg["follow_rotate_pulse_s"])
                     self.motor_api.stop()
                     self.camera.set_banner(
