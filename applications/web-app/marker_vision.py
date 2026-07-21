@@ -84,6 +84,11 @@ DEFAULT_CONFIG = {
     "local_display": False,     # also render the annotated frame in a cv2 window
     "local_display_window": "RBT01 Marker Vision",  # window title
     "local_display_fullscreen": False,  # borderless fullscreen on the panel
+    # On Wayland/Weston (ST demo image) OpenCV's imshow can't draw (GTK is X11-
+    # only). Set wayland_display=True to push annotated frames to a waylandsink
+    # via GStreamer instead. Requires env XDG_RUNTIME_DIR=/run/user/<uid> and
+    # WAYLAND_DISPLAY=<socket> pointing at the running weston.
+    "wayland_display": False,
     # --- follow-me mode (continuous tracking, keeps a set distance) ---
     "follow_marker_id": None,   # which marker to follow; None = nearest in view
     "follow_distance_mm": 600.0,  # gap to maintain from the marker
@@ -191,6 +196,8 @@ class CameraStream:
         self.stream_fps = float(cfg.get("stream_fps", 15.0))
         self.local_display = bool(cfg.get("local_display", False))
         self._window_ready = False  # created lazily on the grab thread
+        self.wayland_display = bool(cfg.get("wayland_display", False))
+        self._wl_writer = None      # cv2.VideoWriter -> waylandsink, lazy
         self._thread = None
         self._stop = threading.Event()
         self._jpeg = None
@@ -296,6 +303,12 @@ class CameraStream:
                 except Exception:
                     pass
                 self._window_ready = False
+            if self._wl_writer is not None:
+                try:
+                    self._wl_writer.release()
+                except Exception:
+                    pass
+                self._wl_writer = None
             if cap is not None:
                 cap.release()
             logger.info("CameraStream: stopped")
@@ -318,8 +331,41 @@ class CameraStream:
                     self._jpeg = buf.tobytes()
             if self.local_display:
                 self._show_local(frame)
+            if self.wayland_display:
+                self._show_wayland(frame)
         except Exception as e:
             logger.debug(f"CameraStream publish failed: {e}")
+
+    def _show_wayland(self, frame):
+        """Push the annotated frame to a Wayland surface via GStreamer
+        (appsrc -> videoconvert -> waylandsink). This is the display path for the
+        ST Weston image, where OpenCV's imshow (GTK/X11) can't draw. Lazily builds
+        a cv2.VideoWriter once the frame size is known; disables itself on failure
+        so the MJPEG feed keeps running. Needs XDG_RUNTIME_DIR + WAYLAND_DISPLAY
+        env pointing at the running weston compositor."""
+        try:
+            if self._wl_writer is None:
+                h, w = frame.shape[:2]
+                fps = self.stream_fps if self.stream_fps > 0 else 15.0
+                pipeline = ("appsrc ! videoconvert ! "
+                            "waylandsink sync=false")
+                writer = cv2.VideoWriter(pipeline, cv2.CAP_GSTREAMER, 0,
+                                         fps, (w, h), True)
+                if not writer.isOpened():
+                    raise RuntimeError("waylandsink VideoWriter did not open "
+                                       "(check XDG_RUNTIME_DIR/WAYLAND_DISPLAY)")
+                self._wl_writer = writer
+                logger.info(f"Wayland display: streaming {w}x{h}@{fps:.0f} to waylandsink")
+            self._wl_writer.write(frame)
+        except Exception as e:
+            logger.warning(f"Wayland display unavailable, disabling it: {e}")
+            self.wayland_display = False
+            if self._wl_writer is not None:
+                try:
+                    self._wl_writer.release()
+                except Exception:
+                    pass
+                self._wl_writer = None
 
     def _show_local(self, frame):
         """Render the annotated frame in a cv2 window on the board's attached
@@ -855,7 +901,12 @@ if __name__ == "__main__":
     elif CV_AVAILABLE:
         cap = _open_capture(cfg)
         detect = _make_detector()
-        show = True  # imshow preview; auto-disables if there's no GUI backend
+        # Preview: on Wayland (ST Weston image) imshow's GTK backend can't draw,
+        # so if wayland_display is set push frames to waylandsink via a
+        # VideoWriter; otherwise use imshow. Either auto-disables on failure.
+        use_wl = bool(cfg.get("wayland_display", False))
+        show = True
+        wl_writer = None
         print(f"Live readout (camera={cam}, focal_px={focal}) — 'q' or Ctrl-C to quit.")
         try:
             while True:
@@ -875,7 +926,21 @@ if __name__ == "__main__":
                                         (int(c[:, 0].min()), int(c[:, 1].min()) - 8),
                                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2,
                                         cv2.LINE_AA)
-                if show:
+                if show and use_wl:
+                    try:
+                        if wl_writer is None:
+                            h, w = frame.shape[:2]
+                            wl_writer = cv2.VideoWriter(
+                                "appsrc ! videoconvert ! waylandsink sync=false",
+                                cv2.CAP_GSTREAMER, 0, 15.0, (w, h), True)
+                            if not wl_writer.isOpened():
+                                raise RuntimeError("waylandsink writer did not open "
+                                                   "(check XDG_RUNTIME_DIR/WAYLAND_DISPLAY)")
+                        wl_writer.write(frame)
+                    except Exception as e:
+                        print(f"(preview off — waylandsink failed: {e})")
+                        show = False
+                elif show:
                     try:
                         cv2.imshow("marker_vision", frame)
                         if (cv2.waitKey(1) & 0xFF) == ord("q"):
@@ -889,6 +954,11 @@ if __name__ == "__main__":
             pass
         finally:
             cap.release()
+            if wl_writer is not None:
+                try:
+                    wl_writer.release()
+                except Exception:
+                    pass
             try:
                 cv2.destroyAllWindows()
             except Exception:
