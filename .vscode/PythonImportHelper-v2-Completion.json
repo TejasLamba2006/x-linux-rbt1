@@ -2637,7 +2637,7 @@
         "kind": 6,
         "importPath": "applications.web-app.marker_vision",
         "description": "applications.web-app.marker_vision",
-        "peekOfCode": "class MarkerNavigator:\n    \"\"\"Background drive-to-marker controller. One run per start().\"\"\"\n    def __init__(self, config=None):\n        cfg = dict(DEFAULT_CONFIG)\n        if config:\n            cfg.update({k: v for k, v in config.items() if v is not None or k == \"target_marker_id\"})\n        self.cfg = cfg\n        self._thread = None\n        self._stop = threading.Event()\n        self.motor_api = None",
+        "peekOfCode": "class MarkerNavigator:\n    \"\"\"Background drive-to-marker controller. One run per start().\"\"\"\n    def __init__(self, config=None):\n        cfg = dict(DEFAULT_CONFIG)\n        if config:\n            cfg.update({k: v for k, v in config.items()\n                       if v is not None or k == \"target_marker_id\"})\n        self.cfg = cfg\n        self._thread = None\n        self._stop = threading.Event()",
         "detail": "applications.web-app.marker_vision",
         "documentation": {}
     },
@@ -2664,7 +2664,7 @@
         "kind": 5,
         "importPath": "applications.web-app.marker_vision",
         "description": "applications.web-app.marker_vision",
-        "peekOfCode": "logger = logging.getLogger(__name__)\nCV_AVAILABLE = False\ntry:\n    import cv2\n    CV_AVAILABLE = True\nexcept Exception as e:  # pragma: no cover - depends on board deps\n    logging.getLogger(__name__).warning(f\"Marker vision unavailable (cv2 not loaded): {e}\")\n# Defaults for every tunable. main.py merges robot_config.json[\"vision\"] over this.\nDEFAULT_CONFIG = {\n    \"camera\": 0,            # cv2.VideoCapture source: int index or \"/dev/videoN\" path",
+        "peekOfCode": "logger = logging.getLogger(__name__)\nCV_AVAILABLE = False\ntry:\n    import cv2\n    CV_AVAILABLE = True\nexcept Exception as e:  # pragma: no cover - depends on board deps\n    logging.getLogger(__name__).warning(\n        f\"Marker vision unavailable (cv2 not loaded): {e}\")\n# Defaults for every tunable. main.py merges robot_config.json[\"vision\"] over this.\nDEFAULT_CONFIG = {",
         "detail": "applications.web-app.marker_vision",
         "documentation": {}
     },
@@ -2673,7 +2673,7 @@
         "kind": 5,
         "importPath": "applications.web-app.marker_vision",
         "description": "applications.web-app.marker_vision",
-        "peekOfCode": "CV_AVAILABLE = False\ntry:\n    import cv2\n    CV_AVAILABLE = True\nexcept Exception as e:  # pragma: no cover - depends on board deps\n    logging.getLogger(__name__).warning(f\"Marker vision unavailable (cv2 not loaded): {e}\")\n# Defaults for every tunable. main.py merges robot_config.json[\"vision\"] over this.\nDEFAULT_CONFIG = {\n    \"camera\": 0,            # cv2.VideoCapture source: int index or \"/dev/videoN\" path\n    \"gst_pipeline\": None,   # if set, open THIS GStreamer pipeline via CAP_GSTREAMER",
+        "peekOfCode": "CV_AVAILABLE = False\ntry:\n    import cv2\n    CV_AVAILABLE = True\nexcept Exception as e:  # pragma: no cover - depends on board deps\n    logging.getLogger(__name__).warning(\n        f\"Marker vision unavailable (cv2 not loaded): {e}\")\n# Defaults for every tunable. main.py merges robot_config.json[\"vision\"] over this.\nDEFAULT_CONFIG = {\n    \"camera\": 0,            # cv2.VideoCapture source: int index or \"/dev/videoN\" path",
         "detail": "applications.web-app.marker_vision",
         "documentation": {}
     },
