@@ -855,7 +855,8 @@ if __name__ == "__main__":
     elif CV_AVAILABLE:
         cap = _open_capture(cfg)
         detect = _make_detector()
-        print(f"Live readout (camera={cam}, focal_px={focal}) — Ctrl-C to quit.")
+        show = True  # imshow preview; auto-disables if there's no GUI backend
+        print(f"Live readout (camera={cam}, focal_px={focal}) — 'q' or Ctrl-C to quit.")
         try:
             while True:
                 ok, frame = cap.read()
@@ -864,10 +865,31 @@ if __name__ == "__main__":
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 corners, ids, _ = detect(gray)
                 if ids is not None:
+                    cv2.aruco.drawDetectedMarkers(frame, corners, ids)
                     for i, mid in enumerate(ids.flatten()):
                         m = _measure(corners[i], focal, size, frame.shape[1])
                         if m:
                             print(f"id={mid}  dist={m[0]:.0f}mm  bearing={m[1]:+.1f}deg")
-                time.sleep(0.1)
+                            c = corners[i].reshape(4, 2)
+                            cv2.putText(frame, f"#{mid} {m[0]:.0f}mm {m[1]:+.1f}deg",
+                                        (int(c[:, 0].min()), int(c[:, 1].min()) - 8),
+                                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2,
+                                        cv2.LINE_AA)
+                if show:
+                    try:
+                        cv2.imshow("marker_vision", frame)
+                        if (cv2.waitKey(1) & 0xFF) == ord("q"):
+                            break
+                    except Exception as e:
+                        print(f"(preview off — no display: {e})")
+                        show = False
+                else:
+                    time.sleep(0.1)
         except KeyboardInterrupt:
+            pass
+        finally:
             cap.release()
+            try:
+                cv2.destroyAllWindows()
+            except Exception:
+                pass
