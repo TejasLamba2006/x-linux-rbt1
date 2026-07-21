@@ -34,7 +34,8 @@ import math
 import threading
 import time
 
-import numpy as np  # hard dep on the board (ONNX voice too); safe at module level
+# hard dep on the board (ONNX voice too); safe at module level
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +44,8 @@ try:
     import cv2
     CV_AVAILABLE = True
 except Exception as e:  # pragma: no cover - depends on board deps
-    logging.getLogger(__name__).warning(f"Marker vision unavailable (cv2 not loaded): {e}")
+    logging.getLogger(__name__).warning(
+        f"Marker vision unavailable (cv2 not loaded): {e}")
 
 
 # Defaults for every tunable. main.py merges robot_config.json["vision"] over this.
@@ -57,7 +59,7 @@ DEFAULT_CONFIG = {
     "frame_width": 1280,
     "frame_height": 720,
     "marker_size_mm": 100.0,
-    "focal_px": 900.0,      # MUST calibrate per camera/res; default ~ 1280px @ 60-70deg HFOV
+    "focal_px": 300.0,      # MUST calibrate per camera/res; default ~ 1280px @ 60-70deg HFOV
     "standoff_mm": 400.0,   # stop this far from the marker
     "target_marker_id": None,  # None = lock onto the nearest (largest) marker
     "kw": 2.5,              # rotate command per degree of bearing error
@@ -79,7 +81,8 @@ DEFAULT_CONFIG = {
     "tof_stop_mm": 250.0,   # ToF obstacle override: closer than this -> stop
     "stream": True,         # publish annotated JPEG frames for the MJPEG feed
     "stream_quality": 60,   # JPEG quality 1-100 (lower = less CPU/bandwidth)
-    "stream_fps": 15.0,     # camera grab + feed rate (always-on controller feed)
+    # camera grab + feed rate (always-on controller feed)
+    "stream_fps": 15.0,
     # --- local display (HDMI/DSI panel wired to the board) ---
     "local_display": False,     # also render the annotated frame in a cv2 window
     "local_display_window": "RBT01 Marker Vision",  # window title
@@ -137,7 +140,8 @@ def _open_capture(cfg):
 
     src = cfg["camera"]
     is_devpath = isinstance(src, str) and src.startswith("/dev/")
-    cap = cv2.VideoCapture(src, cv2.CAP_V4L2) if is_devpath else cv2.VideoCapture(src)
+    cap = cv2.VideoCapture(
+        src, cv2.CAP_V4L2) if is_devpath else cv2.VideoCapture(src)
     if not is_devpath:
         # USB/index source: native res is negotiable, so honor the config.
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, cfg["frame_width"])
@@ -190,7 +194,8 @@ class CameraStream:
     def __init__(self, config=None):
         cfg = dict(DEFAULT_CONFIG)
         if config:
-            cfg.update({k: v for k, v in config.items() if v is not None or k == "target_marker_id"})
+            cfg.update({k: v for k, v in config.items()
+                       if v is not None or k == "target_marker_id"})
         self.cfg = cfg
         self.quality = int(cfg.get("stream_quality", 60))
         self.stream_fps = float(cfg.get("stream_fps", 15.0))
@@ -217,7 +222,8 @@ class CameraStream:
         if not CV_AVAILABLE or self.running:
             return self.running
         self._stop.clear()
-        self._thread = threading.Thread(target=self._run, daemon=True, name="camera-stream")
+        self._thread = threading.Thread(
+            target=self._run, daemon=True, name="camera-stream")
         self._thread.start()
         return True
 
@@ -265,7 +271,8 @@ class CameraStream:
                 if not ok or frame is None:
                     read_fails += 1
                     if read_fails >= 20:
-                        logger.error("CameraStream: 20 consecutive read failures, aborting")
+                        logger.error(
+                            "CameraStream: 20 consecutive read failures, aborting")
                         break
                     time.sleep(period)
                     continue
@@ -278,7 +285,8 @@ class CameraStream:
                 detections = []
                 if ids is not None:
                     for i, mid in enumerate(ids.flatten()):
-                        m = _measure(corners[i], cfg["focal_px"], cfg["marker_size_mm"], frame_w)
+                        m = _measure(
+                            corners[i], cfg["focal_px"], cfg["marker_size_mm"], frame_w)
                         if m:
                             detections.append((int(mid), m[0], m[1], m[2]))
 
@@ -325,7 +333,8 @@ class CameraStream:
                 banner = f"LIVE  #{nearest[0]}  {nearest[1]:.0f}mm  {nearest[2]:+.1f}deg"
             cv2.putText(frame, banner, (8, 24), cv2.FONT_HERSHEY_SIMPLEX,
                         0.7, (0, 255, 0), 2, cv2.LINE_AA)
-            ok, buf = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, self.quality])
+            ok, buf = cv2.imencode(
+                ".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, self.quality])
             if ok:
                 with self._jpeg_lock:
                     self._jpeg = buf.tobytes()
@@ -355,7 +364,8 @@ class CameraStream:
                     raise RuntimeError("waylandsink VideoWriter did not open "
                                        "(check XDG_RUNTIME_DIR/WAYLAND_DISPLAY)")
                 self._wl_writer = writer
-                logger.info(f"Wayland display: streaming {w}x{h}@{fps:.0f} to waylandsink")
+                logger.info(
+                    f"Wayland display: streaming {w}x{h}@{fps:.0f} to waylandsink")
             self._wl_writer.write(frame)
         except Exception as e:
             logger.warning(f"Wayland display unavailable, disabling it: {e}")
@@ -374,7 +384,8 @@ class CameraStream:
         disables itself after the first failure so the feed keeps running."""
         try:
             if not self._window_ready:
-                win = self.cfg.get("local_display_window", "RBT01 Marker Vision")
+                win = self.cfg.get("local_display_window",
+                                   "RBT01 Marker Vision")
                 if self.cfg.get("local_display_fullscreen", False):
                     cv2.namedWindow(win, cv2.WINDOW_NORMAL)
                     cv2.setWindowProperty(win, cv2.WND_PROP_FULLSCREEN,
@@ -384,7 +395,8 @@ class CameraStream:
                 self._window_name = win
                 self._window_ready = True
             cv2.imshow(self._window_name, frame)
-            cv2.waitKey(1)  # required to pump the GUI event loop / actually draw
+            # required to pump the GUI event loop / actually draw
+            cv2.waitKey(1)
         except Exception as e:
             logger.warning(f"Local display unavailable, disabling it: {e}")
             self.local_display = False
@@ -396,7 +408,8 @@ class MarkerNavigator:
     def __init__(self, config=None):
         cfg = dict(DEFAULT_CONFIG)
         if config:
-            cfg.update({k: v for k, v in config.items() if v is not None or k == "target_marker_id"})
+            cfg.update({k: v for k, v in config.items()
+                       if v is not None or k == "target_marker_id"})
         self.cfg = cfg
         self._thread = None
         self._stop = threading.Event()
@@ -432,7 +445,8 @@ class MarkerNavigator:
         self.status_cb = status_cb
         self.can_strafe = can_strafe
         self._stop.clear()
-        self._thread = threading.Thread(target=self._run, daemon=True, name="marker-nav")
+        self._thread = threading.Thread(
+            target=self._run, daemon=True, name="marker-nav")
         self._thread.start()
         return True
 
@@ -511,11 +525,13 @@ class MarkerNavigator:
                 # ToF obstacle override — highest priority, every tick.
                 if self._tof_blocked():
                     self.motor_api.stop()
-                    self._emit(state="ARRIVED", note="tof obstacle", marker_id=locked_id)
+                    self._emit(state="ARRIVED", note="tof obstacle",
+                               marker_id=locked_id)
                     logger.info("Vision: ToF obstacle -> stop")
                     break
 
-                target = self._pick_target(detections, locked_id) if detections else None
+                target = self._pick_target(
+                    detections, locked_id) if detections else None
 
                 # Show the controller feed what the nav is doing this tick.
                 _banner = state
@@ -532,7 +548,8 @@ class MarkerNavigator:
                         if confirm >= cfg["confirm_frames"]:
                             locked_id = target[0]
                             state, confirm, centered = "CENTER", 0, 0
-                            logger.info(f"Vision: locked marker {locked_id} -> CENTER")
+                            logger.info(
+                                f"Vision: locked marker {locked_id} -> CENTER")
                     else:
                         confirm = 0
                         self.motor_api.rotate_angle(int(cfg["search_speed"]))
@@ -541,7 +558,8 @@ class MarkerNavigator:
                             self._emit(state="GIVEUP", note="search timeout")
                             logger.info("Vision: search timeout -> give up")
                             break
-                    self._emit(state=state, note="searching" if not target else "confirming")
+                    self._emit(
+                        state=state, note="searching" if not target else "confirming")
 
                 # --- CENTER / APPROACH share the reacquire path -----------
                 elif state in ("CENTER", "APPROACH"):
@@ -551,7 +569,8 @@ class MarkerNavigator:
                             state, lost_start = "LOST", time.time()
                             self.motor_api.stop()
                             logger.info("Vision: marker lost -> LOST")
-                        self._emit(state=state, note="holding", marker_id=locked_id)
+                        self._emit(state=state, note="holding",
+                                   marker_id=locked_id)
                     else:
                         miss = 0
                         _, dist, bearing, _ = target
@@ -570,11 +589,13 @@ class MarkerNavigator:
                                 if self.can_strafe and abs(bearing) < 8.0:
                                     cmd = _floor_cmd(_clamp(cfg["kw"] * bearing, -cfg["max_cmd"], cfg["max_cmd"]),
                                                      cfg["rotate_floor"])
-                                    self.motor_api.direction(int(_clamp(cmd, -cfg["max_cmd"], cfg["max_cmd"])), 0)
+                                    self.motor_api.direction(
+                                        int(_clamp(cmd, -cfg["max_cmd"], cfg["max_cmd"])), 0)
                                 else:
                                     cmd = _floor_cmd(_clamp(cfg["kw"] * bearing, -cfg["max_cmd"], cfg["max_cmd"]),
                                                      cfg["rotate_floor"])
-                                    self.motor_api.rotate_angle(int(_clamp(cmd, -cfg["max_cmd"], cfg["max_cmd"])))
+                                    self.motor_api.rotate_angle(
+                                        int(_clamp(cmd, -cfg["max_cmd"], cfg["max_cmd"])))
 
                         else:  # APPROACH
                             if dist <= cfg["standoff_mm"]:
@@ -595,7 +616,8 @@ class MarkerNavigator:
                                 if abs(bearing) > dband:
                                     trim = _floor_cmd(_clamp(cfg["kw"] * bearing, -cfg["max_cmd"], cfg["max_cmd"]),
                                                       cfg["rotate_floor"])
-                                    self.motor_api.rotate_angle(int(_clamp(trim, -cfg["max_cmd"], cfg["max_cmd"])))
+                                    self.motor_api.rotate_angle(
+                                        int(_clamp(trim, -cfg["max_cmd"], cfg["max_cmd"])))
                                 else:
                                     self.motor_api.rotate_angle(0)
 
@@ -616,7 +638,8 @@ class MarkerNavigator:
                         break
                     else:
                         # slow-search toward the side we last saw the marker
-                        d = cfg["search_speed"] if last_bearing >= 0 else -cfg["search_speed"]
+                        d = cfg["search_speed"] if last_bearing >= 0 else - \
+                            cfg["search_speed"]
                         self.motor_api.rotate_angle(int(d))
                         self._emit(state="LOST", note="searching")
 
@@ -684,7 +707,8 @@ class MarkerFollower:
         self.status_cb = status_cb
         self.can_strafe = can_strafe
         self._stop.clear()
-        self._thread = threading.Thread(target=self._run, daemon=True, name="marker-follow")
+        self._thread = threading.Thread(
+            target=self._run, daemon=True, name="marker-follow")
         self._thread.start()
         return True
 
@@ -791,7 +815,8 @@ class MarkerFollower:
                     self._emit(state="CENTERING", distance_mm=round(dist, 1),
                                bearing_deg=round(bearing, 1), marker_id=target[0],
                                target_mm=follow_mm)
-                    time.sleep(cfg["follow_settle_s"])  # let motion stop before re-read
+                    # let motion stop before re-read
+                    time.sleep(cfg["follow_settle_s"])
                     last_seq = -1  # force a fresh frame next iteration
                     continue
 
@@ -799,14 +824,16 @@ class MarkerFollower:
                 self.motor_api.rotate_angle(0)
 
                 # --- forward/back: keep the set distance (reverse if too close) ---
-                err = dist - follow_mm  # +ve: too far (advance); -ve: too close (reverse)
+                # +ve: too far (advance); -ve: too close (reverse)
+                err = dist - follow_mm
                 if abs(err) <= dband_mm:
                     self.motor_api.throttle_value(0)
                     state = "HOLDING"
                 else:
                     thr = _floor_cmd(_clamp(cfg["kv"] * err, -maxc, maxc),
                                      cfg["throttle_floor"])
-                    self.motor_api.throttle_value(int(_clamp(thr, -maxc, maxc)))
+                    self.motor_api.throttle_value(
+                        int(_clamp(thr, -maxc, maxc)))
                     state = "ADVANCING" if err > 0 else "REVERSING"
 
                 banner = f"FOLLOW #{target[0]} {dist:.0f}mm {bearing:+.1f}deg {state}"
@@ -855,7 +882,8 @@ def calibrate(camera=0, marker_size_mm=100.0, known_distance_mm=500.0,
             corners, ids, _ = detect(gray)
             if ids is not None and len(corners):
                 c = corners[0].reshape(4, 2)
-                px = (np.linalg.norm(c[0] - c[1]) + np.linalg.norm(c[3] - c[2])) / 2.0
+                px = (np.linalg.norm(c[0] - c[1]) +
+                      np.linalg.norm(c[3] - c[2])) / 2.0
                 focal = px * known_distance_mm / marker_size_mm
                 print(f"marker_px={px:.1f}  ->  focal_px={focal:.1f}")
                 break
@@ -879,11 +907,14 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     # self-check the pure math with no hardware needed
-    fake = np.array([[[100, 100], [200, 100], [200, 200], [100, 200]]], dtype=np.float32)
-    d, b, w = _measure(fake, focal_px=900.0, marker_size_mm=100.0, frame_w=1280)
+    fake = np.array(
+        [[[100, 100], [200, 100], [200, 200], [100, 200]]], dtype=np.float32)
+    d, b, w = _measure(fake, focal_px=900.0,
+                       marker_size_mm=100.0, frame_w=1280)
     assert abs(w - 100.0) < 1e-6, w
     assert abs(d - 900.0) < 1e-6, d           # 100mm * 900px / 100px = 900mm
-    assert b < 0, b                            # marker centre (150) left of 640 -> negative bearing
+    # marker centre (150) left of 640 -> negative bearing
+    assert b < 0, b
     print(f"self-check OK: dist={d:.0f}mm bearing={b:.1f}deg width={w:.0f}px")
 
     cfg = dict(DEFAULT_CONFIG)
@@ -907,7 +938,8 @@ if __name__ == "__main__":
         use_wl = bool(cfg.get("wayland_display", False))
         show = True
         wl_writer = None
-        print(f"Live readout (camera={cam}, focal_px={focal}) — 'q' or Ctrl-C to quit.")
+        print(
+            f"Live readout (camera={cam}, focal_px={focal}) — 'q' or Ctrl-C to quit.")
         try:
             while True:
                 ok, frame = cap.read()
@@ -920,11 +952,14 @@ if __name__ == "__main__":
                     for i, mid in enumerate(ids.flatten()):
                         m = _measure(corners[i], focal, size, frame.shape[1])
                         if m:
-                            print(f"id={mid}  dist={m[0]:.0f}mm  bearing={m[1]:+.1f}deg")
+                            print(
+                                f"id={mid}  dist={m[0]:.0f}mm  bearing={m[1]:+.1f}deg")
                             c = corners[i].reshape(4, 2)
                             cv2.putText(frame, f"#{mid} {m[0]:.0f}mm {m[1]:+.1f}deg",
-                                        (int(c[:, 0].min()), int(c[:, 1].min()) - 8),
-                                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2,
+                                        (int(c[:, 0].min()), int(
+                                            c[:, 1].min()) - 8),
+                                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (
+                                            0, 255, 0), 2,
                                         cv2.LINE_AA)
                 if show and use_wl:
                     try:
