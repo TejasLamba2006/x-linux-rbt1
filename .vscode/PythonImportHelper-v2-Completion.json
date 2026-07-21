@@ -2655,7 +2655,7 @@
         "kind": 2,
         "importPath": "applications.web-app.marker_vision",
         "description": "applications.web-app.marker_vision",
-        "peekOfCode": "def calibrate(camera=0, marker_size_mm=100.0, known_distance_mm=500.0,\n              frame_w=1280, frame_h=720):\n    \"\"\"One-time focal-length capture. Place a marker flat, facing the camera, at\n    exactly known_distance_mm, then run this. Returns focal_px to put in config.\n    focal_px = marker_pixel_width * known_distance_mm / marker_size_mm\n    \"\"\"\n    if not CV_AVAILABLE:\n        print(\"cv2 not available\")\n        return None\n    cap = cv2.VideoCapture(camera)",
+        "peekOfCode": "def calibrate(camera=0, marker_size_mm=100.0, known_distance_mm=500.0,\n              frame_w=1280, frame_h=720, gst_pipeline=None):\n    \"\"\"One-time focal-length capture. Place a marker flat, facing the camera, at\n    exactly known_distance_mm, then run this. Returns focal_px to put in config.\n    focal_px = marker_pixel_width * known_distance_mm / marker_size_mm\n    \"\"\"\n    if not CV_AVAILABLE:\n        print(\"cv2 not available\")\n        return None\n    cap = _open_capture({\"camera\": camera, \"gst_pipeline\": gst_pipeline,",
         "detail": "applications.web-app.marker_vision",
         "documentation": {}
     },
@@ -2673,7 +2673,7 @@
         "kind": 5,
         "importPath": "applications.web-app.marker_vision",
         "description": "applications.web-app.marker_vision",
-        "peekOfCode": "CV_AVAILABLE = False\ntry:\n    import cv2\n    CV_AVAILABLE = True\nexcept Exception as e:  # pragma: no cover - depends on board deps\n    logging.getLogger(__name__).warning(f\"Marker vision unavailable (cv2 not loaded): {e}\")\n# Defaults for every tunable. main.py merges robot_config.json[\"vision\"] over this.\nDEFAULT_CONFIG = {\n    \"camera\": 0,            # cv2.VideoCapture source: int index or \"/dev/videoN\" path\n    \"frame_width\": 1280,",
+        "peekOfCode": "CV_AVAILABLE = False\ntry:\n    import cv2\n    CV_AVAILABLE = True\nexcept Exception as e:  # pragma: no cover - depends on board deps\n    logging.getLogger(__name__).warning(f\"Marker vision unavailable (cv2 not loaded): {e}\")\n# Defaults for every tunable. main.py merges robot_config.json[\"vision\"] over this.\nDEFAULT_CONFIG = {\n    \"camera\": 0,            # cv2.VideoCapture source: int index or \"/dev/videoN\" path\n    \"gst_pipeline\": None,   # if set, open THIS GStreamer pipeline via CAP_GSTREAMER",
         "detail": "applications.web-app.marker_vision",
         "documentation": {}
     },
@@ -2682,7 +2682,7 @@
         "kind": 5,
         "importPath": "applications.web-app.marker_vision",
         "description": "applications.web-app.marker_vision",
-        "peekOfCode": "DEFAULT_CONFIG = {\n    \"camera\": 0,            # cv2.VideoCapture source: int index or \"/dev/videoN\" path\n    \"frame_width\": 1280,\n    \"frame_height\": 720,\n    \"marker_size_mm\": 100.0,\n    \"focal_px\": 900.0,      # MUST calibrate per camera/res; default ~ 1280px @ 60-70deg HFOV\n    \"standoff_mm\": 400.0,   # stop this far from the marker\n    \"target_marker_id\": None,  # None = lock onto the nearest (largest) marker\n    \"kw\": 2.5,              # rotate command per degree of bearing error\n    \"kv\": 0.08,             # throttle command per mm of distance error",
+        "peekOfCode": "DEFAULT_CONFIG = {\n    \"camera\": 0,            # cv2.VideoCapture source: int index or \"/dev/videoN\" path\n    \"gst_pipeline\": None,   # if set, open THIS GStreamer pipeline via CAP_GSTREAMER\n                            # instead of \"camera\". Needed for the STM32MP DCMIPP +\n                            # IMX335 main pipe (NV12), which raw V4L2 can't grab.\n                            # Must end in: ... ! videoconvert ! appsink  (BGR frames).\n                            # {w}/{h} placeholders are filled from frame_width/height.\n    \"frame_width\": 1280,\n    \"frame_height\": 720,\n    \"marker_size_mm\": 100.0,",
         "detail": "applications.web-app.marker_vision",
         "documentation": {}
     },

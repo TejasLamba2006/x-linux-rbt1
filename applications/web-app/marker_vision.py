@@ -49,6 +49,11 @@ except Exception as e:  # pragma: no cover - depends on board deps
 # Defaults for every tunable. main.py merges robot_config.json["vision"] over this.
 DEFAULT_CONFIG = {
     "camera": 0,            # cv2.VideoCapture source: int index or "/dev/videoN" path
+    "gst_pipeline": None,   # if set, open THIS GStreamer pipeline via CAP_GSTREAMER
+                            # instead of "camera". Needed for the STM32MP DCMIPP +
+                            # IMX335 main pipe (NV12), which raw V4L2 can't grab.
+                            # Must end in: ... ! videoconvert ! appsink  (BGR frames).
+                            # {w}/{h} placeholders are filled from frame_width/height.
     "frame_width": 1280,
     "frame_height": 720,
     "marker_size_mm": 100.0,
@@ -75,6 +80,10 @@ DEFAULT_CONFIG = {
     "stream": True,         # publish annotated JPEG frames for the MJPEG feed
     "stream_quality": 60,   # JPEG quality 1-100 (lower = less CPU/bandwidth)
     "stream_fps": 15.0,     # camera grab + feed rate (always-on controller feed)
+    # --- local display (HDMI/DSI panel wired to the board) ---
+    "local_display": False,     # also render the annotated frame in a cv2 window
+    "local_display_window": "RBT01 Marker Vision",  # window title
+    "local_display_fullscreen": False,  # borderless fullscreen on the panel
     # --- follow-me mode (continuous tracking, keeps a set distance) ---
     "follow_marker_id": None,   # which marker to follow; None = nearest in view
     "follow_distance_mm": 600.0,  # gap to maintain from the marker
@@ -97,6 +106,36 @@ def _floor_cmd(v, floor):
         return 0
     mag = max(abs(v), floor)
     return int(math.copysign(mag, v))
+
+
+def _open_capture(cfg):
+    """Open the camera per config and return an opened cv2.VideoCapture (or a
+    closed one — caller checks isOpened()).
+
+    Two backends:
+      * cfg["gst_pipeline"] set  -> CAP_GSTREAMER with that pipeline string.
+        {w}/{h} in the string are substituted from frame_width/height. Use this
+        for the STM32MP DCMIPP + IMX335 main pipe, whose NV12 output raw V4L2
+        can't grab; the pipeline must end in `videoconvert ! appsink` so OpenCV
+        receives BGR frames. Width/height are baked into the pipeline, so we do
+        NOT call CAP_PROP_FRAME_* for this backend.
+      * otherwise -> raw V4L2 on cfg["camera"] (int index or "/dev/videoN"),
+        setting width/height/buffersize as before.
+    """
+    gst = cfg.get("gst_pipeline")
+    if gst:
+        pipeline = gst.format(w=cfg["frame_width"], h=cfg["frame_height"])
+        logger.info(f"Opening camera via GStreamer: {pipeline}")
+        return cv2.VideoCapture(pipeline, cv2.CAP_GSTREAMER)
+
+    cap = cv2.VideoCapture(cfg["camera"])
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, cfg["frame_width"])
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg["frame_height"])
+    try:
+        cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+    except Exception:
+        pass
+    return cap
 
 
 # --- ArUco detector (compatible across OpenCV 4.6- and 4.7+ API split) --------
@@ -144,6 +183,8 @@ class CameraStream:
         self.cfg = cfg
         self.quality = int(cfg.get("stream_quality", 60))
         self.stream_fps = float(cfg.get("stream_fps", 15.0))
+        self.local_display = bool(cfg.get("local_display", False))
+        self._window_ready = False  # created lazily on the grab thread
         self._thread = None
         self._stop = threading.Event()
         self._jpeg = None
@@ -194,15 +235,10 @@ class CameraStream:
         cfg = self.cfg
         cap = None
         try:
-            cap = cv2.VideoCapture(cfg["camera"])
-            cap.set(cv2.CAP_PROP_FRAME_WIDTH, cfg["frame_width"])
-            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg["frame_height"])
-            try:
-                cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
-            except Exception:
-                pass
+            cap = _open_capture(cfg)
             if not cap.isOpened():
-                logger.error(f"CameraStream: cannot open camera {cfg['camera']}")
+                logger.error(f"CameraStream: cannot open camera "
+                             f"{cfg.get('gst_pipeline') or cfg['camera']}")
                 return
 
             detect = _make_detector()
@@ -247,6 +283,13 @@ class CameraStream:
         finally:
             with self._jpeg_lock:
                 self._jpeg = None
+            if self._window_ready:
+                try:
+                    cv2.destroyWindow(self._window_name)
+                    cv2.waitKey(1)
+                except Exception:
+                    pass
+                self._window_ready = False
             if cap is not None:
                 cap.release()
             logger.info("CameraStream: stopped")
@@ -267,8 +310,32 @@ class CameraStream:
             if ok:
                 with self._jpeg_lock:
                     self._jpeg = buf.tobytes()
+            if self.local_display:
+                self._show_local(frame)
         except Exception as e:
             logger.debug(f"CameraStream publish failed: {e}")
+
+    def _show_local(self, frame):
+        """Render the annotated frame in a cv2 window on the board's attached
+        display. Same frame as the MJPEG feed (single camera open). Best-effort:
+        if there's no GUI backend (no Wayland/X, or opencv built headless) it
+        disables itself after the first failure so the feed keeps running."""
+        try:
+            if not self._window_ready:
+                win = self.cfg.get("local_display_window", "RBT01 Marker Vision")
+                if self.cfg.get("local_display_fullscreen", False):
+                    cv2.namedWindow(win, cv2.WINDOW_NORMAL)
+                    cv2.setWindowProperty(win, cv2.WND_PROP_FULLSCREEN,
+                                          cv2.WINDOW_FULLSCREEN)
+                else:
+                    cv2.namedWindow(win, cv2.WINDOW_AUTOSIZE)
+                self._window_name = win
+                self._window_ready = True
+            cv2.imshow(self._window_name, frame)
+            cv2.waitKey(1)  # required to pump the GUI event loop / actually draw
+        except Exception as e:
+            logger.warning(f"Local display unavailable, disabling it: {e}")
+            self.local_display = False
 
 
 class MarkerNavigator:
@@ -714,7 +781,7 @@ class MarkerFollower:
 
 
 def calibrate(camera=0, marker_size_mm=100.0, known_distance_mm=500.0,
-              frame_w=1280, frame_h=720):
+              frame_w=1280, frame_h=720, gst_pipeline=None):
     """One-time focal-length capture. Place a marker flat, facing the camera, at
     exactly known_distance_mm, then run this. Returns focal_px to put in config.
 
@@ -723,9 +790,8 @@ def calibrate(camera=0, marker_size_mm=100.0, known_distance_mm=500.0,
     if not CV_AVAILABLE:
         print("cv2 not available")
         return None
-    cap = cv2.VideoCapture(camera)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, frame_w)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_h)
+    cap = _open_capture({"camera": camera, "gst_pipeline": gst_pipeline,
+                         "frame_width": frame_w, "frame_height": frame_h})
     detect = _make_detector()
     focal = None
     try:
@@ -778,11 +844,10 @@ if __name__ == "__main__":
 
     if len(sys.argv) > 1 and sys.argv[1] == "calibrate":
         calibrate(camera=cam, marker_size_mm=size,
-                  frame_w=cfg["frame_width"], frame_h=cfg["frame_height"])
+                  frame_w=cfg["frame_width"], frame_h=cfg["frame_height"],
+                  gst_pipeline=cfg.get("gst_pipeline"))
     elif CV_AVAILABLE:
-        cap = cv2.VideoCapture(cam)
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, cfg["frame_width"])
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg["frame_height"])
+        cap = _open_capture(cfg)
         detect = _make_detector()
         print(f"Live readout (camera={cam}, focal_px={focal}) — Ctrl-C to quit.")
         try:
