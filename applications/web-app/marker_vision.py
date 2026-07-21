@@ -114,13 +114,15 @@ def _open_capture(cfg):
 
     Two backends:
       * cfg["gst_pipeline"] set  -> CAP_GSTREAMER with that pipeline string.
-        {w}/{h} in the string are substituted from frame_width/height. Use this
-        for the STM32MP DCMIPP + IMX335 main pipe, whose NV12 output raw V4L2
-        can't grab; the pipeline must end in `videoconvert ! appsink` so OpenCV
-        receives BGR frames. Width/height are baked into the pipeline, so we do
-        NOT call CAP_PROP_FRAME_* for this backend.
-      * otherwise -> raw V4L2 on cfg["camera"] (int index or "/dev/videoN"),
-        setting width/height/buffersize as before.
+        {w}/{h} in the string are substituted from frame_width/height. Escape
+        hatch only; not needed for the DCMIPP main pipe (see below).
+      * otherwise -> V4L2 on cfg["camera"] (int index or "/dev/videoN").
+
+    CRITICAL (STM32MP DCMIPP + IMX335): do NOT set CAP_PROP_FRAME_WIDTH/HEIGHT on
+    a /dev/videoN path. The DCMIPP media-controller pipeline is fixed by media-ctl
+    (640x480 RGB here) and cannot be reconfigured via VIDIOC_S_FMT from OpenCV's
+    V4L2 backend — attempting it silently stops the stream. We take the pipeline's
+    native resolution as-is. Only integer/USB sources get width/height set.
     """
     gst = cfg.get("gst_pipeline")
     if gst:
@@ -128,9 +130,13 @@ def _open_capture(cfg):
         logger.info(f"Opening camera via GStreamer: {pipeline}")
         return cv2.VideoCapture(pipeline, cv2.CAP_GSTREAMER)
 
-    cap = cv2.VideoCapture(cfg["camera"])
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, cfg["frame_width"])
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg["frame_height"])
+    src = cfg["camera"]
+    is_devpath = isinstance(src, str) and src.startswith("/dev/")
+    cap = cv2.VideoCapture(src, cv2.CAP_V4L2) if is_devpath else cv2.VideoCapture(src)
+    if not is_devpath:
+        # USB/index source: native res is negotiable, so honor the config.
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, cfg["frame_width"])
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg["frame_height"])
     try:
         cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     except Exception:
