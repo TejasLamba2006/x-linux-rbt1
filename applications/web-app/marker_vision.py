@@ -123,7 +123,7 @@ DEFAULT_CONFIG = {
     "autopilot_waypoint_wait_s": 2.0,   # pause duration at each waypoint marker
     "autopilot_rotate_to_search": False, # rotate slowly to search if marker not seen
     "autopilot_rotate_search_duty": 30,  # rotation duty during search
-    "autopilot_rotate_search_pulse_s": 0.3, # pulse duration for rotate search
+    "autopilot_rotate_search_pulse_s": 0.7, # pulse duration for rotate search
     "autopilot_rotate_search_settle_s": 1.0, # pause 1 second after pulse search
 }
 
