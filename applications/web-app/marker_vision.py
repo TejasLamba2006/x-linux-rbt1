@@ -100,6 +100,34 @@ DEFAULT_CONFIG = {
     "follow_rotate_pulse_s": 0.12,   # rotate this long then STOP, so it can't
                                      # overshoot while blind between camera frames
     "follow_settle_s": 0.10,         # pause after a rotate pulse before re-reading
+
+    # --- follow-me PID controllers ---
+    # Bearing PID (yaw / rotation axis).  Error unit: degrees.
+    # kw is still the proportional gain fed into rotate_angle(); these PID
+    # gains are used for the separate follow-me PID path.
+    "follow_pid_bearing_kp": 1.8,    # P: degrees -> rotate duty
+    "follow_pid_bearing_ki": 0.0,    # I: start at 0, raise if heading drifts at steady state
+    "follow_pid_bearing_kd": 0.3,    # D: damps yaw oscillation (adds to pulse protection)
+
+    # Distance PID (forward / back axis).  Error unit: mm.
+    "follow_pid_dist_kp": 0.06,      # P: mm error -> throttle duty
+    "follow_pid_dist_ki": 0.002,     # I: removes creep when tracking slow targets
+    "follow_pid_dist_kd": 0.8,       # D: smooths stop -- avoids slam-then-bounce
+
+    # Lateral PID (strafe axis).  Error unit: degrees (same as bearing).
+    # Used only inside follow_lateral_threshold; maps bearing -> side slip.
+    "follow_pid_lat_kp": 1.2,        # P: degrees -> strafe duty
+    "follow_pid_lat_ki": 0.0,        # I: removes camera-centre bias
+    "follow_pid_lat_kd": 0.2,        # D: damps lateral wobble
+
+    # When |bearing| > this (degrees) the robot ROTATES (pulsed) to face the
+    # target.  When |bearing| <= this it STRAFES for fine lateral alignment.
+    # Smaller value = more strafing; larger = more rotating.
+    "follow_lateral_threshold": 20.0,
+
+    # Minimum strafe duty that actually moves the wheels (same concept as
+    # rotate_floor / throttle_floor -- wheels stall below ~25%).
+    "follow_strafe_floor": 25,
 }
 
 
@@ -114,6 +142,64 @@ def _floor_cmd(v, floor):
         return 0
     mag = max(abs(v), floor)
     return int(math.copysign(mag, v))
+
+
+class _PID:
+    """Minimal PID controller with output clamping and integrator anti-windup.
+
+    Anti-windup: the integrator is only accumulated when the *unclamped* output
+    equals the *clamped* output (i.e. we are not saturated).  This prevents the
+    integrator from winding up while the robot is stopped / in a rotation pulse
+    and then causing a big lurch once it resumes the strafe/throttle axes.
+
+    Usage::
+        pid = _PID(kp=0.06, ki=0.002, kd=0.8, out_min=-40, out_max=40)
+        output = pid.update(error_mm, dt_s)
+        pid.reset()   # call when switching control axes or re-acquiring marker
+    """
+
+    def __init__(self, kp: float, ki: float, kd: float,
+                 out_min: float, out_max: float, deadband: float = 0.0):
+        self.kp = kp
+        self.ki = ki
+        self.kd = kd
+        self.out_min = out_min
+        self.out_max = out_max
+        self.deadband = deadband  # errors smaller than this are treated as zero
+        self._integral = 0.0
+        self._prev_error = 0.0
+        self._first = True
+
+    def reset(self) -> None:
+        """Clear integrator and derivative history (call on state transitions)."""
+        self._integral = 0.0
+        self._prev_error = 0.0
+        self._first = True
+
+    def update(self, error: float, dt: float) -> float:
+        """Compute PID output for the given error and elapsed time dt (seconds).
+        Returns a value clamped to [out_min, out_max]."""
+        if self._first:
+            self._prev_error = error
+            self._first = False
+
+        if abs(error) <= self.deadband:
+            error = 0.0
+
+        dt = max(dt, 1e-4)  # guard against zero/negative dt
+
+        p = self.kp * error
+        d = self.kd * (error - self._prev_error) / dt
+        self._prev_error = error
+
+        raw = p + self.ki * self._integral + d
+        clamped = _clamp(raw, self.out_min, self.out_max)
+
+        # Anti-windup: only integrate when not saturated
+        if raw == clamped:
+            self._integral += error * dt
+
+        return clamped
 
 
 def _open_capture(cfg):
@@ -755,13 +841,47 @@ class MarkerFollower:
             follow_mm = float(cfg["follow_distance_mm"])
             dband_mm = float(cfg["follow_deadband_mm"])
             maxc = cfg["max_cmd"]
+            lat_thresh = float(cfg["follow_lateral_threshold"])
+            bear_dband = float(cfg["follow_bearing_deadband"])
+            str_floor = int(cfg["follow_strafe_floor"])
             miss = 0
             last_seq = -1
+            last_tick = time.time()
+
+            # --- Three independent PID controllers ----------------------------
+            # Bearing PID: large bearing errors (> lat_thresh) → rotation axis.
+            bearing_pid = _PID(
+                kp=cfg["follow_pid_bearing_kp"],
+                ki=cfg["follow_pid_bearing_ki"],
+                kd=cfg["follow_pid_bearing_kd"],
+                out_min=-maxc, out_max=maxc,
+                deadband=bear_dband,
+            )
+            # Distance PID: controls throttle (forward / back).
+            dist_pid = _PID(
+                kp=cfg["follow_pid_dist_kp"],
+                ki=cfg["follow_pid_dist_ki"],
+                kd=cfg["follow_pid_dist_kd"],
+                out_min=-maxc, out_max=maxc,
+                deadband=dband_mm,
+            )
+            # Lateral PID: small bearing errors (≤ lat_thresh) → strafe axis.
+            # Same error units as bearing PID (degrees) but drives direction().
+            lat_pid = _PID(
+                kp=cfg["follow_pid_lat_kp"],
+                ki=cfg["follow_pid_lat_ki"],
+                kd=cfg["follow_pid_lat_kd"],
+                out_min=-maxc, out_max=maxc,
+                deadband=bear_dband,
+            )
+
             logger.info(f"Follow: started (id={cfg['follow_marker_id']}, "
-                        f"dist={follow_mm:.0f}mm)")
+                        f"dist={follow_mm:.0f}mm, lat_thresh={lat_thresh:.0f}deg)")
 
             while not self._stop.is_set():
                 tick = time.time()
+                dt = tick - last_tick
+                last_tick = tick
 
                 detections, frame_w, seq = self.camera.latest_detections()
                 if seq == last_seq or detections is None:
@@ -773,6 +893,9 @@ class MarkerFollower:
                 # front (not necessarily the marker) -> stop, don't reverse-hunt.
                 if self._tof_blocked():
                     self.motor_api.stop()
+                    bearing_pid.reset()
+                    dist_pid.reset()
+                    lat_pid.reset()
                     self.camera.set_banner("FOLLOW blocked (ToF)")
                     self._emit(state="BLOCKED", note="tof obstacle")
                     time.sleep(period)
@@ -786,6 +909,11 @@ class MarkerFollower:
                     miss += 1
                     if miss >= cfg["hold_frames"]:
                         self.motor_api.stop()
+                        # Reset all PIDs so stale integral doesn't lurch on
+                        # reacquisition.
+                        bearing_pid.reset()
+                        dist_pid.reset()
+                        lat_pid.reset()
                         self.camera.set_banner("FOLLOW waiting (no marker)")
                         self._emit(state="WAITING", note="marker lost")
                     time.sleep(period)
@@ -793,58 +921,98 @@ class MarkerFollower:
                 miss = 0
 
                 _, dist, bearing, _ = target
+                dist_err = dist - follow_mm   # +ve = too far, -ve = too close
 
-                # --- rotation: PULSE toward center, don't spin continuously ---
-                # At camera fps the robot turns "blind" between frames; a steady
-                # rotate command overshoots and the marker leaves the FOV (lost).
-                # Instead: if clearly off-center, rotate for a short pulse then
-                # STOP and wait for a fresh frame before deciding again. While
-                # correcting bearing we do NOT drive forward/back -- center first.
-                if abs(bearing) > cfg["follow_bearing_deadband"]:
-                    cmd = _floor_cmd(_clamp(cfg["kw"] * bearing, -maxc, maxc),
-                                     cfg["rotate_floor"])
-                    cmd = int(_clamp(cmd, -maxc, maxc))
-                    # Rotate to FACE the marker (turn the robot), not strafe. A
-                    # follow-me should point at what it follows; +bearing (marker
-                    # to the right) -> +rotate (turn right) toward it.
-                    self.motor_api.rotate_angle(cmd)
+                # ===========================================================
+                # AXIS SELECTION: rotate vs strafe
+                # ===========================================================
+                # Large bearing offset -> ROTATE (pulsed) to face the target.
+                # The pulse-then-stop pattern is preserved so the robot can't
+                # overshoot and lose the marker between camera frames.
+                # While rotating we reset the strafe/dist PIDs (the error
+                # reading will be stale after the robot turns).
+                if abs(bearing) > lat_thresh:
+                    # PID output for rotation
+                    rot_cmd = bearing_pid.update(bearing, dt)
+                    rot_cmd = _floor_cmd(int(_clamp(rot_cmd, -maxc, maxc)),
+                                         cfg["rotate_floor"])
+
+                    # Reset lateral + distance PIDs -- readings are stale while
+                    # the robot is turning blind between frames.
+                    lat_pid.reset()
+                    dist_pid.reset()
+
+                    # Issue pulse, then hard-stop so momentum can't carry the
+                    # robot past the marker (original overturn-prevention logic).
+                    self.motor_api.rotate_angle(int(rot_cmd))
                     time.sleep(cfg["follow_rotate_pulse_s"])
                     self.motor_api.stop()
                     self.camera.set_banner(
-                        f"FOLLOW #{target[0]} {dist:.0f}mm {bearing:+.1f}deg CENTERING")
-                    self._emit(state="CENTERING", distance_mm=round(dist, 1),
+                        f"FOLLOW #{target[0]} {dist:.0f}mm {bearing:+.1f}deg "
+                        f"ROTATING rot={rot_cmd:+d}")
+                    self._emit(state="ROTATING", distance_mm=round(dist, 1),
                                bearing_deg=round(bearing, 1), marker_id=target[0],
-                               target_mm=follow_mm)
-                    # let motion stop before re-read
+                               target_mm=follow_mm, rot_cmd=rot_cmd)
+                    # Settle, then force a fresh camera frame before next decision.
                     time.sleep(cfg["follow_settle_s"])
-                    last_seq = -1  # force a fresh frame next iteration
+                    last_seq = -1
                     continue
 
-                # Centered enough -> hold heading and manage distance only.
+                # -----------------------------------------------------------
+                # Small bearing offset (≤ lat_thresh): use STRAFE for lateral
+                # alignment + THROTTLE for distance -- simultaneously.
+                # Mecanum mixing handles both axes natively; no heading change.
+                # -----------------------------------------------------------
+
+                # Stop any residual rotation from the previous ROTATING phase.
                 self.motor_api.rotate_angle(0)
+                # Reset bearing PID so its derivative term doesn't spike on the
+                # first tick after a transition from ROTATING.
+                bearing_pid.reset()
 
-                # --- forward/back: keep the set distance (reverse if too close) ---
-                # +ve: too far (advance); -ve: too close (reverse)
-                err = dist - follow_mm
-                if abs(err) <= dband_mm:
-                    self.motor_api.throttle_value(0)
-                    state = "HOLDING"
+                # -- Strafe (lateral) ----------------------------------------
+                # Inside the bearing deadband -> no strafe needed.
+                if abs(bearing) <= bear_dband:
+                    str_cmd = 0
+                    self.motor_api.direction(0, 0)
                 else:
-                    thr = _floor_cmd(_clamp(cfg["kv"] * err, -maxc, maxc),
-                                     cfg["throttle_floor"])
-                    self.motor_api.throttle_value(
-                        int(_clamp(thr, -maxc, maxc)))
-                    state = "ADVANCING" if err > 0 else "REVERSING"
+                    str_raw = lat_pid.update(bearing, dt)
+                    str_cmd = _floor_cmd(int(_clamp(str_raw, -maxc, maxc)),
+                                         str_floor)
+                    # direction(x_axis, y_axis): x_axis is strafe (right +, left -)
+                    self.motor_api.direction(int(str_cmd), 0)
 
-                banner = f"FOLLOW #{target[0]} {dist:.0f}mm {bearing:+.1f}deg {state}"
+                # -- Throttle (forward / back) --------------------------------
+                if abs(dist_err) <= dband_mm:
+                    thr_cmd = 0
+                    self.motor_api.throttle_value(0)
+                    motion_state = "HOLDING"
+                else:
+                    thr_raw = dist_pid.update(dist_err, dt)
+                    thr_cmd = _floor_cmd(int(_clamp(thr_raw, -maxc, maxc)),
+                                         cfg["throttle_floor"])
+                    self.motor_api.throttle_value(int(thr_cmd))
+                    motion_state = "ADVANCING" if dist_err > 0 else "REVERSING"
+
+                # Determine the combined description for the banner.
+                if str_cmd != 0 and thr_cmd != 0:
+                    if dist_err > 0:
+                        motion_state = "ADVANCING+STRAFE"
+                    else:
+                        motion_state = "REVERSING+STRAFE"
+                elif str_cmd != 0:
+                    motion_state = "STRAFING"
+
+                banner = (f"FOLLOW #{target[0]} {dist:.0f}mm {bearing:+.1f}deg "
+                          f"thr={thr_cmd:+d} str={str_cmd:+d} {motion_state}")
                 self.camera.set_banner(banner)
-                self._emit(state=state, distance_mm=round(dist, 1),
+                self._emit(state=motion_state, distance_mm=round(dist, 1),
                            bearing_deg=round(bearing, 1), marker_id=target[0],
-                           target_mm=follow_mm)
+                           target_mm=follow_mm, thr_cmd=thr_cmd, str_cmd=str_cmd)
 
-                dt = time.time() - tick
-                if dt < period:
-                    time.sleep(period - dt)
+                elapsed = time.time() - tick
+                if elapsed < period:
+                    time.sleep(period - elapsed)
 
         except Exception as e:
             logger.error(f"Follow loop error: {e}")
