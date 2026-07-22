@@ -80,9 +80,9 @@ DEFAULT_CONFIG = {
     "lost_search_s": 5.0,
     "tof_stop_mm": 250.0,   # ToF obstacle override: closer than this -> stop
     "stream": True,         # publish annotated JPEG frames for the MJPEG feed
-    "stream_quality": 100,   # JPEG quality 1-100 (lower = less CPU/bandwidth)
+    "stream_quality": 90,   # JPEG quality 1-100 (lower = less CPU/bandwidth)
     # camera grab + feed rate (always-on controller feed)
-    "stream_fps": 60.0,
+    "stream_fps": 30.0,
     # --- local display (HDMI/DSI panel wired to the board) ---
     "local_display": False,     # also render the annotated frame in a cv2 window
     "local_display_window": "RBT01 Marker Vision",  # window title
