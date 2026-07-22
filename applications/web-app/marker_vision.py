@@ -124,7 +124,7 @@ DEFAULT_CONFIG = {
     "autopilot_rotate_to_search": False, # rotate slowly to search if marker not seen
     "autopilot_rotate_search_duty": 30,  # rotation duty during search
     "autopilot_rotate_search_pulse_s": 0.5, # pulse duration for rotate search
-    "autopilot_rotate_search_settle_s": 1.0, # pause 1 second after pulse search
+    "autopilot_rotate_search_settle_s": 1.5, # pause 1 second after pulse search
 }
 
 
