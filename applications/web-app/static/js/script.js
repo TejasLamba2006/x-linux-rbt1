@@ -854,14 +854,15 @@ const startAutopilotBtn = document.getElementById('start-autopilot-btn');
 const autopilotRotateSearch = document.getElementById('autopilot-rotate-search');
 const autopilotStatus = document.getElementById('autopilot-status');
 
-function addWaypointRow(idVal = 0, distCmVal = 50) {
+function addWaypointRow(idVal = 0, distCmVal = 50, waitSecVal = 2) {
     if (!waypointList) return;
     const row = document.createElement('div');
     row.className = 'waypoint-row';
-    row.style.cssText = 'display: flex; align-items: center; gap: 6px; margin-bottom: 4px;';
+    row.style.cssText = 'display: flex; align-items: center; gap: 4px; margin-bottom: 4px;';
     row.innerHTML = `
-        <label style="font-size: 0.85rem;">ID: <input type="number" class="wp-id" min="0" max="49" value="${idVal}" style="width: 45px;"></label>
-        <label style="font-size: 0.85rem;">Keep cm: <input type="number" class="wp-dist" min="10" max="300" step="5" value="${distCmVal}" style="width: 55px;"></label>
+        <label style="font-size: 0.8rem;">ID: <input type="number" class="wp-id" min="0" max="49" value="${idVal}" style="width: 40px;"></label>
+        <label style="font-size: 0.8rem;">Keep cm: <input type="number" class="wp-dist" min="10" max="300" step="5" value="${distCmVal}" style="width: 50px;"></label>
+        <label style="font-size: 0.8rem;">Wait s: <input type="number" class="wp-wait" min="0" max="60" step="0.5" value="${waitSecVal}" style="width: 45px;"></label>
         <button type="button" class="remove-wp-btn" style="padding: 2px 6px; font-size: 0.75rem; color: #ff5555; background: none; border: 1px solid #ff5555; border-radius: 4px; cursor: pointer;">✕</button>
     `;
     row.querySelector('.remove-wp-btn').addEventListener('click', function() {
@@ -871,13 +872,13 @@ function addWaypointRow(idVal = 0, distCmVal = 50) {
 }
 
 if (addWaypointBtn) {
-    addWaypointBtn.addEventListener('click', () => addWaypointRow(0, 50));
+    addWaypointBtn.addEventListener('click', () => addWaypointRow(0, 50, 2));
 }
 
 // Seed default waypoints if empty
 if (waypointList && waypointList.children.length === 0) {
-    addWaypointRow(0, 50);
-    addWaypointRow(1, 60);
+    addWaypointRow(0, 50, 2);
+    addWaypointRow(1, 60, 2);
 }
 
 function getWaypointsFromUI() {
@@ -887,12 +888,15 @@ function getWaypointsFromUI() {
     rows.forEach(row => {
         const idInput = row.querySelector('.wp-id');
         const distInput = row.querySelector('.wp-dist');
+        const waitInput = row.querySelector('.wp-wait');
         const idVal = idInput ? parseInt(idInput.value, 10) : 0;
         const distCm = distInput ? parseFloat(distInput.value) : 50;
+        const waitSec = waitInput ? parseFloat(waitInput.value) : 2.0;
         if (!isNaN(idVal) && !isNaN(distCm)) {
             waypoints.push({
                 id: idVal,
-                distance_mm: distCm * 10
+                distance_mm: distCm * 10,
+                wait_s: !isNaN(waitSec) ? waitSec : 2.0
             });
         }
     });
