@@ -119,11 +119,12 @@ DEFAULT_CONFIG = {
     "follow_strafe_floor": 25,
 
     # --- waypoint autopilot mode ---
-    "waypoints": [],                   # list of dicts: [{"id": 0, "distance_mm": 500}, ...]
+    "waypoints": [],                   # list of dicts: [{"id": 0, "distance_mm": 500, "wait_s": 2.0}, ...]
+    "autopilot_waypoint_wait_s": 2.0,   # pause duration at each waypoint marker
     "autopilot_rotate_to_search": False, # rotate slowly to search if marker not seen
     "autopilot_rotate_search_duty": 30,  # rotation duty during search
     "autopilot_rotate_search_pulse_s": 0.3, # pulse duration for rotate search
-    "autopilot_rotate_search_settle_s": 2.0, # pause 2 seconds after pulse search
+    "autopilot_rotate_search_settle_s": 1.0, # pause 1 second after pulse search
 }
 
 
@@ -1157,11 +1158,19 @@ class WaypointAutopilot:
                     if abs(dist_err) < dband_stop:
                         _holding = True
                         self.motor_api.stop()
-                        logger.info(f"WaypointAutopilot: Reached WP #{wp_idx+1} (ID {target_id} at {target_dist_mm}mm)")
-                        self._emit(state="WAYPOINT_REACHED", waypoint=wp_idx+1, target_id=target_id)
+                        wait_s = float(curr_wp.get("wait_s", cfg.get("autopilot_waypoint_wait_s", 2.0)))
+                        logger.info(f"WaypointAutopilot: Reached WP #{wp_idx+1} (ID {target_id} at {target_dist_mm}mm). Waiting {wait_s:.1f}s...")
+                        self.camera.set_banner(f"AUTOPILOT WP#{wp_idx+1}/{len(self.waypoints)} REACHED (ID {target_id}). Waiting {wait_s:.1f}s...")
+                        self._emit(state="WAYPOINT_REACHED", waypoint=wp_idx+1, target_id=target_id, wait_s=wait_s)
+                        
+                        wait_start = time.time()
+                        while not self._stop.is_set() and (time.time() - wait_start) < wait_s:
+                            time.sleep(0.1)
+
                         wp_idx += 1
                         _ema_dist = None
-                        time.sleep(0.5)
+                        miss = cfg["hold_frames"]  # Force immediate search if next marker isn't visible
+                        last_seq = -1
                         continue
 
                 if not _holding:
