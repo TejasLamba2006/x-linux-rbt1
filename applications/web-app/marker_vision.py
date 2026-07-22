@@ -1118,11 +1118,12 @@ class MarkerFollower:
                 elif str_cmd != 0 and thr_cmd == 0:
                     motion_state = "STRAFING"
 
-                banner = (f"FOLLOW #{target[0]} {dist:.0f}mm {bearing:+.1f}deg "
+                banner = (f"FOLLOW #{target[0]} {dist:.0f}mm(r:{dist_raw:.0f}) {bearing:+.1f}deg "
                           f"thr={thr_cmd:+d} str={str_cmd:+d} "
                           f"[{'H' if _holding else 'M'}] {motion_state}")
                 self.camera.set_banner(banner)
                 self._emit(state=motion_state, distance_mm=round(dist, 1),
+                           distance_raw_mm=round(dist_raw, 1),
                            bearing_deg=round(bearing, 1), marker_id=target[0],
                            target_mm=follow_mm, thr_cmd=thr_cmd, str_cmd=str_cmd,
                            holding=_holding)
