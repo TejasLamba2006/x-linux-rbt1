@@ -141,7 +141,7 @@ DEFAULT_CONFIG = {
     # 0.0 = no smoothing (raw); 1.0 = never updates.  0.3 is a gentle
     # low-pass that removes frame-to-frame noise (~30-50mm on USB cameras)
     # without lagging badly behind a genuinely moving target.
-    "follow_dist_ema_alpha": 0.3,
+    "follow_dist_ema_alpha": 0.5,
 
     # When |bearing| > this (degrees) the robot ROTATES (pulsed) to face the
     # target.  When |bearing| <= this it STRAFES for fine lateral alignment.
