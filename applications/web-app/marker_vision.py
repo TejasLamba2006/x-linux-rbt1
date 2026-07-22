@@ -922,6 +922,7 @@ class MarkerFollower:
                     bearing_pid.reset()
                     dist_pid.reset()
                     lat_pid.reset()
+                    _holding = True   # require large error to restart after obstacle clears
                     self.camera.set_banner("FOLLOW blocked (ToF)")
                     self._emit(state="BLOCKED", note="tof obstacle")
                     time.sleep(period)
