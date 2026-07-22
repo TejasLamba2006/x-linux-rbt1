@@ -97,20 +97,10 @@ DEFAULT_CONFIG = {
     "follow_distance_mm": 600.0,  # gap to maintain from the marker
 
     # --- Hysteresis (Schmitt-trigger) deadband for distance control -----------
-    # Two separate thresholds replace the old single follow_deadband_mm.
-    # STOP when error falls below follow_deadband_stop_mm.  Once stopped
-    # (HOLDING), only restart when error exceeds follow_deadband_start_mm.
-    # The gap between them is the hysteresis window that prevents the robot
-    # from bouncing at the boundary (bang-bang oscillation).
     "follow_deadband_stop_mm": 60.0,    # stop when within this distance
     "follow_deadband_start_mm": 130.0,  # restart only when error exceeds this
 
     # --- Approach braking zone ------------------------------------------------
-    # Within follow_brake_zone_mm of the target, the maximum allowed throttle
-    # is linearly scaled from max_cmd (at the far edge of the zone) down to
-    # throttle_floor (at the inner edge / stop threshold).  This gives the
-    # robot a natural slow-down ramp instead of running at full floor speed
-    # all the way to the stop point, which causes overshoot.
     "follow_brake_zone_mm": 300.0,
 
     "follow_bearing_deadband": 8.0,  # |bearing| under this -> no strafe
@@ -118,39 +108,22 @@ DEFAULT_CONFIG = {
                                      # overshoot while blind between camera frames
     "follow_settle_s": 0.10,         # pause after a rotate pulse before re-reading
 
-    # --- follow-me PID controllers ---
-    # Bearing PID (yaw / rotation axis).  Error unit: degrees.
-    # kw is still the proportional gain fed into rotate_angle(); these PID
-    # gains are used for the separate follow-me PID path.
-    "follow_pid_bearing_kp": 1.8,    # P: degrees -> rotate duty
-    "follow_pid_bearing_ki": 0.0,    # I: start at 0, raise if heading drifts at steady state
-    "follow_pid_bearing_kd": 0.3,    # D: damps yaw oscillation (adds to pulse protection)
-
-    # Distance PID (forward / back axis).  Error unit: mm.
-    "follow_pid_dist_kp": 0.06,      # P: mm error -> throttle duty
-    "follow_pid_dist_ki": 0.002,     # I: removes creep when tracking slow targets
-    "follow_pid_dist_kd": 0.8,       # D: smooths stop -- avoids slam-then-bounce
-
-    # Lateral PID (strafe axis).  Error unit: degrees (same as bearing).
-    # Used only inside follow_lateral_threshold; maps bearing -> side slip.
-    "follow_pid_lat_kp": 1.2,        # P: degrees -> strafe duty
-    "follow_pid_lat_ki": 0.0,        # I: removes camera-centre bias
-    "follow_pid_lat_kd": 0.2,        # D: damps lateral wobble
-
     # Exponential moving average smoothing on camera distance readings.
-    # 0.0 = no smoothing (raw); 1.0 = never updates.  0.3 is a gentle
-    # low-pass that removes frame-to-frame noise (~30-50mm on USB cameras)
-    # without lagging badly behind a genuinely moving target.
     "follow_dist_ema_alpha": 0.5,
 
     # When |bearing| > this (degrees) the robot ROTATES (pulsed) to face the
     # target.  When |bearing| <= this it STRAFES for fine lateral alignment.
-    # Smaller value = more strafing; larger = more rotating.
     "follow_lateral_threshold": 20.0,
 
-    # Minimum strafe duty that actually moves the wheels (same concept as
-    # rotate_floor / throttle_floor -- wheels stall below ~25%).
+    # Minimum strafe duty that actually moves the wheels
     "follow_strafe_floor": 25,
+
+    # --- waypoint autopilot mode ---
+    "waypoints": [],                   # list of dicts: [{"id": 0, "distance_mm": 500}, ...]
+    "autopilot_rotate_to_search": False, # rotate slowly to search if marker not seen
+    "autopilot_rotate_search_duty": 30,  # rotation duty during search
+    "autopilot_rotate_search_pulse_s": 0.3, # pulse duration for rotate search
+    "autopilot_rotate_search_settle_s": 0.2, # pause after pulse search
 }
 
 
@@ -165,64 +138,6 @@ def _floor_cmd(v, floor):
         return 0
     mag = max(abs(v), floor)
     return int(math.copysign(mag, v))
-
-
-class _PID:
-    """Minimal PID controller with output clamping and integrator anti-windup.
-
-    Anti-windup: the integrator is only accumulated when the *unclamped* output
-    equals the *clamped* output (i.e. we are not saturated).  This prevents the
-    integrator from winding up while the robot is stopped / in a rotation pulse
-    and then causing a big lurch once it resumes the strafe/throttle axes.
-
-    Usage::
-        pid = _PID(kp=0.06, ki=0.002, kd=0.8, out_min=-40, out_max=40)
-        output = pid.update(error_mm, dt_s)
-        pid.reset()   # call when switching control axes or re-acquiring marker
-    """
-
-    def __init__(self, kp: float, ki: float, kd: float,
-                 out_min: float, out_max: float, deadband: float = 0.0):
-        self.kp = kp
-        self.ki = ki
-        self.kd = kd
-        self.out_min = out_min
-        self.out_max = out_max
-        self.deadband = deadband  # errors smaller than this are treated as zero
-        self._integral = 0.0
-        self._prev_error = 0.0
-        self._first = True
-
-    def reset(self) -> None:
-        """Clear integrator and derivative history (call on state transitions)."""
-        self._integral = 0.0
-        self._prev_error = 0.0
-        self._first = True
-
-    def update(self, error: float, dt: float) -> float:
-        """Compute PID output for the given error and elapsed time dt (seconds).
-        Returns a value clamped to [out_min, out_max]."""
-        if self._first:
-            self._prev_error = error
-            self._first = False
-
-        if abs(error) <= self.deadband:
-            error = 0.0
-
-        dt = max(dt, 1e-4)  # guard against zero/negative dt
-
-        p = self.kp * error
-        d = self.kd * (error - self._prev_error) / dt
-        self._prev_error = error
-
-        raw = p + self.ki * self._integral + d
-        clamped = _clamp(raw, self.out_min, self.out_max)
-
-        # Anti-windup: only integrate when not saturated
-        if raw == clamped:
-            self._integral += error * dt
-
-        return clamped
 
 
 def _open_capture(cfg):
@@ -862,10 +777,9 @@ class MarkerFollower:
         try:
             period = 1.0 / cfg["fps"]
             follow_mm = float(cfg["follow_distance_mm"])
-            # Hysteresis thresholds (Schmitt-trigger deadband).
-            dband_stop = float(cfg["follow_deadband_stop_mm"])    # stop here
-            dband_start = float(cfg["follow_deadband_start_mm"])  # restart here
-            brake_zone = float(cfg["follow_brake_zone_mm"])       # slow-down ramp
+            dband_stop = float(cfg["follow_deadband_stop_mm"])
+            dband_start = float(cfg["follow_deadband_start_mm"])
+            brake_zone = float(cfg["follow_brake_zone_mm"])
             maxc = cfg["max_cmd"]
             thr_floor = int(cfg["throttle_floor"])
             lat_thresh = float(cfg["follow_lateral_threshold"])
@@ -874,46 +788,10 @@ class MarkerFollower:
             miss = 0
             last_seq = -1
             last_tick = time.time()
-            # Schmitt-trigger state: True means currently HOLDING (stopped).
-            # Start stopped so the robot doesn't lurch on launch.
             _holding = True
 
-            # EMA state for distance smoothing.  Seeded on the first reading.
             _ema_dist = None
-            _ema_alpha = float(cfg.get("follow_dist_ema_alpha", 0.3))
-            # Maximum dt we feed into the PID derivative.  After a rotation
-            # pulse (120ms motion + 100ms settle) dt can jump to 250ms+,
-            # causing a huge derivative spike.  Cap it to 2 * frame period.
-            _max_dt = 2.0 / max(cfg["fps"], 1.0)
-
-            # --- Three independent PID controllers ----------------------------
-            # Bearing PID: large bearing errors (> lat_thresh) → rotation axis.
-            bearing_pid = _PID(
-                kp=cfg["follow_pid_bearing_kp"],
-                ki=cfg["follow_pid_bearing_ki"],
-                kd=cfg["follow_pid_bearing_kd"],
-                out_min=-maxc, out_max=maxc,
-                deadband=bear_dband,
-            )
-            # Distance PID: controls throttle (forward / back).
-            # deadband=dband_stop: PID won't compute on sub-stop-threshold errors;
-            # the hysteresis Schmitt trigger is the actual gate for start/stop.
-            dist_pid = _PID(
-                kp=cfg["follow_pid_dist_kp"],
-                ki=cfg["follow_pid_dist_ki"],
-                kd=cfg["follow_pid_dist_kd"],
-                out_min=-maxc, out_max=maxc,
-                deadband=dband_stop,
-            )
-            # Lateral PID: small bearing errors (≤ lat_thresh) → strafe axis.
-            # Same error units as bearing PID (degrees) but drives direction().
-            lat_pid = _PID(
-                kp=cfg["follow_pid_lat_kp"],
-                ki=cfg["follow_pid_lat_ki"],
-                kd=cfg["follow_pid_lat_kd"],
-                out_min=-maxc, out_max=maxc,
-                deadband=bear_dband,
-            )
+            _ema_alpha = float(cfg.get("follow_dist_ema_alpha", 0.5))
 
             logger.info(f"Follow: started (id={cfg['follow_marker_id']}, "
                         f"dist={follow_mm:.0f}mm, lat_thresh={lat_thresh:.0f}deg, "
@@ -931,14 +809,9 @@ class MarkerFollower:
                     continue
                 last_seq = seq
 
-                # ToF obstacle override -- highest priority. Something right in
-                # front (not necessarily the marker) -> stop, don't reverse-hunt.
                 if self._tof_blocked():
                     self.motor_api.stop()
-                    bearing_pid.reset()
-                    dist_pid.reset()
-                    lat_pid.reset()
-                    _holding = True   # require large error to restart after obstacle clears
+                    _holding = True
                     self.camera.set_banner("FOLLOW blocked (ToF)")
                     self._emit(state="BLOCKED", note="tof obstacle")
                     time.sleep(period)
@@ -947,17 +820,10 @@ class MarkerFollower:
                 target = self._pick(detections) if detections else None
 
                 if target is None:
-                    # Marker lost -> stop and wait (per design). Hold a few
-                    # frames of tolerance to ride out detection flicker.
                     miss += 1
                     if miss >= cfg["hold_frames"]:
                         self.motor_api.stop()
-                        # Reset all PIDs so stale integral doesn't lurch on
-                        # reacquisition.
-                        bearing_pid.reset()
-                        dist_pid.reset()
-                        lat_pid.reset()
-                        _holding = True   # stay stopped until marker returns
+                        _holding = True
                         self.camera.set_banner("FOLLOW waiting (no marker)")
                         self._emit(state="WAITING", note="marker lost")
                     time.sleep(period)
@@ -966,46 +832,21 @@ class MarkerFollower:
 
                 _, dist_raw, bearing, _ = target
 
-                # --- EMA smoothing on distance --------------------------------
-                # USB camera distance readings have ~30-50mm frame-to-frame
-                # noise even when the marker is perfectly still.  Without
-                # smoothing this noise alone is enough to oscillate across the
-                # deadband boundary.  EMA is a single-state low-pass filter:
-                #   ema = alpha * previous + (1-alpha) * new_raw
-                # alpha=0 => raw; alpha=0.3 => gentle smoothing; alpha->1 => frozen.
                 if _ema_dist is None:
-                    _ema_dist = dist_raw          # seed on first frame
+                    _ema_dist = dist_raw
                 else:
                     _ema_dist = _ema_alpha * _ema_dist + (1.0 - _ema_alpha) * dist_raw
                 dist = _ema_dist
 
-                # Cap dt to avoid derivative spike after rotation pulse sleeps
-                dt_pid = min(dt, _max_dt)
+                dist_err = dist - follow_mm
 
-                dist_err = dist - follow_mm   # +ve = too far, -ve = too close
-
-                # ===========================================================
-                # AXIS SELECTION: rotate vs strafe
-                # ===========================================================
-                # Large bearing offset -> ROTATE (pulsed) to face the target.
-                # The pulse-then-stop pattern is preserved so the robot can't
-                # overshoot and lose the marker between camera frames.
-                # While rotating we reset the strafe/dist PIDs (the error
-                # reading will be stale after the robot turns).
+                # Rotate phase if bearing error is large
                 if abs(bearing) > lat_thresh:
-                    # PID output for rotation
-                    rot_cmd = bearing_pid.update(bearing, dt)
-                    rot_cmd = _floor_cmd(int(_clamp(rot_cmd, -maxc, maxc)),
-                                         cfg["rotate_floor"])
+                    rot_frac = min(1.0, abs(bearing) / 45.0)
+                    rot_mag = _clamp(maxc * rot_frac, cfg["rotate_floor"], maxc)
+                    rot_cmd = int(rot_mag if bearing > 0 else -rot_mag)
 
-                    # Reset lateral + distance PIDs -- readings are stale while
-                    # the robot is turning blind between frames.
-                    lat_pid.reset()
-                    dist_pid.reset()
-
-                    # Issue pulse, then hard-stop so momentum can't carry the
-                    # robot past the marker (original overturn-prevention logic).
-                    self.motor_api.rotate_angle(int(rot_cmd))
+                    self.motor_api.rotate_angle(rot_cmd)
                     time.sleep(cfg["follow_rotate_pulse_s"])
                     self.motor_api.stop()
                     self.camera.set_banner(
@@ -1014,105 +855,53 @@ class MarkerFollower:
                     self._emit(state="ROTATING", distance_mm=round(dist, 1),
                                bearing_deg=round(bearing, 1), marker_id=target[0],
                                target_mm=follow_mm, rot_cmd=rot_cmd)
-                    # Settle, then force a fresh camera frame before next decision.
                     time.sleep(cfg["follow_settle_s"])
                     last_seq = -1
                     continue
 
-                # -----------------------------------------------------------
-                # Small bearing offset (≤ lat_thresh): use STRAFE for lateral
-                # alignment + THROTTLE for distance -- simultaneously.
-                # Mecanum mixing handles both axes natively; no heading change.
-                # -----------------------------------------------------------
-
-                # Stop any residual rotation from the previous ROTATING phase.
+                # Small bearing: strafe + throttle
                 self.motor_api.rotate_angle(0)
-                # Reset bearing PID so its derivative term doesn't spike on the
-                # first tick after a transition from ROTATING.
-                bearing_pid.reset()
 
-                # -- Strafe (lateral) ----------------------------------------
-                # Inside the bearing deadband -> no strafe needed.
+                # -- Strafe (lateral) --
                 if abs(bearing) <= bear_dband:
                     str_cmd = 0
                     self.motor_api.direction(0, 0)
                 else:
-                    str_raw = lat_pid.update(bearing, dt)
-                    str_cmd = _floor_cmd(int(_clamp(str_raw, -maxc, maxc)),
-                                         str_floor)
-                    # direction(x_axis, y_axis): x_axis is strafe (right +, left -)
-                    self.motor_api.direction(int(str_cmd), 0)
+                    str_frac = min(1.0, abs(bearing) / lat_thresh)
+                    str_mag = _clamp(maxc * str_frac, str_floor, maxc)
+                    str_cmd = int(str_mag if bearing > 0 else -str_mag)
+                    self.motor_api.direction(str_cmd, 0)
 
-                # -- Throttle (forward / back) — hysteresis + braking zone ----
-                #
-                # WHY THREE LAYERS:
-                #   _floor_cmd forces any sub-25 PID output up to 25, turning
-                #   proportional control into bang-bang for most of the useful
-                #   tracking range (error must be > 417mm for kv=0.06 to
-                #   produce raw output >= 25).  This causes the oscillation.
-                #
-                #   Fix 1 — Schmitt-trigger (hysteresis): two thresholds.
-                #     While HOLDING: only start if |err| > dband_start (130mm).
-                #     While MOVING:  only stop  if |err| < dband_stop  (60mm).
-                #   Fix 2 — Braking zone: linearly cap max throttle as the
-                #     robot gets closer, so it slows down before the stop point.
-                #   Fix 3 — No floor bump in near zone: inside brake_zone,
-                #     if PID output < floor send 0, not 25, so the D-term can
-                #     actually reduce output below the stall threshold.
-                #
+                # -- Throttle (forward / back) --
                 thr_cmd = 0
                 motion_state = "HOLDING"
 
                 if _holding:
-                    # Currently stopped: restart only if error is large enough
-                    # that a meaningful move is warranted (Schmitt upper edge).
                     if abs(dist_err) > dband_start:
                         _holding = False
-                        dist_pid.reset()  # fresh start, no derivative spike
                 else:
-                    # Currently moving: stop when error falls inside stop zone
-                    # (Schmitt lower edge).
                     if abs(dist_err) < dband_stop:
                         _holding = True
-                        dist_pid.reset()
-                        # Hard-stop all axes -- don't leave stale strafe/rotation
-                        # in mechanumapi state.  throttle_value(0) alone doesn't
-                        # zero the strafe component.
                         self.motor_api.stop()
 
                 if not _holding:
-                    # --- Braking zone: proportionally cap max throttle ---------
-                    # Far from target (error > brake_zone) -> full max_cmd cap.
-                    # Inside brake_zone -> linearly ramp cap down to thr_floor.
-                    # This ensures the robot is already slowing before it hits
-                    # the stop threshold, preventing overshoot.
                     err_mag = abs(dist_err)
                     if err_mag >= brake_zone:
                         effective_max = float(maxc)
                     else:
-                        # Linear interpolation: brake_zone -> maxc, 0 -> thr_floor
-                        zone_frac = err_mag / brake_zone   # 0.0 at target, 1.0 at edge
+                        zone_frac = err_mag / brake_zone
                         effective_max = thr_floor + (maxc - thr_floor) * zone_frac
 
-                    # --- PID output with zone-aware floor handling ------------
-                    thr_raw = dist_pid.update(dist_err, dt_pid)
-                    thr_clamped = _clamp(thr_raw, -effective_max, effective_max)
-
+                    thr_mag = effective_max * (err_mag / max(brake_zone, 1.0))
                     if err_mag >= brake_zone:
-                        # Far zone: apply floor to overcome static friction
-                        # (robot needs the kick to get started from rest).
-                        thr_cmd = _floor_cmd(int(thr_clamped), thr_floor)
+                        thr_cmd = _floor_cmd(int(thr_mag * (1 if dist_err > 0 else -1)), thr_floor)
                     else:
-                        # Near zone: honour PID output as-is.  If below floor,
-                        # send 0 so the D-term can actually brake rather than
-                        # being overridden to a fixed 25 that causes overshoot.
-                        thr_int = int(thr_clamped)
+                        thr_int = int(thr_mag * (1 if dist_err > 0 else -1))
                         thr_cmd = thr_int if abs(thr_int) >= thr_floor else 0
 
                     self.motor_api.throttle_value(thr_cmd)
                     motion_state = "ADVANCING" if dist_err > 0 else "REVERSING"
 
-                # Determine the combined description for the banner.
                 if str_cmd != 0 and thr_cmd != 0:
                     motion_state = ("ADVANCING" if dist_err > 0 else "REVERSING") + "+STRAFE"
                 elif str_cmd != 0 and thr_cmd == 0:
@@ -1143,6 +932,287 @@ class MarkerFollower:
             if self.camera:
                 self.camera.set_banner(None)
             logger.info("Follow: stopped")
+
+
+class WaypointAutopilot:
+    """Sequential marker navigator for autopilot mode.
+
+    Drives to a list of waypoints: [{"id": 0, "distance_mm": 500}, ...]
+    At each waypoint:
+    - Locates marker ID.
+    - If found: approaches using proportional throttle + strafe + rotation until
+      within follow_deadband_stop_mm of target distance.
+    - Once stopped at target distance: advances to the next waypoint.
+    - If marker ID not found:
+        - If rotate_to_search is True: rotates in place to search.
+        - Else: stops and waits.
+    - When all waypoints reached: emits state="DONE" and stops.
+    """
+
+    def __init__(self, config=None):
+        cfg = dict(DEFAULT_CONFIG)
+        if config:
+            cfg.update({k: v for k, v in config.items() if v is not None})
+        self.cfg = cfg
+        self.running = False
+        self._thread = None
+        self._stop = threading.Event()
+        self.motor_api = None
+        self.camera = None
+        self.tof_reader = None
+        self.status_cb = None
+        self.can_strafe = True
+        self.waypoints = []
+        self.rotate_to_search = False
+
+    def start(self, motor_api, camera, tof_reader=None, status_cb=None,
+              can_strafe=True, waypoints=None, rotate_to_search=None):
+        if self.running:
+            return False
+        self.motor_api = motor_api
+        self.camera = camera
+        self.tof_reader = tof_reader
+        self.status_cb = status_cb
+        self.can_strafe = can_strafe
+        if waypoints is not None:
+            self.waypoints = waypoints
+        else:
+            self.waypoints = self.cfg.get("waypoints", [])
+        if rotate_to_search is not None:
+            self.rotate_to_search = bool(rotate_to_search)
+        else:
+            self.rotate_to_search = bool(self.cfg.get("autopilot_rotate_to_search", False))
+
+        self._stop.clear()
+        self.running = True
+        self._thread = threading.Thread(target=self._run, daemon=True)
+        self._thread.start()
+        return True
+
+    def stop(self):
+        if not self.running:
+            return
+        self.running = False
+        self._stop.set()
+        if self.camera:
+            self.camera.set_banner(None)
+        if self.motor_api:
+            try:
+                self.motor_api.stop()
+            except Exception as e:
+                logger.error(f"WaypointAutopilot stop(): motor stop failed: {e}")
+
+    def _emit(self, **kw):
+        if self.status_cb:
+            try:
+                self.status_cb(kw)
+            except Exception:
+                pass
+
+    def _tof_blocked(self):
+        if not self.tof_reader:
+            return False
+        try:
+            dist, valid = self.tof_reader()
+        except Exception:
+            return False
+        return valid and dist is not None and dist < self.cfg["tof_stop_mm"]
+
+    def _find_marker(self, detections, marker_id):
+        if detections and marker_id is not None:
+            for det in detections:
+                if det[0] == marker_id:
+                    return det
+        return None
+
+    def _run(self):
+        cfg = self.cfg
+        try:
+            period = 1.0 / cfg["fps"]
+            dband_stop = float(cfg["follow_deadband_stop_mm"])
+            dband_start = float(cfg["follow_deadband_start_mm"])
+            brake_zone = float(cfg["follow_brake_zone_mm"])
+            maxc = cfg["max_cmd"]
+            thr_floor = int(cfg["throttle_floor"])
+            lat_thresh = float(cfg["follow_lateral_threshold"])
+            bear_dband = float(cfg["follow_bearing_deadband"])
+            str_floor = int(cfg["follow_strafe_floor"])
+
+            search_duty = int(cfg.get("autopilot_rotate_search_duty", 30))
+            search_pulse_s = float(cfg.get("autopilot_rotate_search_pulse_s", 0.3))
+            search_settle_s = float(cfg.get("autopilot_rotate_search_settle_s", 0.2))
+
+            wp_idx = 0
+            miss = 0
+            last_seq = -1
+            last_tick = time.time()
+            _holding = True
+            _ema_dist = None
+            _ema_alpha = float(cfg.get("follow_dist_ema_alpha", 0.5))
+            search_dir = 1
+
+            logger.info(f"WaypointAutopilot: started with {len(self.waypoints)} waypoints (rotate_search={self.rotate_to_search})")
+
+            while not self._stop.is_set():
+                if wp_idx >= len(self.waypoints):
+                    self.motor_api.stop()
+                    self.camera.set_banner("AUTOPILOT: All waypoints reached!")
+                    self._emit(state="DONE", waypoints_total=len(self.waypoints))
+                    time.sleep(period)
+                    continue
+
+                curr_wp = self.waypoints[wp_idx]
+                target_id = curr_wp.get("id")
+                target_dist_mm = float(curr_wp.get("distance_mm", 500.0))
+
+                tick = time.time()
+                dt = tick - last_tick
+                last_tick = tick
+
+                detections, frame_w, seq = self.camera.latest_detections()
+                if seq == last_seq or detections is None:
+                    time.sleep(period / 2)
+                    continue
+                last_seq = seq
+
+                if self._tof_blocked():
+                    self.motor_api.stop()
+                    _holding = True
+                    self.camera.set_banner(f"AUTOPILOT WP#{wp_idx+1}/{len(self.waypoints)} (ID {target_id}) blocked (ToF)")
+                    self._emit(state="BLOCKED", note="tof obstacle", waypoint=wp_idx+1)
+                    time.sleep(period)
+                    continue
+
+                target = self._find_marker(detections, target_id)
+
+                if target is None:
+                    miss += 1
+                    if miss >= cfg["hold_frames"]:
+                        self.motor_api.stop()
+                        _holding = True
+                        _ema_dist = None
+
+                        if self.rotate_to_search:
+                            rot_cmd = search_duty * search_dir
+                            self.motor_api.rotate_angle(rot_cmd)
+                            self.camera.set_banner(
+                                f"AUTOPILOT WP#{wp_idx+1}/{len(self.waypoints)} SEARCHING (ID {target_id}) rot={rot_cmd:+d}")
+                            self._emit(state="SEARCHING_ROTATE", waypoint=wp_idx+1, target_id=target_id, rot_cmd=rot_cmd)
+                            time.sleep(search_pulse_s)
+                            self.motor_api.stop()
+                            time.sleep(search_settle_s)
+                            search_dir = -search_dir
+                            last_seq = -1
+                            continue
+                        else:
+                            self.camera.set_banner(f"AUTOPILOT WP#{wp_idx+1}/{len(self.waypoints)} waiting for ID {target_id}")
+                            self._emit(state="WAITING", note=f"marker {target_id} lost", waypoint=wp_idx+1, target_id=target_id)
+                    time.sleep(period)
+                    continue
+                miss = 0
+
+                _, dist_raw, bearing, _ = target
+
+                if _ema_dist is None:
+                    _ema_dist = dist_raw
+                else:
+                    _ema_dist = _ema_alpha * _ema_dist + (1.0 - _ema_alpha) * dist_raw
+                dist = _ema_dist
+
+                dist_err = dist - target_dist_mm
+
+                if abs(bearing) > lat_thresh:
+                    rot_frac = min(1.0, abs(bearing) / 45.0)
+                    rot_mag = _clamp(maxc * rot_frac, cfg["rotate_floor"], maxc)
+                    rot_cmd = int(rot_mag if bearing > 0 else -rot_mag)
+
+                    self.motor_api.rotate_angle(rot_cmd)
+                    time.sleep(cfg["follow_rotate_pulse_s"])
+                    self.motor_api.stop()
+                    self.camera.set_banner(
+                        f"AUTOPILOT WP#{wp_idx+1}/{len(self.waypoints)} (ID {target_id}) {dist:.0f}mm {bearing:+.1f}deg ROTATING rot={rot_cmd:+d}")
+                    self._emit(state="ROTATING", distance_mm=round(dist, 1),
+                               bearing_deg=round(bearing, 1), marker_id=target_id,
+                               target_mm=target_dist_mm, rot_cmd=rot_cmd, waypoint=wp_idx+1)
+                    time.sleep(cfg["follow_settle_s"])
+                    last_seq = -1
+                    continue
+
+                self.motor_api.rotate_angle(0)
+
+                if abs(bearing) <= bear_dband:
+                    str_cmd = 0
+                    self.motor_api.direction(0, 0)
+                else:
+                    str_frac = min(1.0, abs(bearing) / lat_thresh)
+                    str_mag = _clamp(maxc * str_frac, str_floor, maxc)
+                    str_cmd = int(str_mag if bearing > 0 else -str_mag)
+                    self.motor_api.direction(str_cmd, 0)
+
+                thr_cmd = 0
+                motion_state = "HOLDING"
+
+                if _holding:
+                    if abs(dist_err) > dband_start:
+                        _holding = False
+                else:
+                    if abs(dist_err) < dband_stop:
+                        _holding = True
+                        self.motor_api.stop()
+                        logger.info(f"WaypointAutopilot: Reached WP #{wp_idx+1} (ID {target_id} at {target_dist_mm}mm)")
+                        self._emit(state="WAYPOINT_REACHED", waypoint=wp_idx+1, target_id=target_id)
+                        wp_idx += 1
+                        _ema_dist = None
+                        time.sleep(0.5)
+                        continue
+
+                if not _holding:
+                    err_mag = abs(dist_err)
+                    if err_mag >= brake_zone:
+                        effective_max = float(maxc)
+                    else:
+                        zone_frac = err_mag / brake_zone
+                        effective_max = thr_floor + (maxc - thr_floor) * zone_frac
+
+                    thr_mag = effective_max * (err_mag / max(brake_zone, 1.0))
+                    if err_mag >= brake_zone:
+                        thr_cmd = _floor_cmd(int(thr_mag * (1 if dist_err > 0 else -1)), thr_floor)
+                    else:
+                        thr_int = int(thr_mag * (1 if dist_err > 0 else -1))
+                        thr_cmd = thr_int if abs(thr_int) >= thr_floor else 0
+
+                    self.motor_api.throttle_value(thr_cmd)
+                    motion_state = "ADVANCING" if dist_err > 0 else "REVERSING"
+
+                if str_cmd != 0 and thr_cmd != 0:
+                    motion_state = ("ADVANCING" if dist_err > 0 else "REVERSING") + "+STRAFE"
+                elif str_cmd != 0 and thr_cmd == 0:
+                    motion_state = "STRAFING"
+
+                banner = (f"AUTOPILOT WP#{wp_idx+1}/{len(self.waypoints)} (ID {target_id}) {dist:.0f}mm {bearing:+.1f}deg "
+                          f"thr={thr_cmd:+d} str={str_cmd:+d} {motion_state}")
+                self.camera.set_banner(banner)
+                self._emit(state=motion_state, distance_mm=round(dist, 1),
+                           distance_raw_mm=round(dist_raw, 1),
+                           bearing_deg=round(bearing, 1), marker_id=target_id,
+                           target_mm=target_dist_mm, thr_cmd=thr_cmd, str_cmd=str_cmd,
+                           waypoint=wp_idx+1, total_waypoints=len(self.waypoints))
+
+                elapsed = time.time() - tick
+                if elapsed < period:
+                    time.sleep(period - elapsed)
+
+        except Exception as e:
+            logger.error(f"WaypointAutopilot loop error: {e}")
+        finally:
+            if self.motor_api:
+                try:
+                    self.motor_api.stop()
+                except Exception:
+                    pass
+            if self.camera:
+                self.camera.set_banner(None)
+            logger.info("WaypointAutopilot: stopped")
 
 
 def calibrate(camera=0, marker_size_mm=100.0, known_distance_mm=500.0,

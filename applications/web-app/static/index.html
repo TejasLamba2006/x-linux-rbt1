@@ -87,6 +87,25 @@
                 </label>
                 <span id="follow-status"></span>
             </div>
+            <!-- Autopilot map waypoints settings -->
+            <div id="autopilot-control" style="display: none;">
+                <div class="autopilot-header" style="font-weight: bold; margin-bottom: 5px;">
+                    Autopilot Waypoint Map
+                </div>
+                <div id="waypoint-list" style="max-height: 120px; overflow-y: auto; margin-bottom: 5px;">
+                    <!-- Dynamic waypoint rows -->
+                </div>
+                <div class="autopilot-actions" style="margin-bottom: 5px;">
+                    <button type="button" id="add-waypoint-btn" style="padding: 4px 8px;">+ Add Waypoint</button>
+                </div>
+                <div class="autopilot-options" style="margin-bottom: 5px; font-size: 0.85rem;">
+                    <label title="Rotate to search if target marker is not visible">
+                        <input type="checkbox" id="autopilot-rotate-search"> Rotate to search if not found
+                    </label>
+                </div>
+                <button type="button" id="start-autopilot-btn" style="padding: 6px 12px; font-weight: bold;">Start Autopilot Map</button>
+                <span id="autopilot-status" style="display: block; font-size: 0.85rem; margin-top: 4px;"></span>
+            </div>
             <!-- Always-on live camera feed with ArUco detection overlay -->
             <div id="vision-feed">
                 <img id="vision-feed-img" alt="live camera feed">

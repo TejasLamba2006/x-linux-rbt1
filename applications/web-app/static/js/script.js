@@ -99,6 +99,12 @@ function connectWebSocket() {
             if (data.follow) {
                 handleFollowStatus(data.follow);
             }
+            if (data.autopilot_result) {
+                handleAutopilotResult(data.autopilot_result);
+            }
+            if (data.autopilot) {
+                handleAutopilotStatus(data.autopilot);
+            }
         } catch (e) {
             debugLog('Failed to parse message: ' + e);
         }
@@ -840,6 +846,100 @@ function handleFollowStatus(f) {
     followStatus.textContent = s;
 }
 
+// --- Autopilot Waypoints ---
+const autopilotControl = document.getElementById('autopilot-control');
+const waypointList = document.getElementById('waypoint-list');
+const addWaypointBtn = document.getElementById('add-waypoint-btn');
+const startAutopilotBtn = document.getElementById('start-autopilot-btn');
+const autopilotRotateSearch = document.getElementById('autopilot-rotate-search');
+const autopilotStatus = document.getElementById('autopilot-status');
+
+function addWaypointRow(idVal = 0, distCmVal = 50) {
+    if (!waypointList) return;
+    const row = document.createElement('div');
+    row.className = 'waypoint-row';
+    row.style.cssText = 'display: flex; align-items: center; gap: 6px; margin-bottom: 4px;';
+    row.innerHTML = `
+        <label style="font-size: 0.85rem;">ID: <input type="number" class="wp-id" min="0" max="49" value="${idVal}" style="width: 45px;"></label>
+        <label style="font-size: 0.85rem;">Keep cm: <input type="number" class="wp-dist" min="10" max="300" step="5" value="${distCmVal}" style="width: 55px;"></label>
+        <button type="button" class="remove-wp-btn" style="padding: 2px 6px; font-size: 0.75rem; color: #ff5555; background: none; border: 1px solid #ff5555; border-radius: 4px; cursor: pointer;">✕</button>
+    `;
+    row.querySelector('.remove-wp-btn').addEventListener('click', function() {
+        row.remove();
+    });
+    waypointList.appendChild(row);
+}
+
+if (addWaypointBtn) {
+    addWaypointBtn.addEventListener('click', () => addWaypointRow(0, 50));
+}
+
+// Seed default waypoints if empty
+if (waypointList && waypointList.children.length === 0) {
+    addWaypointRow(0, 50);
+    addWaypointRow(1, 60);
+}
+
+function getWaypointsFromUI() {
+    if (!waypointList) return [];
+    const rows = waypointList.querySelectorAll('.waypoint-row');
+    const waypoints = [];
+    rows.forEach(row => {
+        const idInput = row.querySelector('.wp-id');
+        const distInput = row.querySelector('.wp-dist');
+        const idVal = idInput ? parseInt(idInput.value, 10) : 0;
+        const distCm = distInput ? parseFloat(distInput.value) : 50;
+        if (!isNaN(idVal) && !isNaN(distCm)) {
+            waypoints.push({
+                id: idVal,
+                distance_mm: distCm * 10
+            });
+        }
+    });
+    return waypoints;
+}
+
+function startAutopilotMap() {
+    const wps = getWaypointsFromUI();
+    const rotateSearch = autopilotRotateSearch ? autopilotRotateSearch.checked : false;
+    if (wps.length === 0) {
+        if (autopilotStatus) autopilotStatus.textContent = 'Please add at least one waypoint';
+        return;
+    }
+    if (autopilotStatus) autopilotStatus.textContent = 'Starting Autopilot Map...';
+    sendCommand({
+        mode: 'autopilot',
+        waypoints: wps,
+        rotate_to_search: rotateSearch
+    });
+}
+
+if (startAutopilotBtn) {
+    startAutopilotBtn.addEventListener('click', startAutopilotMap);
+}
+
+function handleAutopilotResult(result) {
+    if (!autopilotStatus) return;
+    if (result.error) {
+        autopilotStatus.textContent = result.error;
+    } else if (result.started) {
+        autopilotStatus.textContent = `Autopilot Map started (${(result.waypoints || []).length} waypoints)`;
+    } else if (result.stopped) {
+        autopilotStatus.textContent = 'Autopilot Stopped';
+    }
+}
+
+function handleAutopilotStatus(a) {
+    if (!autopilotStatus) return;
+    let s = a.state || '';
+    if (a.waypoint !== undefined) s += ` WP#${a.waypoint}`;
+    if (a.marker_id !== undefined && a.marker_id !== null) s += ` (ID ${a.marker_id})`;
+    if (a.distance_mm !== undefined) s += ` ${Math.round(a.distance_mm)}mm`;
+    if (a.bearing_deg !== undefined) s += ` ${a.bearing_deg > 0 ? '+' : ''}${a.bearing_deg}°`;
+    if (a.note) s += ` (${a.note})`;
+    autopilotStatus.textContent = s;
+}
+
 // =============================================================================
 // MODE SELECTOR
 // =============================================================================
@@ -851,8 +951,12 @@ function selectMode(mode) {
     const btn = document.querySelector(`[data-mode="${mode}"]`);
     if (btn) btn.classList.add('selected');
 
-    // Follow-me carries the marker id + keep-distance from the UI fields so the
-    // backend can start the follower with them (see the mode gate in main.py).
+    // Toggle mode specific UI panels
+    const followCtrl = document.getElementById('follow-control');
+    const autoCtrl = document.getElementById('autopilot-control');
+    if (followCtrl) followCtrl.style.display = (mode === 'follow-me') ? 'block' : 'none';
+    if (autoCtrl) autoCtrl.style.display = (mode === 'autopilot') ? 'block' : 'none';
+
     if (mode === 'follow-me') {
         const cmd = { [FIELD_STR_MODE]: mode };
         const idEl = document.getElementById('follow-marker-id');
@@ -864,6 +968,18 @@ function selectMode(mode) {
         sendCommand(cmd);
         return;
     }
+
+    if (mode === 'autopilot') {
+        const wps = getWaypointsFromUI();
+        const rotateSearch = autopilotRotateSearch ? autopilotRotateSearch.checked : false;
+        sendCommand({
+            [FIELD_STR_MODE]: mode,
+            waypoints: wps,
+            rotate_to_search: rotateSearch
+        });
+        return;
+    }
+
     sendCommand({ [FIELD_STR_MODE]: mode });
 }
 

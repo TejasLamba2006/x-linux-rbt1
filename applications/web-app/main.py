@@ -101,17 +101,19 @@ except Exception as e:
 # Marker vision (ArUco drive-to-marker) — best-effort like voice: if cv2 is
 # missing, CV_AVAILABLE stays False and the feature silently disables.
 try:
-    from marker_vision import MarkerNavigator, CameraStream, MarkerFollower, CV_AVAILABLE
+    from marker_vision import MarkerNavigator, CameraStream, MarkerFollower, WaypointAutopilot, CV_AVAILABLE
 except Exception as e:
     CV_AVAILABLE = False
     MarkerNavigator = None
     CameraStream = None
     MarkerFollower = None
+    WaypointAutopilot = None
     logging.getLogger(__name__).warning(f"Marker vision unavailable: {e}")
 
 camera_stream = None  # shared CameraStream (owns the webcam; drives the always-on feed)
 navigator = None  # active MarkerNavigator instance (set on vision_nav start)
 follower = None  # active MarkerFollower instance (set when follow-me mode starts)
+autopilot = None  # active WaypointAutopilot instance (set when autopilot mode starts)
 
 
 # =============================================================================
@@ -1131,6 +1133,46 @@ def stop_follow():
     return {"stopped": True}
 
 
+def start_autopilot(loop, waypoints=None, rotate_to_search=None):
+    """Start waypoint autopilot mode. Loop = running asyncio loop for status broadcasts."""
+    global autopilot
+    if not CV_AVAILABLE or WaypointAutopilot is None:
+        return {"error": "vision unavailable (opencv not installed)"}
+    if motor_api is None:
+        return {"error": "motor API not initialized"}
+    if camera_stream is None or not camera_stream.running:
+        return {"error": "camera stream not running"}
+    if autopilot is not None and autopilot.running:
+        autopilot.stop()
+
+    def _broadcast(status):
+        asyncio.run_coroutine_threadsafe(manager.broadcast({"autopilot": status}), loop)
+
+    cfg = dict(load_config().get("vision", {}))
+    autopilot = WaypointAutopilot(cfg)
+    started = autopilot.start(
+        motor_api,
+        camera_stream,
+        tof_reader=tof_center_distance,
+        status_cb=_broadcast,
+        can_strafe=(current_drive_type == "mecanum"),
+        waypoints=waypoints,
+        rotate_to_search=rotate_to_search,
+    )
+    if started:
+        return {"started": True, "state": "AUTOPILOT",
+                "waypoints": waypoints, "rotate_to_search": rotate_to_search}
+    return {"error": "failed to start autopilot"}
+
+
+def stop_autopilot():
+    """Stop waypoint autopilot mode."""
+    global autopilot
+    if autopilot is not None:
+        autopilot.stop()
+    return {"stopped": True}
+
+
 # =============================================================================
 # FASTAPI APPLICATION
 # =============================================================================
@@ -1650,9 +1692,22 @@ class ConnectionManager:
                                                   marker_id=mid, distance_mm=dist)
                             await websocket.send_json({"follow_result": result})
                             continue
-                        elif 'mode' in parsed_data and follower is not None and follower.running:
-                            # switched away from follow-me -> stop tracking
-                            stop_follow()
+                        elif parsed_data.get('mode') == 'autopilot':
+                            wps = parsed_data.get('waypoints', [])
+                            r_search = parsed_data.get('rotate_to_search', False)
+                            if motor_api:
+                                motor_api.mode_select('autopilot')
+                            result = start_autopilot(asyncio.get_running_loop(),
+                                                     waypoints=wps, rotate_to_search=r_search)
+                            await websocket.send_json({"autopilot_result": result})
+                            continue
+
+                        if 'mode' in parsed_data:
+                            target_mode = parsed_data['mode']
+                            if target_mode != 'follow-me' and follower is not None and follower.running:
+                                stop_follow()
+                            if target_mode != 'autopilot' and autopilot is not None and autopilot.running:
+                                stop_autopilot()
 
                         # Process motor commands
                         if motor_api:
