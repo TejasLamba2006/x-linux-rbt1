@@ -123,7 +123,7 @@ DEFAULT_CONFIG = {
     "autopilot_rotate_to_search": False, # rotate slowly to search if marker not seen
     "autopilot_rotate_search_duty": 30,  # rotation duty during search
     "autopilot_rotate_search_pulse_s": 0.3, # pulse duration for rotate search
-    "autopilot_rotate_search_settle_s": 0.2, # pause after pulse search
+    "autopilot_rotate_search_settle_s": 2.0, # pause 2 seconds after pulse search
 }
 
 
@@ -1049,7 +1049,6 @@ class WaypointAutopilot:
             _holding = True
             _ema_dist = None
             _ema_alpha = float(cfg.get("follow_dist_ema_alpha", 0.5))
-            search_dir = 1
 
             logger.info(f"WaypointAutopilot: started with {len(self.waypoints)} waypoints (rotate_search={self.rotate_to_search})")
 
@@ -1093,7 +1092,7 @@ class WaypointAutopilot:
                         _ema_dist = None
 
                         if self.rotate_to_search:
-                            rot_cmd = search_duty * search_dir
+                            rot_cmd = search_duty
                             self.motor_api.rotate_angle(rot_cmd)
                             self.camera.set_banner(
                                 f"AUTOPILOT WP#{wp_idx+1}/{len(self.waypoints)} SEARCHING (ID {target_id}) rot={rot_cmd:+d}")
@@ -1101,7 +1100,6 @@ class WaypointAutopilot:
                             time.sleep(search_pulse_s)
                             self.motor_api.stop()
                             time.sleep(search_settle_s)
-                            search_dir = -search_dir
                             last_seq = -1
                             continue
                         else:
