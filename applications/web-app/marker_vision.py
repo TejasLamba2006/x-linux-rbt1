@@ -611,14 +611,12 @@ class MarkerNavigator:
                                     logger.info("Vision: centered -> APPROACH")
                             else:
                                 centered = 0
-                                if self.can_strafe and abs(bearing) < 8.0:
-                                    cmd = _floor_cmd(_clamp(cfg["kw"] * bearing, -cfg["max_cmd"], cfg["max_cmd"]),
-                                                     cfg["rotate_floor"])
+                                cmd = _floor_cmd(_clamp(cfg["kw"] * bearing, -cfg["max_cmd"], cfg["max_cmd"]),
+                                                 cfg["rotate_floor"])
+                                if self.can_strafe:
                                     self.motor_api.direction(
                                         int(_clamp(cmd, -cfg["max_cmd"], cfg["max_cmd"])), 0)
                                 else:
-                                    cmd = _floor_cmd(_clamp(cfg["kw"] * bearing, -cfg["max_cmd"], cfg["max_cmd"]),
-                                                     cfg["rotate_floor"])
                                     self.motor_api.rotate_angle(
                                         int(_clamp(cmd, -cfg["max_cmd"], cfg["max_cmd"])))
 
@@ -639,10 +637,14 @@ class MarkerNavigator:
                                 self.motor_api.throttle_value(int(thr))
                                 # small steering trim while approaching
                                 if abs(bearing) > dband:
-                                    trim = _floor_cmd(_clamp(cfg["kw"] * bearing, -cfg["max_cmd"], cfg["max_cmd"]),
-                                                      cfg["rotate_floor"])
-                                    self.motor_api.rotate_angle(
-                                        int(_clamp(trim, -cfg["max_cmd"], cfg["max_cmd"])))
+                                    cmd = _floor_cmd(_clamp(cfg["kw"] * bearing, -cfg["max_cmd"], cfg["max_cmd"]),
+                                                     cfg["rotate_floor"])
+                                    if self.can_strafe:
+                                        self.motor_api.direction(
+                                            int(_clamp(cmd, -cfg["max_cmd"], cfg["max_cmd"])), 0)
+                                    else:
+                                        self.motor_api.rotate_angle(
+                                            int(_clamp(cmd, -cfg["max_cmd"], cfg["max_cmd"])))
                                 else:
                                     self.motor_api.rotate_angle(0)
 
@@ -841,8 +843,8 @@ class MarkerFollower:
 
                 dist_err = dist - follow_mm
 
-                # Rotate phase if bearing error is large
-                if abs(bearing) > lat_thresh:
+                # Phase 1: Large bearing offset -> ROTATE to face target (only if robot cannot strafe, e.g. differential drive)
+                if not self.can_strafe and abs(bearing) > lat_thresh:
                     rot_frac = min(1.0, abs(bearing) / 45.0)
                     rot_mag = _clamp(maxc * rot_frac, cfg["rotate_floor"], maxc)
                     rot_cmd = int(rot_mag if bearing > 0 else -rot_mag)
@@ -860,20 +862,33 @@ class MarkerFollower:
                     last_seq = -1
                     continue
 
-                # Small bearing: strafe + throttle
+                # Phase 2: Bearing offset > bear_dband -> STRAFE ONLY to center laterally
+                # Keep throttle at 0 so it doesn't move slanting/diagonally while centering.
                 self.motor_api.rotate_angle(0)
-
-                # -- Strafe (lateral) --
-                if abs(bearing) <= bear_dband:
-                    str_cmd = 0
-                    self.motor_api.direction(0, 0)
-                else:
+                if abs(bearing) > bear_dband:
+                    self.motor_api.throttle_value(0)
                     str_frac = min(1.0, abs(bearing) / lat_thresh)
                     str_mag = _clamp(maxc * str_frac, str_floor, maxc)
                     str_cmd = int(str_mag if bearing > 0 else -str_mag)
                     self.motor_api.direction(str_cmd, 0)
 
-                # -- Throttle (forward / back) --
+                    banner = (f"FOLLOW #{target[0]} {dist:.0f}mm(r:{dist_raw:.0f}) {bearing:+.1f}deg "
+                              f"str={str_cmd:+d} STRAFING")
+                    self.camera.set_banner(banner)
+                    self._emit(state="STRAFING", distance_mm=round(dist, 1),
+                               distance_raw_mm=round(dist_raw, 1),
+                               bearing_deg=round(bearing, 1), marker_id=target[0],
+                               target_mm=follow_mm, thr_cmd=0, str_cmd=str_cmd,
+                               holding=_holding)
+
+                    elapsed = time.time() - tick
+                    if elapsed < period:
+                        time.sleep(period - elapsed)
+                    continue
+
+                # Phase 3: Centered (|bearing| <= bear_dband) -> THROTTLE ONLY (forward / back)
+                self.motor_api.direction(0, 0)
+                str_cmd = 0
                 thr_cmd = 0
                 motion_state = "HOLDING"
 
@@ -902,11 +917,6 @@ class MarkerFollower:
 
                     self.motor_api.throttle_value(thr_cmd)
                     motion_state = "ADVANCING" if dist_err > 0 else "REVERSING"
-
-                if str_cmd != 0 and thr_cmd != 0:
-                    motion_state = ("ADVANCING" if dist_err > 0 else "REVERSING") + "+STRAFE"
-                elif str_cmd != 0 and thr_cmd == 0:
-                    motion_state = "STRAFING"
 
                 banner = (f"FOLLOW #{target[0]} {dist:.0f}mm(r:{dist_raw:.0f}) {bearing:+.1f}deg "
                           f"thr={thr_cmd:+d} str={str_cmd:+d} "
@@ -1120,7 +1130,8 @@ class WaypointAutopilot:
 
                 dist_err = dist - target_dist_mm
 
-                if abs(bearing) > lat_thresh:
+                # Phase 1: Large bearing offset -> ROTATE to face target (only if robot cannot strafe, e.g. differential drive)
+                if not self.can_strafe and abs(bearing) > lat_thresh:
                     rot_frac = min(1.0, abs(bearing) / 45.0)
                     rot_mag = _clamp(maxc * rot_frac, cfg["rotate_floor"], maxc)
                     rot_cmd = int(rot_mag if bearing > 0 else -rot_mag)
@@ -1137,17 +1148,33 @@ class WaypointAutopilot:
                     last_seq = -1
                     continue
 
+                # Phase 2: Bearing offset > bear_dband -> STRAFE ONLY to center laterally
+                # Keep throttle at 0 so it doesn't move slanting/diagonally while centering.
                 self.motor_api.rotate_angle(0)
-
-                if abs(bearing) <= bear_dband:
-                    str_cmd = 0
-                    self.motor_api.direction(0, 0)
-                else:
+                if abs(bearing) > bear_dband:
+                    self.motor_api.throttle_value(0)
                     str_frac = min(1.0, abs(bearing) / lat_thresh)
                     str_mag = _clamp(maxc * str_frac, str_floor, maxc)
                     str_cmd = int(str_mag if bearing > 0 else -str_mag)
                     self.motor_api.direction(str_cmd, 0)
 
+                    banner = (f"AUTOPILOT WP#{wp_idx+1}/{len(self.waypoints)} (ID {target_id}) {dist:.0f}mm {bearing:+.1f}deg "
+                              f"str={str_cmd:+d} STRAFING")
+                    self.camera.set_banner(banner)
+                    self._emit(state="STRAFING", distance_mm=round(dist, 1),
+                               distance_raw_mm=round(dist_raw, 1),
+                               bearing_deg=round(bearing, 1), marker_id=target_id,
+                               target_mm=target_dist_mm, thr_cmd=0, str_cmd=str_cmd,
+                               waypoint=wp_idx+1, total_waypoints=len(self.waypoints))
+
+                    elapsed = time.time() - tick
+                    if elapsed < period:
+                        time.sleep(period - elapsed)
+                    continue
+
+                # Phase 3: Centered (|bearing| <= bear_dband) -> THROTTLE ONLY (forward / back)
+                self.motor_api.direction(0, 0)
+                str_cmd = 0
                 thr_cmd = 0
                 motion_state = "HOLDING"
 
