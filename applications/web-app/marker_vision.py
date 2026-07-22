@@ -95,8 +95,25 @@ DEFAULT_CONFIG = {
     # --- follow-me mode (continuous tracking, keeps a set distance) ---
     "follow_marker_id": None,   # which marker to follow; None = nearest in view
     "follow_distance_mm": 600.0,  # gap to maintain from the marker
-    "follow_deadband_mm": 80.0,   # distance error inside this -> no forward/back
-    "follow_bearing_deadband": 8.0,  # |bearing| under this -> "centered", don't rotate
+
+    # --- Hysteresis (Schmitt-trigger) deadband for distance control -----------
+    # Two separate thresholds replace the old single follow_deadband_mm.
+    # STOP when error falls below follow_deadband_stop_mm.  Once stopped
+    # (HOLDING), only restart when error exceeds follow_deadband_start_mm.
+    # The gap between them is the hysteresis window that prevents the robot
+    # from bouncing at the boundary (bang-bang oscillation).
+    "follow_deadband_stop_mm": 60.0,    # stop when within this distance
+    "follow_deadband_start_mm": 130.0,  # restart only when error exceeds this
+
+    # --- Approach braking zone ------------------------------------------------
+    # Within follow_brake_zone_mm of the target, the maximum allowed throttle
+    # is linearly scaled from max_cmd (at the far edge of the zone) down to
+    # throttle_floor (at the inner edge / stop threshold).  This gives the
+    # robot a natural slow-down ramp instead of running at full floor speed
+    # all the way to the stop point, which causes overshoot.
+    "follow_brake_zone_mm": 300.0,
+
+    "follow_bearing_deadband": 8.0,  # |bearing| under this -> no strafe
     "follow_rotate_pulse_s": 0.12,   # rotate this long then STOP, so it can't
                                      # overshoot while blind between camera frames
     "follow_settle_s": 0.10,         # pause after a rotate pulse before re-reading
@@ -839,14 +856,21 @@ class MarkerFollower:
         try:
             period = 1.0 / cfg["fps"]
             follow_mm = float(cfg["follow_distance_mm"])
-            dband_mm = float(cfg["follow_deadband_mm"])
+            # Hysteresis thresholds (Schmitt-trigger deadband).
+            dband_stop = float(cfg["follow_deadband_stop_mm"])    # stop here
+            dband_start = float(cfg["follow_deadband_start_mm"])  # restart here
+            brake_zone = float(cfg["follow_brake_zone_mm"])       # slow-down ramp
             maxc = cfg["max_cmd"]
+            thr_floor = int(cfg["throttle_floor"])
             lat_thresh = float(cfg["follow_lateral_threshold"])
             bear_dband = float(cfg["follow_bearing_deadband"])
             str_floor = int(cfg["follow_strafe_floor"])
             miss = 0
             last_seq = -1
             last_tick = time.time()
+            # Schmitt-trigger state: True means currently HOLDING (stopped).
+            # Start stopped so the robot doesn't lurch on launch.
+            _holding = True
 
             # --- Three independent PID controllers ----------------------------
             # Bearing PID: large bearing errors (> lat_thresh) → rotation axis.
@@ -876,7 +900,9 @@ class MarkerFollower:
             )
 
             logger.info(f"Follow: started (id={cfg['follow_marker_id']}, "
-                        f"dist={follow_mm:.0f}mm, lat_thresh={lat_thresh:.0f}deg)")
+                        f"dist={follow_mm:.0f}mm, lat_thresh={lat_thresh:.0f}deg, "
+                        f"stop={dband_stop:.0f}mm, start={dband_start:.0f}mm, "
+                        f"brake_zone={brake_zone:.0f}mm)")
 
             while not self._stop.is_set():
                 tick = time.time()
@@ -914,6 +940,7 @@ class MarkerFollower:
                         bearing_pid.reset()
                         dist_pid.reset()
                         lat_pid.reset()
+                        _holding = True   # stay stopped until marker returns
                         self.camera.set_banner("FOLLOW waiting (no marker)")
                         self._emit(state="WAITING", note="marker lost")
                     time.sleep(period)
@@ -982,33 +1009,85 @@ class MarkerFollower:
                     # direction(x_axis, y_axis): x_axis is strafe (right +, left -)
                     self.motor_api.direction(int(str_cmd), 0)
 
-                # -- Throttle (forward / back) --------------------------------
-                if abs(dist_err) <= dband_mm:
-                    thr_cmd = 0
-                    self.motor_api.throttle_value(0)
-                    motion_state = "HOLDING"
+                # -- Throttle (forward / back) — hysteresis + braking zone ----
+                #
+                # WHY THREE LAYERS:
+                #   _floor_cmd forces any sub-25 PID output up to 25, turning
+                #   proportional control into bang-bang for most of the useful
+                #   tracking range (error must be > 417mm for kv=0.06 to
+                #   produce raw output >= 25).  This causes the oscillation.
+                #
+                #   Fix 1 — Schmitt-trigger (hysteresis): two thresholds.
+                #     While HOLDING: only start if |err| > dband_start (130mm).
+                #     While MOVING:  only stop  if |err| < dband_stop  (60mm).
+                #   Fix 2 — Braking zone: linearly cap max throttle as the
+                #     robot gets closer, so it slows down before the stop point.
+                #   Fix 3 — No floor bump in near zone: inside brake_zone,
+                #     if PID output < floor send 0, not 25, so the D-term can
+                #     actually reduce output below the stall threshold.
+                #
+                thr_cmd = 0
+                motion_state = "HOLDING"
+
+                if _holding:
+                    # Currently stopped: restart only if error is large enough
+                    # that a meaningful move is warranted (Schmitt upper edge).
+                    if abs(dist_err) > dband_start:
+                        _holding = False
+                        dist_pid.reset()  # fresh start, no derivative spike
                 else:
+                    # Currently moving: stop when error falls inside stop zone
+                    # (Schmitt lower edge).
+                    if abs(dist_err) < dband_stop:
+                        _holding = True
+                        dist_pid.reset()
+
+                if not _holding:
+                    # --- Braking zone: proportionally cap max throttle ---------
+                    # Far from target (error > brake_zone) -> full max_cmd cap.
+                    # Inside brake_zone -> linearly ramp cap down to thr_floor.
+                    # This ensures the robot is already slowing before it hits
+                    # the stop threshold, preventing overshoot.
+                    err_mag = abs(dist_err)
+                    if err_mag >= brake_zone:
+                        effective_max = float(maxc)
+                    else:
+                        # Linear interpolation: brake_zone -> maxc, 0 -> thr_floor
+                        zone_frac = err_mag / brake_zone   # 0.0 at target, 1.0 at edge
+                        effective_max = thr_floor + (maxc - thr_floor) * zone_frac
+
+                    # --- PID output with zone-aware floor handling ------------
                     thr_raw = dist_pid.update(dist_err, dt)
-                    thr_cmd = _floor_cmd(int(_clamp(thr_raw, -maxc, maxc)),
-                                         cfg["throttle_floor"])
-                    self.motor_api.throttle_value(int(thr_cmd))
+                    thr_clamped = _clamp(thr_raw, -effective_max, effective_max)
+
+                    if err_mag >= brake_zone:
+                        # Far zone: apply floor to overcome static friction
+                        # (robot needs the kick to get started from rest).
+                        thr_cmd = _floor_cmd(int(thr_clamped), thr_floor)
+                    else:
+                        # Near zone: honour PID output as-is.  If below floor,
+                        # send 0 so the D-term can actually brake rather than
+                        # being overridden to a fixed 25 that causes overshoot.
+                        thr_int = int(thr_clamped)
+                        thr_cmd = thr_int if abs(thr_int) >= thr_floor else 0
+
+                    self.motor_api.throttle_value(thr_cmd)
                     motion_state = "ADVANCING" if dist_err > 0 else "REVERSING"
 
                 # Determine the combined description for the banner.
                 if str_cmd != 0 and thr_cmd != 0:
-                    if dist_err > 0:
-                        motion_state = "ADVANCING+STRAFE"
-                    else:
-                        motion_state = "REVERSING+STRAFE"
-                elif str_cmd != 0:
+                    motion_state = ("ADVANCING" if dist_err > 0 else "REVERSING") + "+STRAFE"
+                elif str_cmd != 0 and thr_cmd == 0:
                     motion_state = "STRAFING"
 
                 banner = (f"FOLLOW #{target[0]} {dist:.0f}mm {bearing:+.1f}deg "
-                          f"thr={thr_cmd:+d} str={str_cmd:+d} {motion_state}")
+                          f"thr={thr_cmd:+d} str={str_cmd:+d} "
+                          f"[{'H' if _holding else 'M'}] {motion_state}")
                 self.camera.set_banner(banner)
                 self._emit(state=motion_state, distance_mm=round(dist, 1),
                            bearing_deg=round(bearing, 1), marker_id=target[0],
-                           target_mm=follow_mm, thr_cmd=thr_cmd, str_cmd=str_cmd)
+                           target_mm=follow_mm, thr_cmd=thr_cmd, str_cmd=str_cmd,
+                           holding=_holding)
 
                 elapsed = time.time() - tick
                 if elapsed < period:
