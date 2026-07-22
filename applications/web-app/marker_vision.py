@@ -882,12 +882,14 @@ class MarkerFollower:
                 deadband=bear_dband,
             )
             # Distance PID: controls throttle (forward / back).
+            # deadband=dband_stop: PID won't compute on sub-stop-threshold errors;
+            # the hysteresis Schmitt trigger is the actual gate for start/stop.
             dist_pid = _PID(
                 kp=cfg["follow_pid_dist_kp"],
                 ki=cfg["follow_pid_dist_ki"],
                 kd=cfg["follow_pid_dist_kd"],
                 out_min=-maxc, out_max=maxc,
-                deadband=dband_mm,
+                deadband=dband_stop,
             )
             # Lateral PID: small bearing errors (≤ lat_thresh) → strafe axis.
             # Same error units as bearing PID (degrees) but drives direction().
