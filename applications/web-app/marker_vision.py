@@ -137,6 +137,12 @@ DEFAULT_CONFIG = {
     "follow_pid_lat_ki": 0.0,        # I: removes camera-centre bias
     "follow_pid_lat_kd": 0.2,        # D: damps lateral wobble
 
+    # Exponential moving average smoothing on camera distance readings.
+    # 0.0 = no smoothing (raw); 1.0 = never updates.  0.3 is a gentle
+    # low-pass that removes frame-to-frame noise (~30-50mm on USB cameras)
+    # without lagging badly behind a genuinely moving target.
+    "follow_dist_ema_alpha": 0.3,
+
     # When |bearing| > this (degrees) the robot ROTATES (pulsed) to face the
     # target.  When |bearing| <= this it STRAFES for fine lateral alignment.
     # Smaller value = more strafing; larger = more rotating.
@@ -872,6 +878,14 @@ class MarkerFollower:
             # Start stopped so the robot doesn't lurch on launch.
             _holding = True
 
+            # EMA state for distance smoothing.  Seeded on the first reading.
+            _ema_dist = None
+            _ema_alpha = float(cfg.get("follow_dist_ema_alpha", 0.3))
+            # Maximum dt we feed into the PID derivative.  After a rotation
+            # pulse (120ms motion + 100ms settle) dt can jump to 250ms+,
+            # causing a huge derivative spike.  Cap it to 2 * frame period.
+            _max_dt = 2.0 / max(cfg["fps"], 1.0)
+
             # --- Three independent PID controllers ----------------------------
             # Bearing PID: large bearing errors (> lat_thresh) → rotation axis.
             bearing_pid = _PID(
@@ -950,7 +964,24 @@ class MarkerFollower:
                     continue
                 miss = 0
 
-                _, dist, bearing, _ = target
+                _, dist_raw, bearing, _ = target
+
+                # --- EMA smoothing on distance --------------------------------
+                # USB camera distance readings have ~30-50mm frame-to-frame
+                # noise even when the marker is perfectly still.  Without
+                # smoothing this noise alone is enough to oscillate across the
+                # deadband boundary.  EMA is a single-state low-pass filter:
+                #   ema = alpha * previous + (1-alpha) * new_raw
+                # alpha=0 => raw; alpha=0.3 => gentle smoothing; alpha->1 => frozen.
+                if _ema_dist is None:
+                    _ema_dist = dist_raw          # seed on first frame
+                else:
+                    _ema_dist = _ema_alpha * _ema_dist + (1.0 - _ema_alpha) * dist_raw
+                dist = _ema_dist
+
+                # Cap dt to avoid derivative spike after rotation pulse sleeps
+                dt_pid = min(dt, _max_dt)
+
                 dist_err = dist - follow_mm   # +ve = too far, -ve = too close
 
                 # ===========================================================
@@ -1044,6 +1075,10 @@ class MarkerFollower:
                     if abs(dist_err) < dband_stop:
                         _holding = True
                         dist_pid.reset()
+                        # Hard-stop all axes -- don't leave stale strafe/rotation
+                        # in mechanumapi state.  throttle_value(0) alone doesn't
+                        # zero the strafe component.
+                        self.motor_api.stop()
 
                 if not _holding:
                     # --- Braking zone: proportionally cap max throttle ---------
@@ -1060,7 +1095,7 @@ class MarkerFollower:
                         effective_max = thr_floor + (maxc - thr_floor) * zone_frac
 
                     # --- PID output with zone-aware floor handling ------------
-                    thr_raw = dist_pid.update(dist_err, dt)
+                    thr_raw = dist_pid.update(dist_err, dt_pid)
                     thr_clamped = _clamp(thr_raw, -effective_max, effective_max)
 
                     if err_mag >= brake_zone:
