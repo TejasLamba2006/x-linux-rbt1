@@ -235,6 +235,42 @@
         "documentation": {}
     },
     {
+        "label": "argparse",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "argparse",
+        "description": "argparse",
+        "detail": "argparse",
+        "documentation": {}
+    },
+    {
+        "label": "glob",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "glob",
+        "description": "glob",
+        "detail": "glob",
+        "documentation": {}
+    },
+    {
+        "label": "logging",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "logging",
+        "description": "logging",
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "uart_motors",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "uart_motors",
+        "description": "uart_motors",
+        "detail": "uart_motors",
+        "documentation": {}
+    },
+    {
         "label": "asyncio",
         "kind": 6,
         "isExtraImport": true,
@@ -268,15 +304,6 @@
         "importPath": "signal",
         "description": "signal",
         "detail": "signal",
-        "documentation": {}
-    },
-    {
-        "label": "logging",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "logging",
-        "description": "logging",
-        "detail": "logging",
         "documentation": {}
     },
     {
@@ -1931,6 +1958,132 @@
         "documentation": {}
     },
     {
+        "label": "split",
+        "kind": 2,
+        "importPath": "applications.web-app.checksum_crack",
+        "description": "applications.web-app.checksum_crack",
+        "peekOfCode": "def split(frame):\n    return frame[:-2], frame[-2], frame[-1]\n# ---- CRC-16 engine ----\ndef crc16(data, poly, init, refin, refout, xorout):\n    crc = init\n    for byte in data:\n        if refin:\n            byte = int(f\"{byte:08b}\"[::-1], 2)\n        crc ^= byte << 8\n        for _ in range(8):",
+        "detail": "applications.web-app.checksum_crack",
+        "documentation": {}
+    },
+    {
+        "label": "crc16",
+        "kind": 2,
+        "importPath": "applications.web-app.checksum_crack",
+        "description": "applications.web-app.checksum_crack",
+        "peekOfCode": "def crc16(data, poly, init, refin, refout, xorout):\n    crc = init\n    for byte in data:\n        if refin:\n            byte = int(f\"{byte:08b}\"[::-1], 2)\n        crc ^= byte << 8\n        for _ in range(8):\n            if crc & 0x8000:\n                crc = ((crc << 1) ^ poly) & 0xFFFF\n            else:",
+        "detail": "applications.web-app.checksum_crack",
+        "documentation": {}
+    },
+    {
+        "label": "ranges",
+        "kind": 2,
+        "importPath": "applications.web-app.checksum_crack",
+        "description": "applications.web-app.checksum_crack",
+        "peekOfCode": "def ranges(frame):\n    n = len(frame)\n    return {\n        \"all_but_last2 (0..-2)\":      frame[0:n-2],\n        \"id..payload (2..-2)\":        frame[2:n-2],\n        \"cmd..payload (3..-2)\":       frame[3:n-2],\n        \"len..payload (4..-2)\":       frame[4:n-2],\n        \"payload_only (5..-2)\":       frame[5:n-2],\n        \"header..payload (0..-2)\":    frame[0:n-2],\n    }",
+        "detail": "applications.web-app.checksum_crack",
+        "documentation": {}
+    },
+    {
+        "label": "match_all",
+        "kind": 2,
+        "importPath": "applications.web-app.checksum_crack",
+        "description": "applications.web-app.checksum_crack",
+        "peekOfCode": "def match_all(crc_fn, rng_key):\n    \"\"\"Return True if crc_fn over range rng_key reproduces BOTH checksum bytes\n    for every frame, in either endianness.\"\"\"\n    for name, frame in FRAMES:\n        data = ranges(frame)[rng_key]\n        c = crc_fn(data)\n        lo, hi = frame[-2], frame[-1]\n        # try little-endian (lo=low byte) and big-endian\n        if not ((c & 0xFF) == lo and (c >> 8) == hi) and \\\n           not ((c & 0xFF) == hi and (c >> 8) == lo):",
+        "detail": "applications.web-app.checksum_crack",
+        "documentation": {}
+    },
+    {
+        "label": "endianness",
+        "kind": 2,
+        "importPath": "applications.web-app.checksum_crack",
+        "description": "applications.web-app.checksum_crack",
+        "peekOfCode": "def endianness(crc_fn, rng_key):\n    \"\"\"Determine which endianness matches, return 'LE'/'BE'/None.\"\"\"\n    le = be = True\n    for name, frame in FRAMES:\n        data = ranges(frame)[rng_key]\n        c = crc_fn(data)\n        lo, hi = frame[-2], frame[-1]\n        if not ((c & 0xFF) == lo and (c >> 8) == hi):\n            le = False\n        if not ((c & 0xFF) == hi and (c >> 8) == lo):",
+        "detail": "applications.web-app.checksum_crack",
+        "documentation": {}
+    },
+    {
+        "label": "FRAMES",
+        "kind": 5,
+        "importPath": "applications.web-app.checksum_crack",
+        "description": "applications.web-app.checksum_crack",
+        "peekOfCode": "FRAMES = [\n    (\"NOP\",              bytes.fromhex(\"AA550A0000 51C2\".replace(\" \", \"\"))),\n    (\"SPEED_FWD\",        bytes.fromhex(\"AA550A0103800000 3CDD\".replace(\" \", \"\"))),\n    (\"SPEED_REV\",        bytes.fromhex(\"AA550A0203800000 78DD\".replace(\" \", \"\"))),\n    (\"TORQUE_FWD\",       bytes.fromhex(\"AA550A0303800000 451D\".replace(\" \", \"\"))),\n    (\"TORQUE_REV\",       bytes.fromhex(\"AA550A0403800000 F0DD\".replace(\" \", \"\"))),\n    (\"SET_MODE_SPEED\",   bytes.fromhex(\"AA550A0500 5292\".replace(\" \", \"\"))),\n    (\"SET_MODE_TORQUE\",  bytes.fromhex(\"AA550A0600 5262\".replace(\" \", \"\"))),\n    (\"START_MOTOR\",      bytes.fromhex(\"AA550A0700 53F2\".replace(\" \", \"\"))),\n    (\"GET_STATUS\",       bytes.fromhex(\"AA550A0800 5602\".replace(\" \", \"\"))),",
+        "detail": "applications.web-app.checksum_crack",
+        "documentation": {}
+    },
+    {
+        "label": "CANDIDATES",
+        "kind": 5,
+        "importPath": "applications.web-app.checksum_crack",
+        "description": "applications.web-app.checksum_crack",
+        "peekOfCode": "CANDIDATES = {\n    \"CRC-16/CCITT-FALSE\": (0x1021, 0xFFFF, False, False, 0x0000),\n    \"CRC-16/XMODEM\":      (0x1021, 0x0000, False, False, 0x0000),\n    \"CRC-16/KERMIT\":      (0x1021, 0x0000, True,  True,  0x0000),\n    \"CRC-16/MODBUS\":      (0x8005, 0xFFFF, True,  True,  0x0000),\n    \"CRC-16/ARC\":         (0x8005, 0x0000, True,  True,  0x0000),\n    \"CRC-16/USB\":         (0x8005, 0xFFFF, True,  True,  0xFFFF),\n    \"CRC-16/MAXIM\":       (0x8005, 0x0000, True,  True,  0xFFFF),\n    \"CRC-16/IBM-3740\":    (0x1021, 0xFFFF, False, False, 0x0000),\n    \"CRC-16/AUG-CCITT\":   (0x1021, 0x1D0F, False, False, 0x0000),",
+        "detail": "applications.web-app.checksum_crack",
+        "documentation": {}
+    },
+    {
+        "label": "found",
+        "kind": 5,
+        "importPath": "applications.web-app.checksum_crack",
+        "description": "applications.web-app.checksum_crack",
+        "peekOfCode": "found = []\nfor cname, (poly, init, refin, refout, xorout) in CANDIDATES.items():\n    fn = lambda d, p=poly, i=init, ri=refin, ro=refout, x=xorout: crc16(d, p, i, ri, ro, x)\n    for rng_key in ranges(FRAMES[0][1]):\n        if match_all(fn, rng_key):\n            end = endianness(fn, rng_key)\n            found.append((cname, rng_key, end))\n            print(f\"MATCH: {cname:40s} range={rng_key:28s} endian={end}\")\nif not found:\n    print(\"No standard CRC-16 matched. Dumping per-frame CRC values for manual inspection...\")",
+        "detail": "applications.web-app.checksum_crack",
+        "documentation": {}
+    },
+    {
+        "label": "find_ports",
+        "kind": 2,
+        "importPath": "applications.web-app.discover_ports",
+        "description": "applications.web-app.discover_ports",
+        "peekOfCode": "def find_ports():\n    \"\"\"List all ST-LINK VCP ports present on the board.\"\"\"\n    ports = sorted(glob.glob(\"/dev/ttyACM*\"))\n    if not ports:\n        logger.error(\"No /dev/ttyACM* ports found. Are the Nucleo boards plugged in?\")\n    return ports\ndef probe(port: str) -> None:\n    \"\"\"Open a port, send NOP + GET_STATUS, dump whatever comes back.\"\"\"\n    board = um.MotorBoard(port, name=port)\n    if not board.connect(timeout=0.3):",
+        "detail": "applications.web-app.discover_ports",
+        "documentation": {}
+    },
+    {
+        "label": "probe",
+        "kind": 2,
+        "importPath": "applications.web-app.discover_ports",
+        "description": "applications.web-app.discover_ports",
+        "peekOfCode": "def probe(port: str) -> None:\n    \"\"\"Open a port, send NOP + GET_STATUS, dump whatever comes back.\"\"\"\n    board = um.MotorBoard(port, name=port)\n    if not board.connect(timeout=0.3):\n        return\n    logger.info(\"\\n=== %s ===\", port)\n    board.send_command(um.CMD_NOP)\n    time.sleep(0.05)\n    board.send_command(um.CMD_GET_STATUS)\n    resp = board.read_response(timeout=0.4)",
+        "detail": "applications.web-app.discover_ports",
+        "documentation": {}
+    },
+    {
+        "label": "spin",
+        "kind": 2,
+        "importPath": "applications.web-app.discover_ports",
+        "description": "applications.web-app.discover_ports",
+        "peekOfCode": "def spin(port: str, label: str) -> None:\n    \"\"\"Init + short forward spin on one port so you can identify the wheel.\"\"\"\n    board = um.MotorBoard(port, name=label)\n    if not board.connect(timeout=0.2):\n        return\n    logger.info(\"\\n>>> Spinning %s  (watch which physical wheel turns!) <<<\", port)\n    board.send_command(um.CMD_CLEAR_FAULTS)\n    board.send_command(um.CMD_SET_MODE_SPEED)\n    board.send_command(um.CMD_START_MOTOR)\n    time.sleep(0.1)",
+        "detail": "applications.web-app.discover_ports",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "applications.web-app.discover_ports",
+        "description": "applications.web-app.discover_ports",
+        "peekOfCode": "def main():\n    ap = argparse.ArgumentParser(description=\"Discover UART motor board ports\")\n    ap.add_argument(\"--spin\", action=\"store_true\",\n                    help=\"briefly spin each wheel to identify its position\")\n    ap.add_argument(\"--ports\", nargs=\"*\",\n                    help=\"explicit port list (default: all /dev/ttyACM*)\")\n    args = ap.parse_args()\n    ports = args.ports or find_ports()\n    if not ports:\n        sys.exit(1)",
+        "detail": "applications.web-app.discover_ports",
+        "documentation": {}
+    },
+    {
+        "label": "RL",
+        "kind": 5,
+        "importPath": "applications.web-app.discover_ports",
+        "description": "applications.web-app.discover_ports",
+        "peekOfCode": "RL = /dev/ttyACM0 is already confirmed. Use this to confirm the rest.\n\"\"\"\nimport argparse\nimport glob\nimport logging\nimport sys\nimport time\nimport uart_motors as um\nlogging.basicConfig(level=logging.DEBUG, format=\"%(message)s\")\nlogger = logging.getLogger(\"discover\")",
+        "detail": "applications.web-app.discover_ports",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "kind": 5,
+        "importPath": "applications.web-app.discover_ports",
+        "description": "applications.web-app.discover_ports",
+        "peekOfCode": "logger = logging.getLogger(\"discover\")\ndef find_ports():\n    \"\"\"List all ST-LINK VCP ports present on the board.\"\"\"\n    ports = sorted(glob.glob(\"/dev/ttyACM*\"))\n    if not ports:\n        logger.error(\"No /dev/ttyACM* ports found. Are the Nucleo boards plugged in?\")\n    return ports\ndef probe(port: str) -> None:\n    \"\"\"Open a port, send NOP + GET_STATUS, dump whatever comes back.\"\"\"\n    board = um.MotorBoard(port, name=port)",
+        "detail": "applications.web-app.discover_ports",
+        "documentation": {}
+    },
+    {
         "label": "ConnectionManager",
         "kind": 6,
         "importPath": "applications.web-app.main",
@@ -2214,7 +2367,25 @@
         "kind": 2,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "def stop_follow():\n    \"\"\"Stop follow-me tracking.\"\"\"\n    global follower\n    if follower is not None:\n        follower.stop()\n    return {\"stopped\": True}\n# =============================================================================\n# FASTAPI APPLICATION\n# =============================================================================\n@asynccontextmanager",
+        "peekOfCode": "def stop_follow():\n    \"\"\"Stop follow-me tracking.\"\"\"\n    global follower\n    if follower is not None:\n        follower.stop()\n    return {\"stopped\": True}\ndef start_autopilot(loop, waypoints=None, rotate_to_search=None):\n    \"\"\"Start waypoint autopilot mode. Loop = running asyncio loop for status broadcasts.\"\"\"\n    global autopilot\n    if not CV_AVAILABLE or WaypointAutopilot is None:",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "start_autopilot",
+        "kind": 2,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "def start_autopilot(loop, waypoints=None, rotate_to_search=None):\n    \"\"\"Start waypoint autopilot mode. Loop = running asyncio loop for status broadcasts.\"\"\"\n    global autopilot\n    if not CV_AVAILABLE or WaypointAutopilot is None:\n        return {\"error\": \"vision unavailable (opencv not installed)\"}\n    if motor_api is None:\n        return {\"error\": \"motor API not initialized\"}\n    if camera_stream is None or not camera_stream.running:\n        return {\"error\": \"camera stream not running\"}\n    if autopilot is not None and autopilot.running:",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "stop_autopilot",
+        "kind": 2,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "def stop_autopilot():\n    \"\"\"Stop waypoint autopilot mode.\"\"\"\n    global autopilot\n    if autopilot is not None:\n        autopilot.stop()\n    return {\"stopped\": True}\n# =============================================================================\n# FASTAPI APPLICATION\n# =============================================================================\n@asynccontextmanager",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -2457,7 +2628,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "camera_stream = None  # shared CameraStream (owns the webcam; drives the always-on feed)\nnavigator = None  # active MarkerNavigator instance (set on vision_nav start)\nfollower = None  # active MarkerFollower instance (set when follow-me mode starts)\n# =============================================================================\n# CONFIGURATION FILE MANAGEMENT\n# =============================================================================\ndef load_config() -> dict:\n    \"\"\"Load configuration from JSON file.\"\"\"\n    default_config = {\n        \"drive_type\": \"mecanum\",",
+        "peekOfCode": "camera_stream = None  # shared CameraStream (owns the webcam; drives the always-on feed)\nnavigator = None  # active MarkerNavigator instance (set on vision_nav start)\nfollower = None  # active MarkerFollower instance (set when follow-me mode starts)\nautopilot = None  # active WaypointAutopilot instance (set when autopilot mode starts)\n# =============================================================================\n# CONFIGURATION FILE MANAGEMENT\n# =============================================================================\ndef load_config() -> dict:\n    \"\"\"Load configuration from JSON file.\"\"\"\n    default_config = {",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -2466,7 +2637,7 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "navigator = None  # active MarkerNavigator instance (set on vision_nav start)\nfollower = None  # active MarkerFollower instance (set when follow-me mode starts)\n# =============================================================================\n# CONFIGURATION FILE MANAGEMENT\n# =============================================================================\ndef load_config() -> dict:\n    \"\"\"Load configuration from JSON file.\"\"\"\n    default_config = {\n        \"drive_type\": \"mecanum\",\n        \"network_mode\": \"wifi\"",
+        "peekOfCode": "navigator = None  # active MarkerNavigator instance (set on vision_nav start)\nfollower = None  # active MarkerFollower instance (set when follow-me mode starts)\nautopilot = None  # active WaypointAutopilot instance (set when autopilot mode starts)\n# =============================================================================\n# CONFIGURATION FILE MANAGEMENT\n# =============================================================================\ndef load_config() -> dict:\n    \"\"\"Load configuration from JSON file.\"\"\"\n    default_config = {\n        \"drive_type\": \"mecanum\",",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -2475,7 +2646,16 @@
         "kind": 5,
         "importPath": "applications.web-app.main",
         "description": "applications.web-app.main",
-        "peekOfCode": "follower = None  # active MarkerFollower instance (set when follow-me mode starts)\n# =============================================================================\n# CONFIGURATION FILE MANAGEMENT\n# =============================================================================\ndef load_config() -> dict:\n    \"\"\"Load configuration from JSON file.\"\"\"\n    default_config = {\n        \"drive_type\": \"mecanum\",\n        \"network_mode\": \"wifi\"\n    }",
+        "peekOfCode": "follower = None  # active MarkerFollower instance (set when follow-me mode starts)\nautopilot = None  # active WaypointAutopilot instance (set when autopilot mode starts)\n# =============================================================================\n# CONFIGURATION FILE MANAGEMENT\n# =============================================================================\ndef load_config() -> dict:\n    \"\"\"Load configuration from JSON file.\"\"\"\n    default_config = {\n        \"drive_type\": \"mecanum\",\n        \"network_mode\": \"wifi\"",
+        "detail": "applications.web-app.main",
+        "documentation": {}
+    },
+    {
+        "label": "autopilot",
+        "kind": 5,
+        "importPath": "applications.web-app.main",
+        "description": "applications.web-app.main",
+        "peekOfCode": "autopilot = None  # active WaypointAutopilot instance (set when autopilot mode starts)\n# =============================================================================\n# CONFIGURATION FILE MANAGEMENT\n# =============================================================================\ndef load_config() -> dict:\n    \"\"\"Load configuration from JSON file.\"\"\"\n    default_config = {\n        \"drive_type\": \"mecanum\",\n        \"network_mode\": \"wifi\"\n    }",
         "detail": "applications.web-app.main",
         "documentation": {}
     },
@@ -2651,6 +2831,15 @@
         "documentation": {}
     },
     {
+        "label": "WaypointAutopilot",
+        "kind": 6,
+        "importPath": "applications.web-app.marker_vision",
+        "description": "applications.web-app.marker_vision",
+        "peekOfCode": "class WaypointAutopilot:\n    \"\"\"Sequential marker navigator for autopilot mode.\n    Drives to a list of waypoints: [{\"id\": 0, \"distance_mm\": 500}, ...]\n    At each waypoint:\n    - Locates marker ID.\n    - If found: approaches using proportional throttle + strafe + rotation until\n      within follow_deadband_stop_mm of target distance.\n    - Once stopped at target distance: advances to the next waypoint.\n    - If marker ID not found:\n        - If rotate_to_search is True: rotates in place to search.",
+        "detail": "applications.web-app.marker_vision",
+        "documentation": {}
+    },
+    {
         "label": "calibrate",
         "kind": 2,
         "importPath": "applications.web-app.marker_vision",
@@ -2808,7 +2997,7 @@
         "kind": 5,
         "importPath": "applications.web-app.mechanumapi",
         "description": "applications.web-app.mechanumapi",
-        "peekOfCode": "Board = read_board_compatibility_name()\nSTSPIN = None\ntry:\n    if Board == \"stm32mp257\":\n        import stm32mp2 as STSPIN\n        logger.info(f\"Loaded motor driver for {Board}\")\n    elif Board == \"stm32mp157\":\n        import stm32mp1 as STSPIN\n        logger.info(f\"Loaded motor driver for {Board}\")\n    else:",
+        "peekOfCode": "Board = read_board_compatibility_name()\nSTSPIN = None\ntry:\n    if Board == \"stm32mp257\":\n        # Custom UART backend: 4x STM32 Nucleo + STEVAL-IHM023V3 motor boards\n        # over ST-LINK VCP (/dev/ttyACMx). Drop-in for the old stm32mp2 driver.\n        import uart_motors as STSPIN\n        logger.info(f\"Loaded UART motor backend for {Board}\")\n    elif Board == \"stm32mp157\":\n        import stm32mp1 as STSPIN",
         "detail": "applications.web-app.mechanumapi",
         "documentation": {}
     },
@@ -2817,7 +3006,7 @@
         "kind": 5,
         "importPath": "applications.web-app.mechanumapi",
         "description": "applications.web-app.mechanumapi",
-        "peekOfCode": "STSPIN = None\ntry:\n    if Board == \"stm32mp257\":\n        import stm32mp2 as STSPIN\n        logger.info(f\"Loaded motor driver for {Board}\")\n    elif Board == \"stm32mp157\":\n        import stm32mp1 as STSPIN\n        logger.info(f\"Loaded motor driver for {Board}\")\n    else:\n        logger.warning(f\"Unknown board: {Board}, attempting stm32mp1 driver\")",
+        "peekOfCode": "STSPIN = None\ntry:\n    if Board == \"stm32mp257\":\n        # Custom UART backend: 4x STM32 Nucleo + STEVAL-IHM023V3 motor boards\n        # over ST-LINK VCP (/dev/ttyACMx). Drop-in for the old stm32mp2 driver.\n        import uart_motors as STSPIN\n        logger.info(f\"Loaded UART motor backend for {Board}\")\n    elif Board == \"stm32mp157\":\n        import stm32mp1 as STSPIN\n        logger.info(f\"Loaded motor driver for {Board}\")",
         "detail": "applications.web-app.mechanumapi",
         "documentation": {}
     },
@@ -3404,6 +3593,150 @@
         "description": "applications.web-app.stm32mp2",
         "peekOfCode": "spn_motor_2 = EVSPIN948Driver(pins_2)\nspn_motor_2.setup_gpio()\ndef stop():\n    spn_motor_1.stop()\n    spn_motor_2.stop()\ndef release():\n    try:\n        spn_motor_2.end()\n    except Exception:\n        pass",
         "detail": "applications.web-app.stm32mp2",
+        "documentation": {}
+    },
+    {
+        "label": "MotorBoard",
+        "kind": 6,
+        "importPath": "applications.web-app.uart_motors",
+        "description": "applications.web-app.uart_motors",
+        "peekOfCode": "class MotorBoard:\n    \"\"\"One STM32 motor board behind one /dev/ttyACMx port.\"\"\"\n    def __init__(self, port: str, name: str, board_id: int = BOARD_ID):\n        self.port = port\n        self.name = name\n        self.board_id = board_id\n        self.ser = None\n        self._lock = threading.Lock()\n    def connect(self, timeout: float = 0.1) -> bool:\n        \"\"\"Open the serial port. Returns True on success.\"\"\"",
+        "detail": "applications.web-app.uart_motors",
+        "documentation": {}
+    },
+    {
+        "label": "UARTMotors",
+        "kind": 6,
+        "importPath": "applications.web-app.uart_motors",
+        "description": "applications.web-app.uart_motors",
+        "peekOfCode": "class UARTMotors:\n    \"\"\"\n    Drop-in replacement for the old `stm32mp2` driver module.\n    Exposes motor_1a/1b/2a/2b(duty, dir), stop(), release() so mechanumapi.py\n    works unchanged, plus higher-level helpers (set_speed, clear_faults,\n    get_status, init sequence).\n    \"\"\"\n    # mecanum motor slot -> wheel name\n    _SLOT_TO_WHEEL = {\"1a\": \"FL\", \"1b\": \"FR\", \"2a\": \"RL\", \"2b\": \"RR\"}\n    def __init__(self, wheel_map: dict = None):",
+        "detail": "applications.web-app.uart_motors",
+        "documentation": {}
+    },
+    {
+        "label": "crc16_modbus",
+        "kind": 2,
+        "importPath": "applications.web-app.uart_motors",
+        "description": "applications.web-app.uart_motors",
+        "peekOfCode": "def crc16_modbus(data: bytes) -> int:\n    \"\"\"Return the CRC-16/MODBUS of `data` as a 16-bit int.\"\"\"\n    crc = 0xFFFF\n    for byte in data:\n        crc ^= byte\n        for _ in range(8):\n            if crc & 0x0001:\n                crc = (crc >> 1) ^ 0xA001\n            else:\n                crc >>= 1",
+        "detail": "applications.web-app.uart_motors",
+        "documentation": {}
+    },
+    {
+        "label": "build_frame",
+        "kind": 2,
+        "importPath": "applications.web-app.uart_motors",
+        "description": "applications.web-app.uart_motors",
+        "peekOfCode": "def build_frame(cmd: int, payload: bytes = b\"\", board_id: int = BOARD_ID) -> bytes:\n    \"\"\"\n    Build a complete wire frame for `cmd` with the given payload.\n    The checksum is computed dynamically, so arbitrary speed/direction values\n    work without hardcoding hex strings.\n    \"\"\"\n    payload = bytes(payload)\n    body = bytes([board_id, cmd, len(payload)]) + payload\n    crc = crc16_modbus(body)\n    return HEADER + body + bytes([crc & 0xFF, (crc >> 8) & 0xFF])",
+        "detail": "applications.web-app.uart_motors",
+        "documentation": {}
+    },
+    {
+        "label": "speed_payload",
+        "kind": 2,
+        "importPath": "applications.web-app.uart_motors",
+        "description": "applications.web-app.uart_motors",
+        "peekOfCode": "def speed_payload(value: int) -> bytes:\n    \"\"\"\n    Encode a speed magnitude into the 3-byte SPEED_FWD/REV payload.\n    Confirmed run frame used payload 80 00 00; we emit [hi, lo_mid, lo] of a\n    16-bit magnitude so the high byte carries the coarse value (0x80 == 128).\n    \"\"\"\n    value = max(0, min(SPEED_MAX, int(value)))\n    return bytes([(value >> 8) & 0xFF, value & 0xFF, 0x00])\n# =============================================================================\n# PER-BOARD SERIAL LINK",
+        "detail": "applications.web-app.uart_motors",
+        "documentation": {}
+    },
+    {
+        "label": "get_controller",
+        "kind": 2,
+        "importPath": "applications.web-app.uart_motors",
+        "description": "applications.web-app.uart_motors",
+        "peekOfCode": "def get_controller() -> UARTMotors:\n    \"\"\"Return the process-wide controller, connecting + initializing on first use.\"\"\"\n    global _instance\n    if _instance is None:\n        _instance = UARTMotors()\n        _instance.connect()\n        _instance.init_all()\n    return _instance\ndef __getattr__(name):\n    \"\"\"",
+        "detail": "applications.web-app.uart_motors",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "kind": 5,
+        "importPath": "applications.web-app.uart_motors",
+        "description": "applications.web-app.uart_motors",
+        "peekOfCode": "logger = logging.getLogger(__name__)\n# =============================================================================\n# PROTOCOL CONSTANTS\n# =============================================================================\nHEADER = bytes([0xAA, 0x55])\nBOARD_ID = 0x0A  # confirmed board address in every example frame\n# Command opcodes\nCMD_NOP              = 0x00\nCMD_SPEED_FWD        = 0x01\nCMD_SPEED_REV        = 0x02",
+        "detail": "applications.web-app.uart_motors",
+        "documentation": {}
+    },
+    {
+        "label": "HEADER",
+        "kind": 5,
+        "importPath": "applications.web-app.uart_motors",
+        "description": "applications.web-app.uart_motors",
+        "peekOfCode": "HEADER = bytes([0xAA, 0x55])\nBOARD_ID = 0x0A  # confirmed board address in every example frame\n# Command opcodes\nCMD_NOP              = 0x00\nCMD_SPEED_FWD        = 0x01\nCMD_SPEED_REV        = 0x02\nCMD_TORQUE_FWD       = 0x03\nCMD_TORQUE_REV       = 0x04\nCMD_SET_MODE_SPEED   = 0x05\nCMD_SET_MODE_TORQUE  = 0x06",
+        "detail": "applications.web-app.uart_motors",
+        "documentation": {}
+    },
+    {
+        "label": "BOARD_ID",
+        "kind": 5,
+        "importPath": "applications.web-app.uart_motors",
+        "description": "applications.web-app.uart_motors",
+        "peekOfCode": "BOARD_ID = 0x0A  # confirmed board address in every example frame\n# Command opcodes\nCMD_NOP              = 0x00\nCMD_SPEED_FWD        = 0x01\nCMD_SPEED_REV        = 0x02\nCMD_TORQUE_FWD       = 0x03\nCMD_TORQUE_REV       = 0x04\nCMD_SET_MODE_SPEED   = 0x05\nCMD_SET_MODE_TORQUE  = 0x06\nCMD_START_MOTOR      = 0x07",
+        "detail": "applications.web-app.uart_motors",
+        "documentation": {}
+    },
+    {
+        "label": "CMD_SET_CURRENT_LIMIT",
+        "kind": 5,
+        "importPath": "applications.web-app.uart_motors",
+        "description": "applications.web-app.uart_motors",
+        "peekOfCode": "CMD_SET_CURRENT_LIMIT = 0x0F\nCMD_NAMES = {\n    CMD_NOP: \"NOP\", CMD_SPEED_FWD: \"SPEED_FWD\", CMD_SPEED_REV: \"SPEED_REV\",\n    CMD_TORQUE_FWD: \"TORQUE_FWD\", CMD_TORQUE_REV: \"TORQUE_REV\",\n    CMD_SET_MODE_SPEED: \"SET_MODE_SPEED\", CMD_SET_MODE_TORQUE: \"SET_MODE_TORQUE\",\n    CMD_START_MOTOR: \"START_MOTOR\", CMD_GET_STATUS: \"GET_STATUS\",\n    CMD_GET_SPEED: \"GET_SPEED\", CMD_GET_TORQUE: \"GET_TORQUE\",\n    CMD_CLEAR_FAULTS: \"CLEAR_FAULTS\", CMD_SET_ACCEL_ONLY: \"SET_ACCEL_ONLY\",\n    CMD_SET_TIME_ONLY: \"SET_TIME_ONLY\", CMD_HEARTBEAT: \"HEARTBEAT\",\n    CMD_SET_CURRENT_LIMIT: \"SET_CURRENT_LIMIT\",",
+        "detail": "applications.web-app.uart_motors",
+        "documentation": {}
+    },
+    {
+        "label": "CMD_NAMES",
+        "kind": 5,
+        "importPath": "applications.web-app.uart_motors",
+        "description": "applications.web-app.uart_motors",
+        "peekOfCode": "CMD_NAMES = {\n    CMD_NOP: \"NOP\", CMD_SPEED_FWD: \"SPEED_FWD\", CMD_SPEED_REV: \"SPEED_REV\",\n    CMD_TORQUE_FWD: \"TORQUE_FWD\", CMD_TORQUE_REV: \"TORQUE_REV\",\n    CMD_SET_MODE_SPEED: \"SET_MODE_SPEED\", CMD_SET_MODE_TORQUE: \"SET_MODE_TORQUE\",\n    CMD_START_MOTOR: \"START_MOTOR\", CMD_GET_STATUS: \"GET_STATUS\",\n    CMD_GET_SPEED: \"GET_SPEED\", CMD_GET_TORQUE: \"GET_TORQUE\",\n    CMD_CLEAR_FAULTS: \"CLEAR_FAULTS\", CMD_SET_ACCEL_ONLY: \"SET_ACCEL_ONLY\",\n    CMD_SET_TIME_ONLY: \"SET_TIME_ONLY\", CMD_HEARTBEAT: \"HEARTBEAT\",\n    CMD_SET_CURRENT_LIMIT: \"SET_CURRENT_LIMIT\",\n}",
+        "detail": "applications.web-app.uart_motors",
+        "documentation": {}
+    },
+    {
+        "label": "BAUD_RATE",
+        "kind": 5,
+        "importPath": "applications.web-app.uart_motors",
+        "description": "applications.web-app.uart_motors",
+        "peekOfCode": "BAUD_RATE = 115200\n# Maps the 0-100 \"duty\" the mecanum layer produces onto the 16-bit speed\n# field the firmware expects. The confirmed run frame used 0x80 (128) for a\n# half-throttle spin, so duty*10 -> 50% maps to 500 and 100% maps to 1000,\n# keeping us inside the known-good range. Tune SPEED_SCALE if the wheels\n# need more/less headroom.\nSPEED_SCALE = 10\nSPEED_MAX = 0xFFFF\n# =============================================================================\n# CRC-16/MODBUS  (poly 0xA001 reflected, init 0xFFFF, no final xor)",
+        "detail": "applications.web-app.uart_motors",
+        "documentation": {}
+    },
+    {
+        "label": "SPEED_SCALE",
+        "kind": 5,
+        "importPath": "applications.web-app.uart_motors",
+        "description": "applications.web-app.uart_motors",
+        "peekOfCode": "SPEED_SCALE = 10\nSPEED_MAX = 0xFFFF\n# =============================================================================\n# CRC-16/MODBUS  (poly 0xA001 reflected, init 0xFFFF, no final xor)\n# =============================================================================\ndef crc16_modbus(data: bytes) -> int:\n    \"\"\"Return the CRC-16/MODBUS of `data` as a 16-bit int.\"\"\"\n    crc = 0xFFFF\n    for byte in data:\n        crc ^= byte",
+        "detail": "applications.web-app.uart_motors",
+        "documentation": {}
+    },
+    {
+        "label": "SPEED_MAX",
+        "kind": 5,
+        "importPath": "applications.web-app.uart_motors",
+        "description": "applications.web-app.uart_motors",
+        "peekOfCode": "SPEED_MAX = 0xFFFF\n# =============================================================================\n# CRC-16/MODBUS  (poly 0xA001 reflected, init 0xFFFF, no final xor)\n# =============================================================================\ndef crc16_modbus(data: bytes) -> int:\n    \"\"\"Return the CRC-16/MODBUS of `data` as a 16-bit int.\"\"\"\n    crc = 0xFFFF\n    for byte in data:\n        crc ^= byte\n        for _ in range(8):",
+        "detail": "applications.web-app.uart_motors",
+        "documentation": {}
+    },
+    {
+        "label": "DEFAULT_WHEELS",
+        "kind": 5,
+        "importPath": "applications.web-app.uart_motors",
+        "description": "applications.web-app.uart_motors",
+        "peekOfCode": "DEFAULT_WHEELS = {\n    \"FL\": (\"/dev/ttyACM1\", BOARD_ID),\n    \"FR\": (\"/dev/ttyACM2\", BOARD_ID),\n    \"RL\": (\"/dev/ttyACM0\", BOARD_ID),  # confirmed\n    \"RR\": (\"/dev/ttyACM3\", BOARD_ID),  # TBD -- may not exist\n}\nclass UARTMotors:\n    \"\"\"\n    Drop-in replacement for the old `stm32mp2` driver module.\n    Exposes motor_1a/1b/2a/2b(duty, dir), stop(), release() so mechanumapi.py",
+        "detail": "applications.web-app.uart_motors",
+        "documentation": {}
+    },
+    {
+        "label": "_instance",
+        "kind": 5,
+        "importPath": "applications.web-app.uart_motors",
+        "description": "applications.web-app.uart_motors",
+        "peekOfCode": "_instance = None\ndef get_controller() -> UARTMotors:\n    \"\"\"Return the process-wide controller, connecting + initializing on first use.\"\"\"\n    global _instance\n    if _instance is None:\n        _instance = UARTMotors()\n        _instance.connect()\n        _instance.init_all()\n    return _instance\ndef __getattr__(name):",
+        "detail": "applications.web-app.uart_motors",
         "documentation": {}
     },
     {

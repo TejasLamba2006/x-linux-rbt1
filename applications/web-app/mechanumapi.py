@@ -58,8 +58,10 @@ STSPIN = None
 
 try:
     if Board == "stm32mp257":
-        import stm32mp2 as STSPIN
-        logger.info(f"Loaded motor driver for {Board}")
+        # Custom UART backend: 4x STM32 Nucleo + STEVAL-IHM023V3 motor boards
+        # over ST-LINK VCP (/dev/ttyACMx). Drop-in for the old stm32mp2 driver.
+        import uart_motors as STSPIN
+        logger.info(f"Loaded UART motor backend for {Board}")
     elif Board == "stm32mp157":
         import stm32mp1 as STSPIN
         logger.info(f"Loaded motor driver for {Board}")
