@@ -311,7 +311,9 @@ class UARTMotors:
             # zero-throttle frame on the forward opcode == stop
             board.send_command(CMD_SPEED_FWD, speed_payload(0))
             return
-        cmd = CMD_SPEED_REV if direction else CMD_SPEED_FWD
+        # Physical motor wiring runs opposite to the firmware's FWD/REV naming,
+        # so the opcodes are swapped here: direction 0 (forward) -> SPEED_REV.
+        cmd = CMD_SPEED_FWD if direction else CMD_SPEED_REV
         board.send_command(cmd, speed_payload(magnitude))
 
     def stop_all(self) -> None:
