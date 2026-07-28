@@ -3636,7 +3636,7 @@
         "kind": 2,
         "importPath": "applications.web-app.uart_motors",
         "description": "applications.web-app.uart_motors",
-        "peekOfCode": "def speed_payload(value: int) -> bytes:\n    \"\"\"\n    Encode a speed magnitude into the 3-byte SPEED_FWD/REV payload.\n    Confirmed run frame used payload 80 00 00; we emit [hi, lo_mid, lo] of a\n    16-bit magnitude so the high byte carries the coarse value (0x80 == 128).\n    \"\"\"\n    value = max(0, min(SPEED_MAX, int(value)))\n    return bytes([(value >> 8) & 0xFF, value & 0xFF, 0x00])\n# =============================================================================\n# PER-BOARD SERIAL LINK",
+        "peekOfCode": "def speed_payload(value: int) -> bytes:\n    \"\"\"\n    Encode a speed magnitude into the 3-byte SPEED_FWD/REV payload.\n    The confirmed run frame used payload 80 00 00 -- the speed lives in the\n    FIRST byte (little-endian 16-bit value, low byte first, third byte 0x00).\n    So 0x80 (128) -> [0x80, 0x00, 0x00], and 500 (0x01F4) -> [0xF4, 0x01, 0x00].\n    \"\"\"\n    value = max(0, min(SPEED_MAX, int(value)))\n    return bytes([value & 0xFF, (value >> 8) & 0xFF, 0x00])\n# =============================================================================",
         "detail": "applications.web-app.uart_motors",
         "documentation": {}
     },
@@ -3726,7 +3726,7 @@
         "kind": 5,
         "importPath": "applications.web-app.uart_motors",
         "description": "applications.web-app.uart_motors",
-        "peekOfCode": "DEFAULT_WHEELS = {\n    \"FL\": (\"/dev/ttyACM1\", BOARD_ID),\n    \"FR\": (\"/dev/ttyACM2\", BOARD_ID),\n    \"RL\": (\"/dev/ttyACM0\", BOARD_ID),  # confirmed\n    \"RR\": (\"/dev/ttyACM3\", BOARD_ID),  # TBD -- may not exist\n}\nclass UARTMotors:\n    \"\"\"\n    Drop-in replacement for the old `stm32mp2` driver module.\n    Exposes motor_1a/1b/2a/2b(duty, dir), stop(), release() so mechanumapi.py",
+        "peekOfCode": "DEFAULT_WHEELS = {\n    \"FL\": (\"/dev/ttyACM1\", BOARD_ID),\n    \"FR\": (\"/dev/ttyACM3\", BOARD_ID),\n    \"RL\": (\"/dev/ttyACM0\", BOARD_ID),\n    \"RR\": (\"/dev/ttyACM2\", BOARD_ID),\n}\nclass UARTMotors:\n    \"\"\"\n    Drop-in replacement for the old `stm32mp2` driver module.\n    Exposes motor_1a/1b/2a/2b(duty, dir), stop(), release() so mechanumapi.py",
         "detail": "applications.web-app.uart_motors",
         "documentation": {}
     },

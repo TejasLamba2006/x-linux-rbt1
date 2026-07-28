@@ -122,11 +122,12 @@ def speed_payload(value: int) -> bytes:
     """
     Encode a speed magnitude into the 3-byte SPEED_FWD/REV payload.
 
-    Confirmed run frame used payload 80 00 00; we emit [hi, lo_mid, lo] of a
-    16-bit magnitude so the high byte carries the coarse value (0x80 == 128).
+    The confirmed run frame used payload 80 00 00 -- the speed lives in the
+    FIRST byte (little-endian 16-bit value, low byte first, third byte 0x00).
+    So 0x80 (128) -> [0x80, 0x00, 0x00], and 500 (0x01F4) -> [0xF4, 0x01, 0x00].
     """
     value = max(0, min(SPEED_MAX, int(value)))
-    return bytes([(value >> 8) & 0xFF, value & 0xFF, 0x00])
+    return bytes([value & 0xFF, (value >> 8) & 0xFF, 0x00])
 
 
 # =============================================================================
@@ -223,14 +224,13 @@ class MotorBoard:
 # =============================================================================
 # 4-WHEEL CONTROLLER
 # =============================================================================
-# Wheel positions -> (port, board_id). Port mapping is a best guess until the
-# discovery script confirms it; RL=/dev/ttyACM0 is confirmed. Override via
-# the WHEEL_PORTS env-style dict or edit here once mapping is verified.
+# Wheel positions -> (port, board_id). Mapping confirmed by the per-wheel
+# spin test (discover_ports.py --spin): ACM0=RL, ACM1=FL, ACM2=RR, ACM3=FR.
 DEFAULT_WHEELS = {
     "FL": ("/dev/ttyACM1", BOARD_ID),
-    "FR": ("/dev/ttyACM2", BOARD_ID),
-    "RL": ("/dev/ttyACM0", BOARD_ID),  # confirmed
-    "RR": ("/dev/ttyACM3", BOARD_ID),  # TBD -- may not exist
+    "FR": ("/dev/ttyACM3", BOARD_ID),
+    "RL": ("/dev/ttyACM0", BOARD_ID),
+    "RR": ("/dev/ttyACM2", BOARD_ID),
 }
 
 
