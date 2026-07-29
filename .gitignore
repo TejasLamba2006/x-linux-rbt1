@@ -371,3 +371,4 @@ applications/web-app/tls_cert.pem
 applications/web-app/tls_key.pem
 
 .omc/
+c-code-thats-flashed/

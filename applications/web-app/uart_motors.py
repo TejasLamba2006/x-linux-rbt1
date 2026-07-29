@@ -80,13 +80,13 @@ CMD_NAMES = {
 
 BAUD_RATE = 115200
 
-# Maps the 0-100 "duty" the mecanum layer produces onto the 16-bit speed
-# field the firmware expects. The confirmed run frame used 0x80 (128) for a
-# half-throttle spin, so duty*10 -> 50% maps to 500 and 100% maps to 1000,
-# keeping us inside the known-good range. Tune SPEED_SCALE if the wheels
-# need more/less headroom.
-SPEED_SCALE = 10
-SPEED_MAX = 0xFFFF
+# Speed is a single byte (0-255) mapped linearly to 0-1500 RPM by the firmware.
+# The 3-byte SPEED payload is: [speed_byte, hold_time_byte, accel_brake_byte].
+#   byte[0] = speed (0-255 -> 0-1500 RPM)
+#   byte[1] = hold time (0-255 -> 0-15000ms auto-stop; 0 = run forever)
+#   byte[2] = [7:4] accel nibble, [3:0] brake nibble (0x0F = immediate stop)
+# We always send hold=0 (run until told otherwise) and accel/brake=0 (defaults).
+SPEED_MAX_BYTE = 255
 
 
 # =============================================================================
@@ -122,12 +122,16 @@ def speed_payload(value: int) -> bytes:
     """
     Encode a speed magnitude into the 3-byte SPEED_FWD/REV payload.
 
-    The confirmed run frame used payload 80 00 00 -- the speed lives in the
-    FIRST byte (little-endian 16-bit value, low byte first, third byte 0x00).
-    So 0x80 (128) -> [0x80, 0x00, 0x00], and 500 (0x01F4) -> [0xF4, 0x01, 0x00].
+    Firmware layout (from main.c MC_ProcessPackedProtocolFrame):
+      byte[0] = speed (0-255, linear map to 0-1500 RPM)
+      byte[1] = hold time (0-255, maps to 0-15000ms auto-stop; 0 = run forever)
+      byte[2] = [7:4] accel nibble, [3:0] brake nibble (0x0F = immediate stop)
+
+    We always send hold=0 (run until next command) and accel/brake=0x00
+    (firmware defaults: fast accel, no brake action).
     """
-    value = max(0, min(SPEED_MAX, int(value)))
-    return bytes([value & 0xFF, (value >> 8) & 0xFF, 0x00])
+    value = max(0, min(SPEED_MAX_BYTE, int(value)))
+    return bytes([value, 0x00, 0x00])
 
 
 # =============================================================================
@@ -306,7 +310,8 @@ class UARTMotors:
         if wheel not in self._ready:
             self.init_wheel(wheel)
 
-        magnitude = int(max(0, min(100, speed))) * SPEED_SCALE
+        # Map 0-100 duty (from mecanum layer) to 0-255 firmware speed byte
+        magnitude = int(max(0, min(100, speed)) * 255 / 100)
         if magnitude == 0:
             # zero-throttle frame on the forward opcode == stop
             board.send_command(CMD_SPEED_FWD, speed_payload(0))

@@ -227,6 +227,38 @@
         "documentation": {}
     },
     {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Tuple",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Tuple",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
         "label": "List",
         "importPath": "typing",
         "description": "typing",
@@ -491,6 +523,50 @@
         "documentation": {}
     },
     {
+        "label": "runpy",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "runpy",
+        "description": "runpy",
+        "detail": "runpy",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "site",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "site",
+        "description": "site",
+        "detail": "site",
+        "documentation": {}
+    },
+    {
+        "label": "struct",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "struct",
+        "description": "struct",
+        "detail": "struct",
+        "documentation": {}
+    },
+    {
+        "label": "serial",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "serial",
+        "description": "serial",
+        "detail": "serial",
+        "documentation": {}
+    },
+    {
         "label": "onnxruntime",
         "kind": 6,
         "isExtraImport": true,
@@ -604,15 +680,6 @@
         "description": "pynput",
         "isExtraImport": true,
         "detail": "pynput",
-        "documentation": {}
-    },
-    {
-        "label": "struct",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "struct",
-        "description": "struct",
-        "detail": "struct",
         "documentation": {}
     },
     {
@@ -3636,7 +3703,7 @@
         "kind": 2,
         "importPath": "applications.web-app.uart_motors",
         "description": "applications.web-app.uart_motors",
-        "peekOfCode": "def speed_payload(value: int) -> bytes:\n    \"\"\"\n    Encode a speed magnitude into the 3-byte SPEED_FWD/REV payload.\n    The confirmed run frame used payload 80 00 00 -- the speed lives in the\n    FIRST byte (little-endian 16-bit value, low byte first, third byte 0x00).\n    So 0x80 (128) -> [0x80, 0x00, 0x00], and 500 (0x01F4) -> [0xF4, 0x01, 0x00].\n    \"\"\"\n    value = max(0, min(SPEED_MAX, int(value)))\n    return bytes([value & 0xFF, (value >> 8) & 0xFF, 0x00])\n# =============================================================================",
+        "peekOfCode": "def speed_payload(value: int) -> bytes:\n    \"\"\"\n    Encode a speed magnitude into the 3-byte SPEED_FWD/REV payload.\n    Firmware layout (from main.c MC_ProcessPackedProtocolFrame):\n      byte[0] = speed (0-255, linear map to 0-1500 RPM)\n      byte[1] = hold time (0-255, maps to 0-15000ms auto-stop; 0 = run forever)\n      byte[2] = [7:4] accel nibble, [3:0] brake nibble (0x0F = immediate stop)\n    We always send hold=0 (run until next command) and accel/brake=0x00\n    (firmware defaults: fast accel, no brake action).\n    \"\"\"",
         "detail": "applications.web-app.uart_motors",
         "documentation": {}
     },
@@ -3699,25 +3766,16 @@
         "kind": 5,
         "importPath": "applications.web-app.uart_motors",
         "description": "applications.web-app.uart_motors",
-        "peekOfCode": "BAUD_RATE = 115200\n# Maps the 0-100 \"duty\" the mecanum layer produces onto the 16-bit speed\n# field the firmware expects. The confirmed run frame used 0x80 (128) for a\n# half-throttle spin, so duty*10 -> 50% maps to 500 and 100% maps to 1000,\n# keeping us inside the known-good range. Tune SPEED_SCALE if the wheels\n# need more/less headroom.\nSPEED_SCALE = 10\nSPEED_MAX = 0xFFFF\n# =============================================================================\n# CRC-16/MODBUS  (poly 0xA001 reflected, init 0xFFFF, no final xor)",
+        "peekOfCode": "BAUD_RATE = 115200\n# Speed is a single byte (0-255) mapped linearly to 0-1500 RPM by the firmware.\n# The 3-byte SPEED payload is: [speed_byte, hold_time_byte, accel_brake_byte].\n#   byte[0] = speed (0-255 -> 0-1500 RPM)\n#   byte[1] = hold time (0-255 -> 0-15000ms auto-stop; 0 = run forever)\n#   byte[2] = [7:4] accel nibble, [3:0] brake nibble (0x0F = immediate stop)\n# We always send hold=0 (run until told otherwise) and accel/brake=0 (defaults).\nSPEED_MAX_BYTE = 255\n# =============================================================================\n# CRC-16/MODBUS  (poly 0xA001 reflected, init 0xFFFF, no final xor)",
         "detail": "applications.web-app.uart_motors",
         "documentation": {}
     },
     {
-        "label": "SPEED_SCALE",
+        "label": "SPEED_MAX_BYTE",
         "kind": 5,
         "importPath": "applications.web-app.uart_motors",
         "description": "applications.web-app.uart_motors",
-        "peekOfCode": "SPEED_SCALE = 10\nSPEED_MAX = 0xFFFF\n# =============================================================================\n# CRC-16/MODBUS  (poly 0xA001 reflected, init 0xFFFF, no final xor)\n# =============================================================================\ndef crc16_modbus(data: bytes) -> int:\n    \"\"\"Return the CRC-16/MODBUS of `data` as a 16-bit int.\"\"\"\n    crc = 0xFFFF\n    for byte in data:\n        crc ^= byte",
-        "detail": "applications.web-app.uart_motors",
-        "documentation": {}
-    },
-    {
-        "label": "SPEED_MAX",
-        "kind": 5,
-        "importPath": "applications.web-app.uart_motors",
-        "description": "applications.web-app.uart_motors",
-        "peekOfCode": "SPEED_MAX = 0xFFFF\n# =============================================================================\n# CRC-16/MODBUS  (poly 0xA001 reflected, init 0xFFFF, no final xor)\n# =============================================================================\ndef crc16_modbus(data: bytes) -> int:\n    \"\"\"Return the CRC-16/MODBUS of `data` as a 16-bit int.\"\"\"\n    crc = 0xFFFF\n    for byte in data:\n        crc ^= byte\n        for _ in range(8):",
+        "peekOfCode": "SPEED_MAX_BYTE = 255\n# =============================================================================\n# CRC-16/MODBUS  (poly 0xA001 reflected, init 0xFFFF, no final xor)\n# =============================================================================\ndef crc16_modbus(data: bytes) -> int:\n    \"\"\"Return the CRC-16/MODBUS of `data` as a 16-bit int.\"\"\"\n    crc = 0xFFFF\n    for byte in data:\n        crc ^= byte\n        for _ in range(8):",
         "detail": "applications.web-app.uart_motors",
         "documentation": {}
     },
@@ -3737,6 +3795,393 @@
         "description": "applications.web-app.uart_motors",
         "peekOfCode": "_instance = None\ndef get_controller() -> UARTMotors:\n    \"\"\"Return the process-wide controller, connecting + initializing on first use.\"\"\"\n    global _instance\n    if _instance is None:\n        _instance = UARTMotors()\n        _instance.connect()\n        _instance.init_all()\n    return _instance\ndef __getattr__(name):",
         "detail": "applications.web-app.uart_motors",
+        "documentation": {}
+    },
+    {
+        "label": "bin_dir",
+        "kind": 5,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "description": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "peekOfCode": "bin_dir = os.path.dirname(abs_file)\nbase = bin_dir[: -len(\"Scripts\") - 1]  # strip away the bin part from the __file__, plus the path separator\n# prepend bin to PATH (this file is inside the bin directory)\nos.environ[\"PATH\"] = os.pathsep.join([bin_dir, *os.environ.get(\"PATH\", \"\").split(os.pathsep)])\nos.environ[\"VIRTUAL_ENV\"] = base  # virtual env is right above bin directory\nos.environ[\"VIRTUAL_ENV_PROMPT\"] = \"\" or os.path.basename(base)  # noqa: SIM222\n# add the virtual environments libraries to the host python import mechanism\nprev_length = len(sys.path)\nfor lib in \"..\\\\Lib\\\\site-packages\".split(os.pathsep):\n    path = os.path.realpath(os.path.join(bin_dir, lib))",
+        "detail": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "base",
+        "kind": 5,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "description": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "peekOfCode": "base = bin_dir[: -len(\"Scripts\") - 1]  # strip away the bin part from the __file__, plus the path separator\n# prepend bin to PATH (this file is inside the bin directory)\nos.environ[\"PATH\"] = os.pathsep.join([bin_dir, *os.environ.get(\"PATH\", \"\").split(os.pathsep)])\nos.environ[\"VIRTUAL_ENV\"] = base  # virtual env is right above bin directory\nos.environ[\"VIRTUAL_ENV_PROMPT\"] = \"\" or os.path.basename(base)  # noqa: SIM222\n# add the virtual environments libraries to the host python import mechanism\nprev_length = len(sys.path)\nfor lib in \"..\\\\Lib\\\\site-packages\".split(os.pathsep):\n    path = os.path.realpath(os.path.join(bin_dir, lib))\n    site.addsitedir(path)",
+        "detail": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "os.environ[\"PATH\"]",
+        "kind": 5,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "description": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "peekOfCode": "os.environ[\"PATH\"] = os.pathsep.join([bin_dir, *os.environ.get(\"PATH\", \"\").split(os.pathsep)])\nos.environ[\"VIRTUAL_ENV\"] = base  # virtual env is right above bin directory\nos.environ[\"VIRTUAL_ENV_PROMPT\"] = \"\" or os.path.basename(base)  # noqa: SIM222\n# add the virtual environments libraries to the host python import mechanism\nprev_length = len(sys.path)\nfor lib in \"..\\\\Lib\\\\site-packages\".split(os.pathsep):\n    path = os.path.realpath(os.path.join(bin_dir, lib))\n    site.addsitedir(path)\nsys.path[:] = sys.path[prev_length:] + sys.path[0:prev_length]\nsys.real_prefix = sys.prefix",
+        "detail": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "os.environ[\"VIRTUAL_ENV\"]",
+        "kind": 5,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "description": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "peekOfCode": "os.environ[\"VIRTUAL_ENV\"] = base  # virtual env is right above bin directory\nos.environ[\"VIRTUAL_ENV_PROMPT\"] = \"\" or os.path.basename(base)  # noqa: SIM222\n# add the virtual environments libraries to the host python import mechanism\nprev_length = len(sys.path)\nfor lib in \"..\\\\Lib\\\\site-packages\".split(os.pathsep):\n    path = os.path.realpath(os.path.join(bin_dir, lib))\n    site.addsitedir(path)\nsys.path[:] = sys.path[prev_length:] + sys.path[0:prev_length]\nsys.real_prefix = sys.prefix\nsys.prefix = base",
+        "detail": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "os.environ[\"VIRTUAL_ENV_PROMPT\"]",
+        "kind": 5,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "description": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "peekOfCode": "os.environ[\"VIRTUAL_ENV_PROMPT\"] = \"\" or os.path.basename(base)  # noqa: SIM222\n# add the virtual environments libraries to the host python import mechanism\nprev_length = len(sys.path)\nfor lib in \"..\\\\Lib\\\\site-packages\".split(os.pathsep):\n    path = os.path.realpath(os.path.join(bin_dir, lib))\n    site.addsitedir(path)\nsys.path[:] = sys.path[prev_length:] + sys.path[0:prev_length]\nsys.real_prefix = sys.prefix\nsys.prefix = base",
+        "detail": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "prev_length",
+        "kind": 5,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "description": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "peekOfCode": "prev_length = len(sys.path)\nfor lib in \"..\\\\Lib\\\\site-packages\".split(os.pathsep):\n    path = os.path.realpath(os.path.join(bin_dir, lib))\n    site.addsitedir(path)\nsys.path[:] = sys.path[prev_length:] + sys.path[0:prev_length]\nsys.real_prefix = sys.prefix\nsys.prefix = base",
+        "detail": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "sys.path[:]",
+        "kind": 5,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "description": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "peekOfCode": "sys.path[:] = sys.path[prev_length:] + sys.path[0:prev_length]\nsys.real_prefix = sys.prefix\nsys.prefix = base",
+        "detail": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "sys.real_prefix",
+        "kind": 5,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "description": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "peekOfCode": "sys.real_prefix = sys.prefix\nsys.prefix = base",
+        "detail": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "sys.prefix",
+        "kind": 5,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "description": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "peekOfCode": "sys.prefix = base",
+        "detail": "c-code-thats-flashed.Power tool_hallsen..venv.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "crc16_modbus",
+        "kind": 2,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "peekOfCode": "def crc16_modbus(data: bytes) -> int:\n    \"\"\"\n    Computes CRC-16/Modbus over ADDR+CMD+LEN+DATA.\n    Polynomial: 0xA001 (reflected 0x8005), init 0xFFFF, no final XOR.\n    Returns an integer 0x0000-0xFFFF.\n    \"\"\"\n    crc = 0xFFFF\n    for byte in data:\n        crc ^= byte\n        for _ in range(8):",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "build_frame",
+        "kind": 2,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "peekOfCode": "def build_frame(addr: int, cmd: int, payload: bytes) -> bytes:\n    \"\"\"\n    Build a full frame:\n    SOF1, SOF2, ADDR, CMD, LEN, DATA..., CRC-L, CRC-H\n    \"\"\"\n    if not (0x00 <= addr <= 0xFE):\n        raise ValueError(\"ADDR must be 0x00..0xFE\")\n    length = len(payload)\n    if length > 32:\n        raise ValueError(\"Payload length > 32 not supported by protocol\")",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "format_hex",
+        "kind": 2,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "peekOfCode": "def format_hex(data: bytes) -> str:\n    return \" \".join(f\"{b:02X}\" for b in data)\n# --------------------------- RX parsing ------------------------------------\ndef read_exact(ser: serial.Serial, size: int, timeout: float = 1.0) -> Optional[bytes]:\n    \"\"\"\n    Read exactly 'size' bytes or return None if timeout.\n    Uses the port's timeout but enforces an additional safety timeout.\n    \"\"\"\n    buf = bytearray()\n    ser.timeout = timeout",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "read_exact",
+        "kind": 2,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "peekOfCode": "def read_exact(ser: serial.Serial, size: int, timeout: float = 1.0) -> Optional[bytes]:\n    \"\"\"\n    Read exactly 'size' bytes or return None if timeout.\n    Uses the port's timeout but enforces an additional safety timeout.\n    \"\"\"\n    buf = bytearray()\n    ser.timeout = timeout\n    while len(buf) < size:\n        chunk = ser.read(size - len(buf))\n        if not chunk:",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "read_frame",
+        "kind": 2,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "peekOfCode": "def read_frame(ser: serial.Serial, check_crc: bool) -> Optional[dict]:\n    \"\"\"\n    Read one frame from the serial stream.\n    Returns a dict with keys: raw, addr, cmd, length, payload, crc_ok\n    or None on timeout / framing error.\n    \"\"\"\n    # Search for SOF1, SOF2\n    while True:\n        first = ser.read(1)\n        if not first:",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "send_command",
+        "kind": 2,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "peekOfCode": "def send_command(\n    ser: serial.Serial,\n    addr: int,\n    cmd: int,\n    payload: bytes,\n    check_crc: bool,\n    expect_reply: bool = True,\n    description: str = \"\",\n) -> Optional[dict]:\n    \"\"\"",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "cmd_set_watchdog",
+        "kind": 2,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "peekOfCode": "def cmd_set_watchdog(ser, addr, seconds: float, check_crc: bool):\n    # Protocol uses uint16 timeout in ms, 0 disables watchdog.\n    timeout_ms = int(seconds * 1000.0)\n    if timeout_ms > 0xFFFF:\n        print(f\"Requested watchdog {seconds} s exceeds 65535 ms; clamping to 65535 ms.\")\n        timeout_ms = 0xFFFF\n    payload = struct.pack(\"<H\", timeout_ms)\n    send_command(\n        ser,\n        addr,",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "cmd_set_current_limit",
+        "kind": 2,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "peekOfCode": "def cmd_set_current_limit(ser, addr, current_a: float, check_crc: bool):\n    # Current is in mA, uint16\n    ma = int(current_a * 1000.0)\n    if not (0 <= ma <= 0xFFFF):\n        raise ValueError(\"Current limit out of uint16 range\")\n    payload = struct.pack(\"<H\", ma)\n    send_command(\n        ser,\n        addr,\n        0x04,",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "cmd_set_gear_ratio",
+        "kind": 2,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "peekOfCode": "def cmd_set_gear_ratio(ser, addr, ratio: int, check_crc: bool):\n    if not (0 <= ratio <= 0xFFFF):\n        raise ValueError(\"Gear ratio out of uint16 range\")\n    payload = struct.pack(\"<H\", ratio)\n    send_command(\n        ser,\n        addr,\n        0x05,\n        payload,\n        check_crc,",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "cmd_set_control_mode_closed_loop_speed",
+        "kind": 2,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "peekOfCode": "def cmd_set_control_mode_closed_loop_speed(ser, addr, check_crc: bool):\n    # 0x01 = Closed-loop speed\n    payload = bytes([0x01])\n    send_command(\n        ser,\n        addr,\n        0x30,\n        payload,\n        check_crc,\n        description=\"Set Control Mode: Closed-loop speed (0x01)\",",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "cmd_set_target_rpm",
+        "kind": 2,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "peekOfCode": "def cmd_set_target_rpm(ser, addr, rpm: float, check_crc: bool):\n    # 4-byte float32 LE\n    payload = struct.pack(\"<f\", float(rpm))\n    send_command(\n        ser,\n        addr,\n        0x35,\n        payload,\n        check_crc,\n        description=f\"Set Target speed: {rpm} rpm\",",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "peekOfCode": "def main():\n    parser = argparse.ArgumentParser(description=\"Motor driver protocol tester.\")\n    parser.add_argument(\"--port\", default=DEFAULT_PORT, help=\"Serial port\")\n    parser.add_argument(\"--baud\", type=int, default=DEFAULT_BAUD, help=\"Baud rate\")\n    parser.add_argument(\"--addr\", type=lambda x: int(x, 0), default=DEFAULT_ADDR,\n                        help=\"Motor address (e.g. 0x01)\")\n    parser.add_argument(\n        \"--no-crc-check\",\n        action=\"store_true\",\n        help=\"Do NOT validate CRC on received frames (still send CRC).\",",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "DEFAULT_PORT",
+        "kind": 5,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "peekOfCode": "DEFAULT_PORT = \"COM23\" if sys.platform.startswith(\"win\") else \"/dev/ttyUSB0\"\nDEFAULT_BAUD = 115200\nDEFAULT_ADDR = 0x01  # Motor address\nSOF1 = 0xAA\nSOF2 = 0x55\n# --------------------------- CRC-16/Modbus ---------------------------------\ndef crc16_modbus(data: bytes) -> int:\n    \"\"\"\n    Computes CRC-16/Modbus over ADDR+CMD+LEN+DATA.\n    Polynomial: 0xA001 (reflected 0x8005), init 0xFFFF, no final XOR.",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "DEFAULT_BAUD",
+        "kind": 5,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "peekOfCode": "DEFAULT_BAUD = 115200\nDEFAULT_ADDR = 0x01  # Motor address\nSOF1 = 0xAA\nSOF2 = 0x55\n# --------------------------- CRC-16/Modbus ---------------------------------\ndef crc16_modbus(data: bytes) -> int:\n    \"\"\"\n    Computes CRC-16/Modbus over ADDR+CMD+LEN+DATA.\n    Polynomial: 0xA001 (reflected 0x8005), init 0xFFFF, no final XOR.\n    Returns an integer 0x0000-0xFFFF.",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "DEFAULT_ADDR",
+        "kind": 5,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "peekOfCode": "DEFAULT_ADDR = 0x01  # Motor address\nSOF1 = 0xAA\nSOF2 = 0x55\n# --------------------------- CRC-16/Modbus ---------------------------------\ndef crc16_modbus(data: bytes) -> int:\n    \"\"\"\n    Computes CRC-16/Modbus over ADDR+CMD+LEN+DATA.\n    Polynomial: 0xA001 (reflected 0x8005), init 0xFFFF, no final XOR.\n    Returns an integer 0x0000-0xFFFF.\n    \"\"\"",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "SOF1",
+        "kind": 5,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "peekOfCode": "SOF1 = 0xAA\nSOF2 = 0x55\n# --------------------------- CRC-16/Modbus ---------------------------------\ndef crc16_modbus(data: bytes) -> int:\n    \"\"\"\n    Computes CRC-16/Modbus over ADDR+CMD+LEN+DATA.\n    Polynomial: 0xA001 (reflected 0x8005), init 0xFFFF, no final XOR.\n    Returns an integer 0x0000-0xFFFF.\n    \"\"\"\n    crc = 0xFFFF",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "SOF2",
+        "kind": 5,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "peekOfCode": "SOF2 = 0x55\n# --------------------------- CRC-16/Modbus ---------------------------------\ndef crc16_modbus(data: bytes) -> int:\n    \"\"\"\n    Computes CRC-16/Modbus over ADDR+CMD+LEN+DATA.\n    Polynomial: 0xA001 (reflected 0x8005), init 0xFFFF, no final XOR.\n    Returns an integer 0x0000-0xFFFF.\n    \"\"\"\n    crc = 0xFFFF\n    for byte in data:",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "crc16_modbus",
+        "kind": 2,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "peekOfCode": "def crc16_modbus(data: bytes) -> int:\n    \"\"\"\n    Computes CRC-16/Modbus over ADDR+CMD+LEN+DATA.\n    Polynomial: 0xA001 (reflected 0x8005), init 0xFFFF, no final XOR.\n    Returns an integer 0x0000-0xFFFF.\n    \"\"\"\n    crc = 0xFFFF\n    for byte in data:\n        crc ^= byte\n        for _ in range(8):",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "build_frame",
+        "kind": 2,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "peekOfCode": "def build_frame(addr: int, cmd: int, payload: bytes) -> bytes:\n    \"\"\"\n    Build a full frame:\n    SOF1, SOF2, ADDR, CMD, LEN, DATA..., CRC-L, CRC-H\n    \"\"\"\n    if not (0x00 <= addr <= 0xFE):\n        raise ValueError(\"ADDR must be 0x00..0xFE\")\n    length = len(payload)\n    if length > 32:\n        raise ValueError(\"Payload length > 32 not supported by protocol\")",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "format_hex",
+        "kind": 2,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "peekOfCode": "def format_hex(data: bytes) -> str:\n    return \" \".join(f\"{b:02X}\" for b in data)\n# --------------------------- RX parsing ------------------------------------\ndef read_exact(ser: serial.Serial, size: int, timeout: float = 1.0) -> Optional[bytes]:\n    \"\"\"\n    Read exactly 'size' bytes or return None if timeout.\n    Uses the port's timeout but enforces an additional safety timeout.\n    \"\"\"\n    buf = bytearray()\n    ser.timeout = timeout",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "read_exact",
+        "kind": 2,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "peekOfCode": "def read_exact(ser: serial.Serial, size: int, timeout: float = 1.0) -> Optional[bytes]:\n    \"\"\"\n    Read exactly 'size' bytes or return None if timeout.\n    Uses the port's timeout but enforces an additional safety timeout.\n    \"\"\"\n    buf = bytearray()\n    ser.timeout = timeout\n    while len(buf) < size:\n        chunk = ser.read(size - len(buf))\n        if not chunk:",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "read_frame",
+        "kind": 2,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "peekOfCode": "def read_frame(ser: serial.Serial, check_crc: bool) -> Optional[dict]:\n    \"\"\"\n    Read one frame from the serial stream.\n    Returns a dict with keys: raw, addr, cmd, length, payload, crc_ok\n    or None on timeout / framing error.\n    \"\"\"\n    # Search for SOF1, SOF2\n    while True:\n        first = ser.read(1)\n        if not first:",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "send_command",
+        "kind": 2,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "peekOfCode": "def send_command(\n    ser: serial.Serial,\n    addr: int,\n    cmd: int,\n    payload: bytes,\n    check_crc: bool,\n    expect_reply: bool = True,\n    description: str = \"\",\n) -> Optional[dict]:\n    \"\"\"",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "cmd_set_watchdog",
+        "kind": 2,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "peekOfCode": "def cmd_set_watchdog(ser, addr, seconds: float, check_crc: bool):\n    # Protocol uses uint16 timeout in ms, 0 disables watchdog.\n    timeout_ms = int(seconds * 1000.0)\n    if timeout_ms > 0xFFFF:\n        print(f\"Requested watchdog {seconds} s exceeds 65535 ms; clamping to 65535 ms.\")\n        timeout_ms = 0xFFFF\n    payload = struct.pack(\"<H\", timeout_ms)\n    send_command(\n        ser,\n        addr,",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "cmd_set_current_limit",
+        "kind": 2,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "peekOfCode": "def cmd_set_current_limit(ser, addr, current_a: float, check_crc: bool):\n    # Current is in mA, uint16\n    ma = int(current_a * 1000.0)\n    if not (0 <= ma <= 0xFFFF):\n        raise ValueError(\"Current limit out of uint16 range\")\n    payload = struct.pack(\"<H\", ma)\n    send_command(\n        ser,\n        addr,\n        0x04,",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "cmd_set_gear_ratio",
+        "kind": 2,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "peekOfCode": "def cmd_set_gear_ratio(ser, addr, ratio: int, check_crc: bool):\n    if not (0 <= ratio <= 0xFFFF):\n        raise ValueError(\"Gear ratio out of uint16 range\")\n    payload = struct.pack(\"<H\", ratio)\n    send_command(\n        ser,\n        addr,\n        0x05,\n        payload,\n        check_crc,",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "cmd_set_control_mode_closed_loop_speed",
+        "kind": 2,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "peekOfCode": "def cmd_set_control_mode_closed_loop_speed(ser, addr, check_crc: bool):\n    # 0x01 = Closed-loop speed\n    payload = bytes([0x01])\n    send_command(\n        ser,\n        addr,\n        0x30,\n        payload,\n        check_crc,\n        description=\"Set Control Mode: Closed-loop speed (0x01)\",",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "cmd_set_target_rpm",
+        "kind": 2,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "peekOfCode": "def cmd_set_target_rpm(ser, addr, rpm: float, check_crc: bool):\n    # 4-byte float32 LE\n    payload = struct.pack(\"<f\", float(rpm))\n    send_command(\n        ser,\n        addr,\n        0x35,\n        payload,\n        check_crc,\n        description=f\"Set Target speed: {rpm} rpm\",",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "peekOfCode": "def main():\n    parser = argparse.ArgumentParser(description=\"Motor driver protocol tester.\")\n    parser.add_argument(\"--port\", default=DEFAULT_PORT, help=\"Serial port\")\n    parser.add_argument(\"--baud\", type=int, default=DEFAULT_BAUD, help=\"Baud rate\")\n    parser.add_argument(\"--addr\", type=lambda x: int(x, 0), default=DEFAULT_ADDR,\n                        help=\"Motor address (e.g. 0x01)\")\n    parser.add_argument(\n        \"--no-crc-check\",\n        action=\"store_true\",\n        help=\"Do NOT validate CRC on received frames (still send CRC).\",",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "DEFAULT_PORT",
+        "kind": 5,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "peekOfCode": "DEFAULT_PORT = \"COM23\" if sys.platform.startswith(\"win\") else \"/dev/ttyUSB0\"\nDEFAULT_BAUD = 115200\nDEFAULT_ADDR = 0x01  # Motor address\nSOF1 = 0xAA\nSOF2 = 0x55\n# --------------------------- CRC-16/Modbus ---------------------------------\ndef crc16_modbus(data: bytes) -> int:\n    \"\"\"\n    Computes CRC-16/Modbus over ADDR+CMD+LEN+DATA.\n    Polynomial: 0xA001 (reflected 0x8005), init 0xFFFF, no final XOR.",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "DEFAULT_BAUD",
+        "kind": 5,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "peekOfCode": "DEFAULT_BAUD = 115200\nDEFAULT_ADDR = 0x01  # Motor address\nSOF1 = 0xAA\nSOF2 = 0x55\n# --------------------------- CRC-16/Modbus ---------------------------------\ndef crc16_modbus(data: bytes) -> int:\n    \"\"\"\n    Computes CRC-16/Modbus over ADDR+CMD+LEN+DATA.\n    Polynomial: 0xA001 (reflected 0x8005), init 0xFFFF, no final XOR.\n    Returns an integer 0x0000-0xFFFF.",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "DEFAULT_ADDR",
+        "kind": 5,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "peekOfCode": "DEFAULT_ADDR = 0x01  # Motor address\nSOF1 = 0xAA\nSOF2 = 0x55\n# --------------------------- CRC-16/Modbus ---------------------------------\ndef crc16_modbus(data: bytes) -> int:\n    \"\"\"\n    Computes CRC-16/Modbus over ADDR+CMD+LEN+DATA.\n    Polynomial: 0xA001 (reflected 0x8005), init 0xFFFF, no final XOR.\n    Returns an integer 0x0000-0xFFFF.\n    \"\"\"",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "SOF1",
+        "kind": 5,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "peekOfCode": "SOF1 = 0xAA\nSOF2 = 0x55\n# --------------------------- CRC-16/Modbus ---------------------------------\ndef crc16_modbus(data: bytes) -> int:\n    \"\"\"\n    Computes CRC-16/Modbus over ADDR+CMD+LEN+DATA.\n    Polynomial: 0xA001 (reflected 0x8005), init 0xFFFF, no final XOR.\n    Returns an integer 0x0000-0xFFFF.\n    \"\"\"\n    crc = 0xFFFF",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "documentation": {}
+    },
+    {
+        "label": "SOF2",
+        "kind": 5,
+        "importPath": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "description": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
+        "peekOfCode": "SOF2 = 0x55\n# --------------------------- CRC-16/Modbus ---------------------------------\ndef crc16_modbus(data: bytes) -> int:\n    \"\"\"\n    Computes CRC-16/Modbus over ADDR+CMD+LEN+DATA.\n    Polynomial: 0xA001 (reflected 0x8005), init 0xFFFF, no final XOR.\n    Returns an integer 0x0000-0xFFFF.\n    \"\"\"\n    crc = 0xFFFF\n    for byte in data:",
+        "detail": "c-code-thats-flashed.Power tool_hallsen.STM32CubeIDE.Src.test_protocol",
         "documentation": {}
     },
     {
