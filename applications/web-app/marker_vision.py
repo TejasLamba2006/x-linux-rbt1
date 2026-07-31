@@ -284,74 +284,88 @@ class CameraStream:
 
     def _run(self):
         cfg = self.cfg
-        cap = None
-        try:
-            cap = _open_capture(cfg)
-            if not cap.isOpened():
-                logger.error(f"CameraStream: cannot open camera "
-                             f"{cfg.get('gst_pipeline') or cfg['camera']}")
-                return
+        detect = _make_detector()
+        period = 1.0 / self.stream_fps if self.stream_fps > 0 else 0.066
+        logger.info(f"CameraStream: live on camera {cfg['camera']}")
 
-            detect = _make_detector()
-            period = 1.0 / self.stream_fps if self.stream_fps > 0 else 0.066
-            read_fails = 0
-            logger.info(f"CameraStream: live on camera {cfg['camera']}")
-
-            while not self._stop.is_set():
-                tick = time.time()
-                ok, frame = cap.read()
-                if not ok or frame is None:
-                    read_fails += 1
-                    if read_fails >= 20:
-                        logger.error(
-                            "CameraStream: 20 consecutive read failures, aborting")
-                        break
-                    time.sleep(period)
+        # Outer loop: the DCMIPP V4L2 driver periodically stalls (select()
+        # timeout) and can wedge the stream. Instead of dying permanently,
+        # reopen the device and keep going so the feed -- and anything that
+        # consumes it, like follow-me -- survives.
+        while not self._stop.is_set():
+            cap = None
+            try:
+                cap = _open_capture(cfg)
+                if not cap.isOpened():
+                    logger.error(f"CameraStream: cannot open camera "
+                                 f"{cfg.get('gst_pipeline') or cfg['camera']}")
+                    time.sleep(2.0)
                     continue
+
                 read_fails = 0
+                while not self._stop.is_set():
+                    tick = time.time()
+                    ok, frame = cap.read()
+                    if not ok or frame is None:
+                        read_fails += 1
+                        if read_fails >= 20:
+                            logger.warning(
+                                "CameraStream: stream stalled, reopening camera")
+                            break  # -> outer loop reopens the device
+                        time.sleep(period)
+                        continue
+                    read_fails = 0
 
-                frame_w = frame.shape[1]
-                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                corners, ids, _ = detect(gray)
+                    frame_w = frame.shape[1]
+                    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                    corners, ids, _ = detect(gray)
 
-                detections = []
-                if ids is not None:
-                    for i, mid in enumerate(ids.flatten()):
-                        m = _measure(
-                            corners[i], cfg["focal_px"], cfg["marker_size_mm"], frame_w)
-                        if m:
-                            detections.append((int(mid), m[0], m[1], m[2]))
+                    detections = []
+                    if ids is not None:
+                        for i, mid in enumerate(ids.flatten()):
+                            m = _measure(
+                                corners[i], cfg["focal_px"], cfg["marker_size_mm"], frame_w)
+                            if m:
+                                detections.append((int(mid), m[0], m[1], m[2]))
 
-                with self._latest_lock:
-                    self._seq += 1
-                    self._latest = (detections, frame_w, self._seq)
+                    with self._latest_lock:
+                        self._seq += 1
+                        self._latest = (detections, frame_w, self._seq)
 
-                self._publish(frame, ids, corners, detections)
+                    self._publish(frame, ids, corners, detections)
 
-                dt = time.time() - tick
-                if dt < period:
-                    time.sleep(period - dt)
-        except Exception as e:
-            logger.error(f"CameraStream loop error: {e}")
-        finally:
-            with self._jpeg_lock:
-                self._jpeg = None
-            if self._window_ready:
-                try:
-                    cv2.destroyWindow(self._window_name)
-                    cv2.waitKey(1)
-                except Exception:
-                    pass
-                self._window_ready = False
-            if self._wl_writer is not None:
-                try:
-                    self._wl_writer.release()
-                except Exception:
-                    pass
-                self._wl_writer = None
-            if cap is not None:
-                cap.release()
-            logger.info("CameraStream: stopped")
+                    dt = time.time() - tick
+                    if dt < period:
+                        time.sleep(period - dt)
+            except Exception as e:
+                logger.error(f"CameraStream loop error: {e}")
+            finally:
+                if cap is not None:
+                    try:
+                        cap.release()
+                    except Exception:
+                        pass
+            # brief pause before reopen so we don't hammer a wedged driver
+            if not self._stop.is_set():
+                time.sleep(1.0)
+
+        # final teardown (display window / wayland writer)
+        with self._jpeg_lock:
+            self._jpeg = None
+        if self._window_ready:
+            try:
+                cv2.destroyWindow(self._window_name)
+                cv2.waitKey(1)
+            except Exception:
+                pass
+            self._window_ready = False
+        if self._wl_writer is not None:
+            try:
+                self._wl_writer.release()
+            except Exception:
+                pass
+            self._wl_writer = None
+        logger.info("CameraStream: stopped")
 
     def _publish(self, frame, ids, corners, detections):
         try:
