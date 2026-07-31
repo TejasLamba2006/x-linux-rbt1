@@ -271,7 +271,7 @@ def parser(parsed_data: Dict[str, Any]) -> None:
             # to controller/hybrid above and is ONLY fed by the WebSocket
             # dial -- follow-me/autopilot call rotate_angle() directly and
             # never reach this code, so they stay correct.
-            rotate_angle(-parsed_data['dir_rot'])
+            rotate_angle(parsed_data['dir_rot'])
 
     except Exception as e:
         logger.error(f"Error parsing command: {e}")
