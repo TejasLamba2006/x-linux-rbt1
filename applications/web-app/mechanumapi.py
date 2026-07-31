@@ -166,6 +166,7 @@ def direction(x_axis: int, y_axis: int) -> None:
 def rotate_angle(angle: int) -> None:
     """Set in-place rotation speed (omega) and re-apply combined drive."""
     state.rotation = int(clamp(angle, -100, 100))
+    logger.info(f"[ROT-DEBUG] rotate_angle called with {angle} -> state.rotation={state.rotation}")
     apply_drive()
 
 
@@ -225,8 +226,8 @@ def apply_drive() -> None:
         _drive_wheel(STSPIN.motor_2a, rl)
         _drive_wheel_2b(rr)
 
-        logger.debug(
-            f"Drive: vy={vy} vx={vx} omega={omega} -> "
+        logger.info(
+            f"[ROT-DEBUG] Drive: vy={vy} vx={vx} omega={omega} -> "
             f"FL={fl:.0f} FR={fr:.0f} RL={rl:.0f} RR={rr:.0f}"
         )
 
