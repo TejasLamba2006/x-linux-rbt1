@@ -197,7 +197,11 @@ def apply_drive() -> None:
     try:
         vy = state.throttle
         vx = state.strafe
-        omega = state.rotation
+        # The motor wiring runs opposite to the firmware's rotation sense, so
+        # negate the rotation input here. This single point covers joystick
+        # dial, follow-me and autopilot -- all route through rotate_angle().
+        # The hybrid car-steering blend below is added on top, unaffected.
+        omega = -state.rotation
 
         # Hybrid mode: blend car-like steering into the rotation term,
         # scaled by how fast we're moving, on top of strafe (vx) staying

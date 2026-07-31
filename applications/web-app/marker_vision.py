@@ -43,6 +43,13 @@ CV_AVAILABLE = False
 try:
     import cv2
     CV_AVAILABLE = True
+    # Silence OpenCV's own WARN-level V4L2 chatter (e.g. "select() timeout"
+    # during DCMIPP sensor warmup). The frame still arrives; these are noise.
+    # LOG_LEVEL_ERROR = 3 in OpenCV's utils.logging enum.
+    try:
+        cv2.setLogLevel(3)
+    except Exception:
+        pass
 except Exception as e:  # pragma: no cover - depends on board deps
     logging.getLogger(__name__).warning(
         f"Marker vision unavailable (cv2 not loaded): {e}")
