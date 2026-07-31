@@ -265,7 +265,12 @@ def parser(parsed_data: Dict[str, Any]) -> None:
             direction(parsed_data.get('dir_x', 0), parsed_data.get('dir_y', 0))
 
         if "dir_rot" in parsed_data:
-            rotate_angle(parsed_data['dir_rot'])
+            # The browser dial's dir_rot sign is opposite to the motor
+            # mixing's rotation sense, so negate here. This branch is gated
+            # to controller/hybrid above and is ONLY fed by the WebSocket
+            # dial -- follow-me/autopilot call rotate_angle() directly and
+            # never reach this code, so they stay correct.
+            rotate_angle(-parsed_data['dir_rot'])
 
     except Exception as e:
         logger.error(f"Error parsing command: {e}")
