@@ -31,6 +31,7 @@ docking-precision lateral alignment; drive-and-stop doesn't.
 
 import logging
 import math
+import os
 import threading
 import time
 
@@ -53,6 +54,33 @@ try:
 except Exception as e:  # pragma: no cover - depends on board deps
     logging.getLogger(__name__).warning(
         f"Marker vision unavailable (cv2 not loaded): {e}")
+
+
+# --- Board detection & the supported camera capture path ----------------------
+def _read_board_name() -> str:
+    """Return the SoC compat string (e.g. 'stm32mp257') or '' off-board."""
+    try:
+        with open("/proc/device-tree/compatible") as fp:
+            return fp.read().split(',')[-1].rstrip('\x00')
+    except Exception:
+        return ""
+
+
+_BOARD = _read_board_name()
+
+# On the STM32MP257 DK the IMX335 sits behind the DCMIPP ISP, and the raw
+# /dev/videoN nodes are NOT directly capturable -- /dev/video1 is the hantro
+# video decoder, and the dcmipp capture nodes need a libcamera/media-ctl
+# pipeline configured first. ST's supported path on this board is libcamerasrc
+# (it drives the whole DCMIPP pipeline internally). This pipeline is verified
+# to stream 640x480 BGR frames via appsink. Used as the default when the config
+# doesn't specify a gst_pipeline, so it survives robot_config.json regeneration.
+LIBCAMERA_PIPELINE = (
+    "libcamerasrc name=cs src::stream-role=view-finder "
+    "! video/x-raw,format=RGB16,width={w},height={h} "
+    "! videoconvert ! video/x-raw,format=BGR "
+    "! appsink drop=1 max-buffers=1"
+)
 
 
 # Defaults for every tunable. main.py merges robot_config.json["vision"] over this.
@@ -165,8 +193,19 @@ def _open_capture(cfg):
     native resolution as-is. Only integer/USB sources get width/height set.
     """
     gst = cfg.get("gst_pipeline")
+    # On the STM32MP257 DK, default to the libcamera pipeline when the config
+    # doesn't specify one -- the raw /dev/videoN nodes aren't capturable there
+    # (see LIBCAMERA_PIPELINE note above). An explicit gst_pipeline still wins.
+    if not gst and _BOARD == "stm32mp257":
+        gst = LIBCAMERA_PIPELINE
     if gst:
-        pipeline = gst.format(w=cfg["frame_width"], h=cfg["frame_height"])
+        # The verified DCMIPP/libcamera stream is 640x480; don't let a stale
+        # 1280x720 config default request an untested resolution.
+        w = cfg.get("frame_width", 640)
+        h = cfg.get("frame_height", 480)
+        if gst is LIBCAMERA_PIPELINE and (w, h) != (640, 480):
+            w, h = 640, 480
+        pipeline = gst.format(w=w, h=h)
         logger.info(f"Opening camera via GStreamer: {pipeline}")
         return cv2.VideoCapture(pipeline, cv2.CAP_GSTREAMER)
 
