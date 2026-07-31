@@ -197,11 +197,7 @@ def apply_drive() -> None:
     try:
         vy = state.throttle
         vx = state.strafe
-        # The motor wiring runs opposite to the firmware's rotation sense, so
-        # negate the rotation input here. This single point covers joystick
-        # dial, follow-me and autopilot -- all route through rotate_angle().
-        # The hybrid car-steering blend below is added on top, unaffected.
-        omega = -state.rotation
+        omega = state.rotation
 
         # Hybrid mode: blend car-like steering into the rotation term,
         # scaled by how fast we're moving, on top of strafe (vx) staying
@@ -269,7 +265,11 @@ def parser(parsed_data: Dict[str, Any]) -> None:
             direction(parsed_data.get('dir_x', 0), parsed_data.get('dir_y', 0))
 
         if "dir_rot" in parsed_data:
-            rotate_angle(parsed_data['dir_rot'])
+            # The dial's dir_rot sign convention is opposite to the motor
+            # mixing's rotation sense, so negate here. Follow-me/autopilot
+            # call rotate_angle() directly (bypassing this parser) and are
+            # already correct, so the negation stays scoped to the dial.
+            rotate_angle(-parsed_data['dir_rot'])
 
     except Exception as e:
         logger.error(f"Error parsing command: {e}")
